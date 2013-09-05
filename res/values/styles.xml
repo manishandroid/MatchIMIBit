@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="Theme.Yoers" parent="@style/Theme.Sherlock.Light">
+        <item name="android:backgroundDimEnabled">false</item>
+        <!-- <item name="actionBarStyle">@style/example_solid_ActionBar</item> -->
+        <!-- <item name="android:actionBarStyle">@style/example_solid_ActionBar</item> -->
+    </style>
+
+    <style name="example_solid_ActionBar" parent="@style/Widget.Sherlock.Light.ActionBar.Solid">
+        <item name="background">@drawable/bg_ab</item>
+        <item name="backgroundStacked">@drawable/bg_ab_stacked</item>
+        <item name="android:background">@drawable/bg_ab</item>
+        <item name="android:backgroundStacked">@drawable/bg_ab_stacked</item>
+    </style>
+
+    <style name="Theme.Yoers.Dark" parent="@style/Theme.Sherlock">
+        <item name="android:backgroundDimEnabled">false</item>
+        <!-- <item name="actionBarStyle">@style/example_solid_ActionBar</item> -->
+        <!-- <item name="android:actionBarStyle">@style/example_solid_ActionBar</item> -->
+    </style>
+
+    <style name="example_solid_ActionBar_dark" parent="@style/Widget.Sherlock.ActionBar.Solid">
+        <item name="background">@drawable/bg_ab</item>
+        <item name="backgroundStacked">@drawable/bg_ab_stacked</item>
+        <item name="android:background">@drawable/bg_ab</item>
+        <item name="android:backgroundStacked">@drawable/bg_ab_stacked</item>
+    </style>
+
+</resources>

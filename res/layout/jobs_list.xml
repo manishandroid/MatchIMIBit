@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/price_hour"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/price_hour"
+        android:textSize="30sp" >
+    </TextView>
+
+    <LinearLayout
+        android:id="@+id/jobs_schedule_place"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignRight="@id/price_hour"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/date_working"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/date_working" >
+        </TextView>
+
+        <TextView
+            android:id="@+id/time_working"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/time_working" >
+        </TextView>
+
+        <TextView
+            android:id="@+id/place_working"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/place_working" >
+        </TextView>
+
+        <TextView
+            android:id="@+id/address_working"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/address_working" >
+        </TextView>
+    </LinearLayout>
+
+</RelativeLayout>

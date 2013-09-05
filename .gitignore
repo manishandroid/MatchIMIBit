@@ -1,0 +1,5 @@
+/bin
+/gen
+project.properties
+.DS_Store
+.gitignore
