@@ -41,7 +41,7 @@ public final class CommonUtilities {
 	public static final String API_GET_IC_TYPES = "get_ic_types";
 	public static final String API_GET_GENDERS = "get_genders";
 	public static final String API_GET_PART_TIMER_BY_AVAILABLE_ID = "get_part_timer_by_avail_id";
-	
+	public static final String API_GET_FEEDBACKS_BY_PT_ID = "get_feedbacks_by_pt_id";
 	
 //	public static final String API_UPLOAD_FRONT_NRIC_PHOTOS = "posts/upload/";	
 	public static final String PARAM_DATA= "data";
@@ -103,7 +103,12 @@ public final class CommonUtilities {
 	public static final String PARAM_BLOCKED_COMPANIES_REGISTERED_DATE = "registered_date";
 	public static final String PARAM_BLOCKED_COMPANIES_REGISTRATION_NO = "registration_no";
 	public static final String PARAM_BLOCKED_COMPANIES_UPDATE = "updated_at";
-	
+
+	public static final String PARAM_FEEDBACK_AVAILABILITIES = "availabilities";
+	public static final String PARAM_FEEDBACK_COMPANY_NAME = "company_name";
+	public static final String PARAM_FEEDBACK_COMPANY_BRANCH = "branch_name";
+	public static final String PARAM_FEEDBACK_COMPANY_COMMENT = "feedback";
+	public static final String PARAM_FEEDBACK_COMPANY_GRADE = "grade";
 
 	public static final String APP_SETTING = "matchimi.setting";
 	public static final String SETTING_THEME = "setting.theme";
