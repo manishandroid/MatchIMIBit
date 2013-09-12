@@ -1,10 +1,11 @@
 package com.matchimi;
 
+import static com.matchimi.CommonUtilities.LOGOUT;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -28,8 +29,6 @@ import com.matchimi.options.AvailabilityActivity;
 import com.matchimi.options.HistoryDetail;
 import com.matchimi.options.JobsFragment;
 import com.matchimi.registration.RegistrationActivity;
-
-import static com.matchimi.CommonUtilities.*;
 import com.matchimi.utils.ApplicationUtils;
 
 public abstract class TabSwipeActivity extends SherlockFragmentActivity {
@@ -48,9 +47,6 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 				MODE_PRIVATE);
 		prefEditor = authenticationPref.edit();
 
-		/* load setting from pref */
-		authenticationPref = getSharedPreferences(CommonUtilities.APP_SETTING,
-				Context.MODE_PRIVATE);
 		if (authenticationPref.getInt(CommonUtilities.SETTING_THEME,
 				CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
 			setTheme(ApplicationUtils.getTheme(true));
@@ -271,13 +267,11 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 				break;
 			case R.id.menu_history:
 				i = new Intent(getApplicationContext(), HistoryDetail.class);
-				i.putExtra("pt_id", "37");
 				startActivity(i);
 				break;
 			case R.id.menu_availability:
 				i = new Intent(getApplicationContext(),
 						AvailabilityActivity.class);
-				i.putExtra("pt_id", "37");
 				startActivityForResult(i, JobsFragment.RC_JOB_DETAIL);
 				break;
 			case R.id.menu_logout:
@@ -285,7 +279,7 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 						RegistrationActivity.class);
 				i.putExtra(LOGOUT, "true");
 				startActivityForResult(i, JobsFragment.RC_JOB_DETAIL);
-				break;				
+				break;
 			case R.id.menu_setting:
 				showSettingMenu();
 				break;

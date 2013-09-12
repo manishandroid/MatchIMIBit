@@ -46,7 +46,8 @@
                     android:paddingBottom="16dp"
                     android:paddingLeft="40dp"
                     android:paddingTop="16dp"
-                    android:text="@string/dont_show_offer" />
+                    android:text="@string/dont_show_offer"
+                    android:textColor="@android:color/background_dark" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

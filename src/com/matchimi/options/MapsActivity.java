@@ -1,7 +1,9 @@
 package com.matchimi.options;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -19,7 +21,9 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.matchimi.CommonUtilities;
 import com.matchimi.R;
+import com.matchimi.utils.ApplicationUtils;
 
 public class MapsActivity extends Activity {
 
@@ -30,6 +34,14 @@ public class MapsActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		SharedPreferences authenticationPref = getSharedPreferences(
+				CommonUtilities.APP_SETTING, Context.MODE_PRIVATE);
+		if (authenticationPref.getInt(CommonUtilities.SETTING_THEME,
+				CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
+			setTheme(ApplicationUtils.getTheme(true));
+		} else {
+			setTheme(ApplicationUtils.getTheme(false));
+		}
 		setContentView(R.layout.maps_layout);
 
 		LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -107,7 +119,6 @@ public class MapsActivity extends Activity {
 	}
 
 	private void loadLocation() {
-		Log.e("XXXX", "loadLocation()");
 		LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 		boolean isGPSEnabled = locationManager
 				.isProviderEnabled(LocationManager.GPS_PROVIDER);

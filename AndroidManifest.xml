@@ -33,10 +33,11 @@
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
     <application
+        android:largeHeap="true"
         android:allowBackup="true"
         android:icon="@drawable/icon"
         android:label="@string/app_name"
-        android:theme="@style/Theme.Yoers.Dark" >
+        android:theme="@style/Theme.Sherlock.Light" >
         <activity
             android:name="com.matchimi.HomeActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
@@ -105,6 +106,12 @@
             android:label="@string/app_name" >
         </activity>
         <activity
+            android:name="com.matchimi.registration.LoginActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/login"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+        </activity>
+        <activity
             android:name="com.facebook.LoginActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/app_name"
@@ -116,10 +123,10 @@
         </activity>
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyAxF_75GOITrjJXsEbpY87FpCldRHU-W3Y" />
+            android:value="AIzaSyBO5x-qBO8YvNcIZp42whQd4-63JNEADgA" />
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
-            android:value="@string/app_id" />
+            android:value="@string/facebook_app_id" />
     </application>
 
 </manifest>

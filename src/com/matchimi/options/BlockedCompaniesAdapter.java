@@ -1,5 +1,13 @@
 package com.matchimi.options;
 
+import static com.matchimi.CommonUtilities.PARAM_BLOCKED_COMPANIES_ADDRESS;
+import static com.matchimi.CommonUtilities.PARAM_BLOCKED_COMPANIES_EMAIL_1;
+import static com.matchimi.CommonUtilities.PARAM_BLOCKED_COMPANIES_EMAIL_2;
+import static com.matchimi.CommonUtilities.PARAM_BLOCKED_COMPANIES_GRADE_ID;
+import static com.matchimi.CommonUtilities.PARAM_BLOCKED_COMPANIES_NAME;
+import static com.matchimi.CommonUtilities.PARAM_BLOCKED_COMPANIES_POSTAL_CODE;
+import static com.matchimi.CommonUtilities.TAG;
+
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +21,6 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.matchimi.R;
-import static com.matchimi.CommonUtilities.*;
 
 public class BlockedCompaniesAdapter extends BaseAdapter {
 	private Context context;
@@ -55,45 +62,56 @@ public class BlockedCompaniesAdapter extends BaseAdapter {
 			// cache view fields into the holder
 			holder = new ViewHolder();
 
-			Map<String, Object> companyData = (Map<String, Object>) blockedcompaniesList.get(position);
+			Map<String, Object> companyData = (Map<String, Object>) blockedcompaniesList
+					.get(position);
 			Log.d(TAG, companyData.get("company_name").toString());
-			
-			// Set Company Name
-			holder.name = (TextView) v.findViewById(R.id.blockedcompanies_company_name);
-			holder.name.setText(companyData.get(PARAM_BLOCKED_COMPANIES_NAME).toString());
-			
-			// Set Address
-			holder.address = (TextView) v.findViewById(R.id.blockedcompanies_address);
-			holder.address.setText(companyData.get(PARAM_BLOCKED_COMPANIES_ADDRESS).toString());
-			
-			// Set Information
-			holder.information = (TextView) v.findViewById(R.id.blockedcompanies_information);
-			String information = "";
-			
-			String postalCode = companyData.get(PARAM_BLOCKED_COMPANIES_POSTAL_CODE).toString();
 
-			if(postalCode != "") {
+			// Set Company Name
+			holder.name = (TextView) v
+					.findViewById(R.id.blockedcompanies_company_name);
+			holder.name.setText(companyData.get(PARAM_BLOCKED_COMPANIES_NAME)
+					.toString());
+
+			// Set Address
+			holder.address = (TextView) v
+					.findViewById(R.id.blockedcompanies_address);
+			holder.address.setText(companyData.get(
+					PARAM_BLOCKED_COMPANIES_ADDRESS).toString());
+
+			// Set Information
+			holder.information = (TextView) v
+					.findViewById(R.id.blockedcompanies_information);
+			String information = "";
+
+			String postalCode = companyData.get(
+					PARAM_BLOCKED_COMPANIES_POSTAL_CODE).toString();
+
+			if (postalCode != "") {
 				information += "Postal Code: " + postalCode + "\n";
 			}
-			
-			if(companyData.get(PARAM_BLOCKED_COMPANIES_EMAIL_1) != null) {
-				String email_1 = companyData.get(PARAM_BLOCKED_COMPANIES_EMAIL_1).toString();	
-				if(email_1 != "" && email_1 != null) {
+
+			if (companyData.get(PARAM_BLOCKED_COMPANIES_EMAIL_1) != null) {
+				String email_1 = companyData.get(
+						PARAM_BLOCKED_COMPANIES_EMAIL_1).toString();
+				if (email_1 != "" && email_1 != null) {
 					information += "Email: " + email_1 + "\n";
 				}
 			}
-			
-			if(companyData.get(PARAM_BLOCKED_COMPANIES_EMAIL_2) != null) {
-				String email_2 = companyData.get(PARAM_BLOCKED_COMPANIES_EMAIL_2).toString();	
-				if(email_2 != "" && email_2 != null) {
+
+			if (companyData.get(PARAM_BLOCKED_COMPANIES_EMAIL_2) != null) {
+				String email_2 = companyData.get(
+						PARAM_BLOCKED_COMPANIES_EMAIL_2).toString();
+				if (email_2 != "" && email_2 != null) {
 					information += "Email: " + email_2 + "\n";
 				}
 			}
-			
+
 			holder.information.setText(information);
-			
-			holder.rating = (RatingBar) v.findViewById(R.id.blockedcompanies_ratingBar);
-			holder.rating.setRating(Float.parseFloat(companyData.get(PARAM_BLOCKED_COMPANIES_GRADE_ID).toString()));
+
+			holder.rating = (RatingBar) v
+					.findViewById(R.id.blockedcompanies_ratingBar);
+			holder.rating.setRating(Float.parseFloat(companyData.get(
+					PARAM_BLOCKED_COMPANIES_GRADE_ID).toString()));
 
 			// Set Text
 			// Associate the holder with the view for latter lookup

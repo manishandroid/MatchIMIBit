@@ -1,5 +1,9 @@
 package com.matchimi.options;
 
+import static com.matchimi.CommonUtilities.API_CREATE_AVAILABILITY;
+import static com.matchimi.CommonUtilities.API_EDIT_AVAILABILITY;
+import static com.matchimi.CommonUtilities.SERVERURL;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -17,6 +21,7 @@ import android.app.TimePickerDialog.OnTimeSetListener;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -30,6 +35,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -46,7 +52,9 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.matchimi.CommonUtilities;
 import com.matchimi.R;
+import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
 
 public class CreateAvailability extends SherlockActivity {
@@ -59,7 +67,7 @@ public class CreateAvailability extends SherlockActivity {
 	private JSONParser jsonParser = null;
 	private String jsonStr = null;
 
-	private String id = null;
+	private String pt_id = null;
 	private String start = null;
 	private String end = null;
 	private String location = null;
@@ -77,6 +85,16 @@ public class CreateAvailability extends SherlockActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		SharedPreferences authenticationPref = getSharedPreferences(
+				CommonUtilities.APP_SETTING, Context.MODE_PRIVATE);
+		if (authenticationPref.getInt(CommonUtilities.SETTING_THEME,
+				CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
+			setTheme(ApplicationUtils.getTheme(true));
+		} else {
+			setTheme(ApplicationUtils.getTheme(false));
+		}
+		pt_id = authenticationPref.getString(CommonUtilities.USER_PTID, null);
+		
 		setContentView(R.layout.edit_availability);
 
 		context = this;
@@ -143,17 +161,7 @@ public class CreateAvailability extends SherlockActivity {
 					input.setText(price.substring(0, price.indexOf(".")));
 				}
 				builder.setView(input);
-
-				builder.setPositiveButton("Set",
-						new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface arg0, int arg1) {
-								price = input.getText().toString().trim()
-										+ ".0";
-								reloadView();
-							}
-						});
-
+				builder.setPositiveButton("Set", null);
 				builder.setNegativeButton("Cancel",
 						new DialogInterface.OnClickListener() {
 							@Override
@@ -161,8 +169,22 @@ public class CreateAvailability extends SherlockActivity {
 							}
 						});
 
-				AlertDialog dialog = builder.create();
+				final AlertDialog dialog = builder.create();
 				dialog.show();
+				Button positiveButton = dialog
+						.getButton(DialogInterface.BUTTON_POSITIVE);
+				positiveButton.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View onClick) {
+						if (input.getText().length() > 0) {
+							price = input.getText().toString().trim() + ".0";
+							reloadView();
+							dialog.dismiss();
+						} else {
+							input.setError("Field still empty");
+						}
+					}
+				});
 			}
 		});
 
@@ -177,7 +199,6 @@ public class CreateAvailability extends SherlockActivity {
 		});
 
 		Bundle b = getIntent().getExtras();
-		id = b.getString("id");
 		update = b.getBoolean("update");
 		if (update) {
 			ab.setTitle("Edit Availability");
@@ -207,6 +228,7 @@ public class CreateAvailability extends SherlockActivity {
 	public class EditNameDialog extends DialogFragment {
 
 		public EditNameDialog() {
+			
 		}
 
 		@Override
@@ -396,12 +418,11 @@ public class CreateAvailability extends SherlockActivity {
 	}
 
 	protected void doEditAvailability() {
-		final String url = "http://matchimi.buuukapps.com/edit_availability";
+		final String url = SERVERURL + API_EDIT_AVAILABILITY;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
 				if (jsonStr != null) {
-					// FIXME: please check on server response
 					if (jsonStr.trim().equalsIgnoreCase("0")) {
 						Toast.makeText(context, "Edit availability Done.",
 								Toast.LENGTH_SHORT).show();
@@ -431,7 +452,7 @@ public class CreateAvailability extends SherlockActivity {
 				try {
 					JSONObject parentData = new JSONObject();
 					JSONObject childData = new JSONObject();
-					childData.put("pt_id", id);
+					childData.put("pt_id", pt_id);
 					childData.put("asked_salary",
 							price.substring(0, price.indexOf(".")));
 					childData.put("start_date_time", start);
@@ -460,12 +481,11 @@ public class CreateAvailability extends SherlockActivity {
 	}
 
 	protected void doAddAvailability() {
-		final String url = "http://matchimi.buuukapps.com/create_availability";
+		final String url = SERVERURL + API_CREATE_AVAILABILITY;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
 				if (jsonStr != null) {
-					// FIXME: please check on server response
 					if (jsonStr.trim().equalsIgnoreCase("0")) {
 						Toast.makeText(context, "Add availability Done.",
 								Toast.LENGTH_SHORT).show();
@@ -495,7 +515,7 @@ public class CreateAvailability extends SherlockActivity {
 				try {
 					JSONObject parentData = new JSONObject();
 					JSONObject childData = new JSONObject();
-					childData.put("pt_id", id);
+					childData.put("pt_id", pt_id);
 					childData.put("asked_salary",
 							price.substring(0, price.indexOf(".")));
 					childData.put("start_date_time", start);

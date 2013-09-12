@@ -1,12 +1,13 @@
 package com.matchimi.options;
 
-import static com.matchimi.CommonUtilities.*;
+import static com.matchimi.CommonUtilities.PARAM_FEEDBACK_COMPANY_COMMENT;
+import static com.matchimi.CommonUtilities.PARAM_FEEDBACK_COMPANY_GRADE;
+import static com.matchimi.CommonUtilities.PARAM_FEEDBACK_COMPANY_NAME;
 
 import java.util.List;
 import java.util.Map;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,27 +53,35 @@ public class FeedbackAdapter extends BaseAdapter {
 		if (convertView == null) {
 			LayoutInflater li = LayoutInflater.from(context);
 			v = li.inflate(R.layout.feedback_list, parent, false);
-			Map<String, Object> companyData = (Map<String, Object>) feedbackList.get(position); 
-			Map<String, String> details =  (Map<String, String>) companyData.get("availabilities");
+			Map<String, Object> companyData = (Map<String, Object>) feedbackList
+					.get(position);
+			Map<String, String> details = (Map<String, String>) companyData
+					.get("availabilities");
 
 			// cache view fields into the holder
 			holder = new ViewHolder();
 
 			// Set branch name
-			holder.branch_name = (TextView) v.findViewById(R.id.feedback_branch_name);
-			holder.branch_name.setText(details.get(PARAM_FEEDBACK_COMPANY_BRANCH).toString());
-			
+			// holder.branch_name = (TextView) v
+			// .findViewById(R.id.feedback_branch_name);
+			// holder.branch_name.setText(details.get(
+			// PARAM_FEEDBACK_COMPANY_BRANCH).toString());
+
 			// Set feedback from company
 			holder.comment = (TextView) v.findViewById(R.id.feedback_comment);
-			holder.comment.setText(details.get(PARAM_FEEDBACK_COMPANY_COMMENT).toString());
-			
+			holder.comment.setText(details.get(PARAM_FEEDBACK_COMPANY_COMMENT)
+					.toString());
+
 			// Set company name
-			holder.company_name = (TextView) v.findViewById(R.id.feedback_company_name);
-			holder.company_name.setText(details.get(PARAM_FEEDBACK_COMPANY_NAME).toString());
-			
+			holder.company_name = (TextView) v
+					.findViewById(R.id.feedback_company_name);
+			holder.company_name.setText(details
+					.get(PARAM_FEEDBACK_COMPANY_NAME).toString());
+
 			// Set rating grade
 			holder.grade = (RatingBar) v.findViewById(R.id.feedback_grade);
-			String ratingText = details.get(PARAM_FEEDBACK_COMPANY_GRADE).toString();
+			String ratingText = details.get(PARAM_FEEDBACK_COMPANY_GRADE)
+					.toString();
 			holder.grade.setRating((Float.parseFloat(ratingText)));
 
 			// Associate the holder with the view for latter lookup
@@ -86,7 +95,7 @@ public class FeedbackAdapter extends BaseAdapter {
 	}
 
 	static class ViewHolder {
-		TextView branch_name;
+		// TextView branch_name;
 		TextView company_name;
 		TextView comment;
 		TextView start_date_time;

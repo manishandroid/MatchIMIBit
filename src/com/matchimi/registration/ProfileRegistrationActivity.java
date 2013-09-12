@@ -1,26 +1,23 @@
 package com.matchimi.registration;
 
-import static com.matchimi.CommonUtilities.*;
-import static com.matchimi.registration.SharedUtils.updateSettings;
+import static com.matchimi.CommonUtilities.CAMERA_REQUEST;
+import static com.matchimi.CommonUtilities.PREFS_NAME;
+import static com.matchimi.CommonUtilities.TAG;
+import static com.matchimi.CommonUtilities.USER_NRIC_BACK;
+import static com.matchimi.CommonUtilities.USER_NRIC_FRONT;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import khandroid.ext.apache.http.HttpResponse;
 import khandroid.ext.apache.http.client.HttpClient;
@@ -30,6 +27,11 @@ import khandroid.ext.apache.http.entity.mime.MultipartEntity;
 import khandroid.ext.apache.http.entity.mime.content.ByteArrayBody;
 import khandroid.ext.apache.http.entity.mime.content.StringBody;
 import khandroid.ext.apache.http.impl.client.DefaultHttpClient;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -44,12 +46,14 @@ import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
-import android.media.ExifInterface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.text.format.DateFormat;
 import android.text.format.Time;
@@ -57,41 +61,57 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.Request.Method;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response.ErrorListener;
-import com.android.volley.Response.Listener;
-import com.android.volley.toolbox.StringRequest;
+import com.matchimi.CommonUtilities;
 import com.matchimi.HomeActivity;
 import com.matchimi.R;
-import com.matchimi.api.MyVolley;
+import com.matchimi.utils.ApplicationUtils;
+import com.matchimi.utils.JSONParser;
 
 public class ProfileRegistrationActivity extends Activity {
+
+	private Context context;
+
+	private List<String> listGender;
+	private List<String> listGenderId;
+	private List<String> listNRICType;
+	private List<String> listNRICTypeId;
+	private List<String> listSkill;
+	private List<String> listSkillId;
+	private List<String> listSkillDesc;
+	private List<Integer> listSelectedItems;
+
+	private ProgressDialog progress;
+	private JSONParser jsonParser = null;
+	private String jsonStr = null;
+
+	private Bundle bundleExtras;
 	private TextView birthView;
 	private TextView skillView;
-	private TextView experienceView;
 	private TextView nricTypeView;
+
+	private EditText fullName;
+	private EditText phoneNumber;
+	private EditText editExperience;
+
 	private int nricSelected = -1;
+
+	private String pt_id;
+	private String genderSelected = null;
 
 	private Button photoFrontNRIC;
 	private Button photoBackNRIC;
 	private Button profileSubmit;
 
-	private int orientation = 0;
 	private boolean takeFrontNRIC = true;
-
-	private DataOutputStream outputStream = null;
-
-	private String lineEnd = "\r\n";
-	private String twoHyphens = "--";
-	private String boundary = "SwA" + Long.toString(System.currentTimeMillis())
-			+ "SwA";
 
 	int bytesRead, bytesAvailable, bufferSize;
 	byte[] buffer;
@@ -106,45 +126,18 @@ public class ProfileRegistrationActivity extends Activity {
 
 	public AlbumStorageDirFactory mAlbumStorageDirFactory = null;
 	private SharedPreferences settings;
-	private EditText fullName;
 	private RadioGroup genderView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		// Remove title bar
-		// this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-
 		setContentView(R.layout.profileregistration_page);
 
+		context = this;
+
 		fullName = (EditText) findViewById(R.id.regprofile_fullname);
+		phoneNumber = (EditText) findViewById(R.id.editPhoneNumber);
 		genderView = (RadioGroup) findViewById(R.id.gender_group);
-
-		Intent intent = getIntent();
-		Bundle extras = intent.getExtras();
-
-		settings = getSharedPreferences(PREFS_NAME, 0);
-
-		if (extras != null) {
-			Log.d(TAG, "Incoming intent to profile");
-
-			String loggedStatus = extras.getString(LOGGED);
-			String userEmail = extras.getString(USER_EMAIL);
-			String userPassword = extras.getString(USER_PASSWORD);
-			String userFirstName = extras.getString(USER_FIRSTNAME);
-			String userLastName = extras.getString(USER_LASTNAME);
-
-			// Set default value for user fullname
-			if (userFirstName != null) {
-				fullName.setText(userFirstName + " " + userLastName);
-			}
-
-			// Check if user register using manual email
-			if (loggedStatus == LOGGED_REGISTER) {
-				Log.d(TAG, "USER Email " + extras.getString(userEmail));
-			}
-		}
 
 		// Set date birth
 		birthView = (TextView) findViewById(R.id.regprofile_date_of_birth);
@@ -159,8 +152,7 @@ public class ProfileRegistrationActivity extends Activity {
 		skillView.setOnClickListener(skillsListener);
 
 		// Set experience textview and listener
-		experienceView = (TextView) findViewById(R.id.regprofile_work_experience);
-		experienceView.setOnClickListener(workingExperienceListener);
+		editExperience = (EditText) findViewById(R.id.editExperience);
 
 		// Set take front NRIC button
 		photoFrontNRIC = (Button) findViewById(R.id.profile_reg_addfront_button);
@@ -173,12 +165,205 @@ public class ProfileRegistrationActivity extends Activity {
 		profileSubmit = (Button) findViewById(R.id.regprofile_submit_button);
 		profileSubmit.setOnClickListener(profileSubmitListener);
 
+		bundleExtras = getIntent().getExtras();
+		pt_id = bundleExtras.getString(CommonUtilities.USER_PTID);
+
+		settings = getSharedPreferences(PREFS_NAME, 0);
+
+		if (bundleExtras != null) {
+			Log.d(TAG, "Incoming intent to profile");
+			String userFirstName = bundleExtras
+					.getString(CommonUtilities.USER_FIRSTNAME);
+			String userLastName = bundleExtras
+					.getString(CommonUtilities.USER_LASTNAME);
+			String userGender = bundleExtras
+					.getString(CommonUtilities.USER_GENDER);
+			Log.e("AAAA", ">>> " + userGender);
+
+			// Set default value for user fullname
+			if (userFirstName != null) {
+				fullName.setText(userFirstName + " " + userLastName);
+			}
+
+			String bday = bundleExtras.getString(CommonUtilities.USER_BIRTHDAY);
+			if (bday.length() == 10) {
+				birthView.setText(bday);
+			}
+		}
+
 		// Load Album Storage Factory based on Android Version
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
 			mAlbumStorageDirFactory = new FroyoAlbumDirFactory();
 		} else {
 			mAlbumStorageDirFactory = new BaseAlbumDirFactory();
 		}
+
+		loadGender();
+	}
+
+	private void loadGender() {
+		final String url = "http://matchimi.buuukapps.com/get_genders";
+		final Handler mHandlerFeed = new Handler();
+		final Runnable mUpdateResultsFeed = new Runnable() {
+			public void run() {
+				if (jsonStr != null) {
+					try {
+						listGender = new ArrayList<String>();
+						listGenderId = new ArrayList<String>();
+
+						JSONArray jsonArray = new JSONArray(jsonStr);
+						for (int i = 0; i < jsonArray.length(); i++) {
+							JSONObject obj = jsonArray.getJSONObject(i);
+							obj = obj.getJSONObject("genders");
+							listGender.add(obj.getString("gender"));
+							listGenderId.add(obj.getString("gender_id"));
+						}
+
+						createGenderView();
+						loadNRICType();
+					} catch (JSONException e) {
+						Log.e("BBB", ">>> " + e.getMessage());
+					}
+				} else {
+					Toast.makeText(context,
+							"Failed to load all data. Try again later !",
+							Toast.LENGTH_SHORT).show();
+				}
+			}
+		};
+
+		progress = ProgressDialog.show(context,
+				getResources().getString(R.string.app_name),
+				"Loading gender...", true, false);
+		new Thread() {
+			public void run() {
+				jsonParser = new JSONParser();
+				jsonStr = jsonParser.getHttpResultUrlGet(url);
+
+				if (progress != null && progress.isShowing()) {
+					progress.dismiss();
+					mHandlerFeed.post(mUpdateResultsFeed);
+				}
+			}
+		}.start();
+	}
+
+	protected void createGenderView() {
+		if (listGender.size() > 0) {
+			for (int i = 0; i < listGender.size(); i++) {
+				final RadioButton rb = new RadioButton(context);
+				rb.setText(listGender.get(i));
+				rb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+					@Override
+					public void onCheckedChanged(CompoundButton arg0,
+							boolean arg1) {
+						if (arg1) {
+							genderSelected = arg0.getText().toString();
+						}
+					}
+				});
+				genderView.addView(rb);
+				Bundle b = getIntent().getExtras();
+				if (getIntent().hasExtra(CommonUtilities.USER_GENDER)
+						&& b.getString(CommonUtilities.USER_GENDER)
+								.equalsIgnoreCase(listGender.get(i))) {
+					genderSelected = listGender.get(i);
+					rb.setChecked(true);
+				}
+			}
+		}
+	}
+
+	protected void loadNRICType() {
+		final String url = "http://matchimi.buuukapps.com/get_ic_types";
+		final Handler mHandlerFeed = new Handler();
+		final Runnable mUpdateResultsFeed = new Runnable() {
+			public void run() {
+				if (jsonStr != null) {
+					try {
+						listNRICType = new ArrayList<String>();
+						listNRICTypeId = new ArrayList<String>();
+
+						JSONArray jsonArray = new JSONArray(jsonStr);
+						for (int i = 0; i < jsonArray.length(); i++) {
+							JSONObject obj = jsonArray.getJSONObject(i);
+							obj = obj.getJSONObject("nric_types");
+							listNRICType.add(obj.getString("nric_type"));
+							listNRICTypeId.add(obj.getString("nric_type_id"));
+						}
+
+						loadSkill();
+					} catch (JSONException e) {
+						Log.e("CCC", ">>> " + e.getMessage());
+					}
+				} else {
+					Toast.makeText(context,
+							"Failed to load all data. Try again later !",
+							Toast.LENGTH_SHORT).show();
+				}
+			}
+		};
+
+		progress = ProgressDialog.show(context,
+				getResources().getString(R.string.app_name),
+				"Loading NRIC type...", true, false);
+		new Thread() {
+			public void run() {
+				jsonParser = new JSONParser();
+				jsonStr = jsonParser.getHttpResultUrlGet(url);
+
+				if (progress != null && progress.isShowing()) {
+					progress.dismiss();
+					mHandlerFeed.post(mUpdateResultsFeed);
+				}
+			}
+		}.start();
+	}
+
+	protected void loadSkill() {
+		final String url = "http://matchimi.buuukapps.com/get_skills";
+		final Handler mHandlerFeed = new Handler();
+		final Runnable mUpdateResultsFeed = new Runnable() {
+			public void run() {
+				if (jsonStr != null) {
+					try {
+						listSkill = new ArrayList<String>();
+						listSkillId = new ArrayList<String>();
+						listSkillDesc = new ArrayList<String>();
+
+						JSONArray jsonArray = new JSONArray(jsonStr);
+						for (int i = 0; i < jsonArray.length(); i++) {
+							JSONObject obj = jsonArray.getJSONObject(i);
+							obj = obj.getJSONObject("skills");
+							listSkillDesc.add(obj.getString("skill_desc"));
+							listSkillId.add(obj.getString("skill_id"));
+							listSkill.add(obj.getString("skill_name"));
+						}
+					} catch (JSONException e) {
+						Log.e("DDD", ">>> " + e.getMessage());
+					}
+				} else {
+					Toast.makeText(context,
+							"Failed to load all data. Try again later !",
+							Toast.LENGTH_SHORT).show();
+				}
+			}
+		};
+
+		progress = ProgressDialog.show(context,
+				getResources().getString(R.string.app_name),
+				"Loading skill...", true, false);
+		new Thread() {
+			public void run() {
+				jsonParser = new JSONParser();
+				jsonStr = jsonParser.getHttpResultUrlGet(url);
+
+				if (progress != null && progress.isShowing()) {
+					progress.dismiss();
+					mHandlerFeed.post(mUpdateResultsFeed);
+				}
+			}
+		}.start();
 	}
 
 	/**
@@ -196,217 +381,247 @@ public class ProfileRegistrationActivity extends Activity {
 							Time chosenDate = new Time();
 							chosenDate.set(dayOfMonth, monthOfYear, year);
 							long dtDob = chosenDate.toMillis(true);
-							
+
 							Date date = new Date();
 							Calendar cal = Calendar.getInstance();
-						    cal.setTime(date);
-						    cal.add(Calendar.YEAR, -16);
-						    long limitation = cal.getTimeInMillis();
-						    
-						    if(dtDob > limitation) {
-						    	birthView.setText("");
-						    	AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+							cal.setTime(date);
+							cal.add(Calendar.YEAR, -16);
+							long limitation = cal.getTimeInMillis();
+
+							if (dtDob > limitation) {
+								birthView.setText("");
+								AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
 										ProfileRegistrationActivity.this);
-						 
-									// set title
-									alertDialogBuilder.setTitle("Date Birth Restriction");
-						 
-									// set dialog message
-									alertDialogBuilder
-										.setMessage("You must more than 16 years old")
+
+								// set title
+								alertDialogBuilder
+										.setTitle("Date Birth Restriction");
+
+								// set dialog message
+								alertDialogBuilder
+										.setMessage(
+												"You must more than 16 years old")
 										.setCancelable(false)
-										.setPositiveButton("OK",new DialogInterface.OnClickListener() {
-											public void onClick(DialogInterface dialog,int id) {
-												
-											}
-										  });
-						 
-										// create alert dialog
-										AlertDialog alertDialog = alertDialogBuilder.create();
-						 
-										// show it
-										alertDialog.show();
-							
-						    } else {
+										.setPositiveButton(
+												"OK",
+												new DialogInterface.OnClickListener() {
+													public void onClick(
+															DialogInterface dialog,
+															int id) {
+
+													}
+												});
+
+								// create alert dialog
+								AlertDialog alertDialog = alertDialogBuilder
+										.create();
+
+								// show it
+								alertDialog.show();
+
+							} else {
 								CharSequence strDate = DateFormat.format(
-										"MMMM dd, yyyy", dtDob);
-								birthView.setText(strDate);						    	
-						    }
+										"mm/dd/yyyy", dtDob);
+								birthView.setText(strDate);
+							}
 						}
 					}, 2011, 0, 1);
 			dateDlg.setMessage("Your Birthday");
 			dateDlg.show();
-
 		}
 	};
 
 	private OnClickListener profileSubmitListener = new OnClickListener() {
-
 		@Override
 		public void onClick(View view) {
 			String userNRICBack = settings.getString(USER_NRIC_BACK, "");
 			String userNRICFront = settings.getString(USER_NRIC_FRONT, "");
 			String errors = "";
 
-			final String front = "/home/matchimi/data/images/nric_front/1377514650_2131034191_20130826-175753_-1142009496.jpg";
-			final String back = "/home/matchimi/data/images/nric_front/1377514712_2131034191_20130826-175848_-1295733410.jpg";
-
-//			RequestQueue queue = MyVolley.getRequestQueue();
-//			StringRequest myReq = new StringRequest(Method.POST,
-//					SERVERURL + API_CREATE_PARTTIMER_PROFILE,
-//					createMyReqSuccessListener(),
-//					createMyReqErrorListener()) {
-//
-//				protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
-//					Map<String, String> params = new HashMap<String, String>();
-//
-//					Map<String, String> dataParams = new HashMap<String, String>();
-//					Map<String, String> partTimerParams = new HashMap<String, String>();
-//					Map<String, String> partTimerWrap = new HashMap<String, String>();
-//
-//					partTimerParams.put("pt_id", "27");
-//					partTimerParams.put("first_name", "Luis");
-//					partTimerParams.put("last_name", "Vulton");
-//					partTimerParams.put("gender", "male");
-//					partTimerParams.put("dob", "01/01/1977");
-//					partTimerParams.put("profile_picture", "data/images/profile_pic/profile_pic.jpeg");
-//					partTimerParams.put("phone_no", "90009999");
-//					partTimerParams.put("address", "Singapore");
-//					partTimerParams.put("postal_code", "102312");
-//					partTimerParams.put("ic_type", "Student’s Pass");
-//					partTimerParams.put("ic_type_id", "3");
-//					partTimerParams.put("school_id", "1");
-//					partTimerParams.put("ic_expiry_date", "2015-05-01");
-//					partTimerParams.put("ic_front_picture", front);
-//					partTimerParams.put("ic_back_picture", back);
-//					partTimerParams.put("work_experience", "50");
-//					partTimerParams.put("profile_source", "system");
-//					partTimerParams.put("matric_card_picture", "data/images/matric_card/matric_card.jpeg");
-//					partTimerParams.put("matric_card_no", "G1341332G");
-//					partTimerParams.put("ec_first_name", "Alex");
-//					partTimerParams.put("ec_last_name", "Ferguson");
-//					partTimerParams.put("ec_email", "alex@man.com");
-//					partTimerParams.put("ec_phone_no", "98776554");
-//					partTimerParams.put("ec_address", "singapore");
-//					partTimerParams.put("ec_postal_code", "123412");
-//					partTimerParams.put("ec_relationship", "father");
-//					partTimerParams.put("bank_name", "POSB");
-//					partTimerParams.put("bank_account_type", "POSB Savings Plus");
-//					partTimerParams.put("bank_account_no", "12-098-134");
-//					partTimerParams.put("bank_branch_name", "Clementi Branch");
-//
-//					partTimerWrap.put("part_timer", partTimerParams.toString());
-//					dataParams.put("data", partTimerWrap.toString());   
-//
-//					return params;
-//				};
-//			};
-//			queue.add(myReq);
-
-			if (fullName.getText().toString() == "") {
+			if (fullName.getText().toString().trim().length() == 0) {
 				errors += "* Full name\n";
 			}
 
-			if (genderView.getCheckedRadioButtonId() < 0) {
+			if (genderSelected == null) {
 				errors += "* Gender\n";
 			}
 
-			if (birthView.getText().toString() == "") {
+			if (birthView.getText().length() == 0) {
 				errors += "* Birthday\n";
-
 			}
 
-			if (nricTypeView.getText().toString() == "") {
+			if (nricTypeView.getText().length() == 0) {
 				errors += "* NRIC Type\n";
 			}
 
-			if (userNRICFront == "") {
-				errors += "* NRIC front photo\n";
-			}
+			// if (userNRICFront == "") {
+			// errors += "* NRIC front photo\n";
+			// }
+			//
+			// if (userNRICBack == "") {
+			// errors += "* NRIC back photo\n";
+			// }
 
-			if (userNRICBack == "") {
-				errors += "* NRIC back photo\n";
-			}
+//			if (skillView.getText().length() == 0) {
+//				errors += "* Skills\n";
+//			}
 
-			if (skillView.getText().toString() == "") {
-				errors += "* Skills\n";
-			}
-
-			if (experienceView.getText().toString() == "") {
+			if (editExperience.getText().length() == 0) {
 				errors += "* Working Experience\n";
 			}
 
-
-			if (errors == "") {
-				SharedPreferences.Editor editor = settings.edit();
-				editor.putString(LOGGED, "true");
-				editor.commit();
-
-				Intent intent = new Intent(ProfileRegistrationActivity.this,
-						HomeActivity.class);
-				startActivity(intent);
-				finish();
-			} else {
-				String showError = "Please complete :\n\n" + errors;
-
-				AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-						ProfileRegistrationActivity.this);
-		 
-					// set title
-					alertDialogBuilder.setTitle("Invalid Data correct");
-		 
-					// set dialog message
-					alertDialogBuilder
-						.setMessage(showError)
-						.setCancelable(false)
-						.setPositiveButton("Yes",new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog,int id) {
-								
-							}
-						  });
-		 
-						// create alert dialog
-						AlertDialog alertDialog = alertDialogBuilder.create();
-		 
-						// show it
-						alertDialog.show();
+			if (phoneNumber.getText().length() == 0) {
+				errors += "* Phone Number\n";
 			}
 
+			Log.e("ZZZZZ", ">>> selected: " + genderSelected);
+			if (errors.length() == 0) {
+				doCreateProfile();
+			} else {
+				String showError = "Please complete :\n\n" + errors;
+				AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+						ProfileRegistrationActivity.this);
+
+				// set title
+				alertDialogBuilder.setTitle("Invalid Data correct");
+				// set dialog message
+				alertDialogBuilder
+						.setMessage(showError)
+						.setCancelable(false)
+						.setPositiveButton("Yes",
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int id) {
+
+									}
+								});
+
+				// create alert dialog
+				AlertDialog alertDialog = alertDialogBuilder.create();
+				// show it
+				alertDialog.show();
+			}
 		}
 	};
 
-	protected ErrorListener createMyReqErrorListener() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	protected void doCreateProfile() {
+		final String url = "http://matchimi.buuukapps.com/create_and_part_timer_profile";
+		final Handler mHandlerFeed = new Handler();
+		final Runnable mUpdateResultsFeed = new Runnable() {
+			public void run() {
+				if (jsonStr != null) {
+					// FIXME: please check on server response
+					if (jsonStr.trim().equalsIgnoreCase("0")) {
+						SharedPreferences.Editor editor = settings.edit();
+						editor.putBoolean(CommonUtilities.LOGIN, true);
+						editor.putBoolean(CommonUtilities.REGISTERED, true);
+						editor.commit();
 
-	protected Listener<String> createMyReqSuccessListener() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+						Intent intent = new Intent(context, HomeActivity.class);
+						startActivity(intent);
+						finish();
+					} else {
+						Toast.makeText(context,
+								"Creating profile Failed! Please try again !",
+								Toast.LENGTH_LONG).show();
+					}
+				} else {
+					Toast.makeText(context,
+							"Creating profile Failed! Please try again !",
+							Toast.LENGTH_LONG).show();
+				}
+			}
+		};
 
-	
+		progress = ProgressDialog.show(context, "Basic Profile",
+				"Creating profile...", true, false);
+		new Thread() {
+			public void run() {
+				jsonParser = new JSONParser();
+				try {
+					JSONObject parentData = new JSONObject();
+					JSONObject childData = new JSONObject();
+					childData.put("pt_id", pt_id);
+					String name = fullName.getText().toString().trim();
+					String fname = "";
+					String lname = "";
+					if (name.contains(" ")) {
+						fname = name.substring(0, name.lastIndexOf(" "));
+						lname = name.substring(name.lastIndexOf(" ") + 1);
+					} else {
+						fname = name;
+					}
+					childData.put("first_name", fname);
+					childData.put("last_name", lname);
+					childData.put("gender",
+							genderSelected.toLowerCase(Locale.getDefault()));
+					childData.put("dob", birthView.getText().toString().trim());
+					childData.put("profile_picture", "");
+					childData.put("phone_no", phoneNumber.getText().toString()
+							.trim());
+					childData.put("address", "");
+					childData.put("postal_code", "");
+					childData.put("ic_type", listNRICType.get(nricSelected));
+					childData.put("ic_type_id",
+							listNRICTypeId.get(nricSelected));
+					childData.put("school_id", "");
+					childData.put("ic_expiry_date", "");
+
+					childData.put("ic_front_picture", settings.getString(
+							CommonUtilities.USER_NRIC_FRONT, ""));
+					childData.put("ic_back_picture", settings.getString(
+							CommonUtilities.USER_NRIC_BACK, ""));
+					childData.put("work_experience", editExperience.getText()
+							.toString().trim());
+					childData.put("profile_source", "");
+					childData.put("matric_card_picture", "");
+					childData.put("matric_card_no", "");
+					childData.put("ec_first_name", "");
+					childData.put("ec_last_name", "");
+					childData.put("ec_email", "");
+					childData.put("ec_phone_no", "");
+					childData.put("ec_address", "");
+					childData.put("ec_postal_code", "");
+					childData.put("ec_relationship", "");
+					childData.put("bank_name", "");
+					childData.put("bank_account_type", "");
+					childData.put("bank_account_no", "");
+					childData.put("bank_branch_name", "");
+					childData.put("skills", listSelectedItems.toString());
+					parentData.put("part_timer", childData);
+
+					String[] params = { "data" };
+					String[] values = { parentData.toString() };
+					Log.e("XYZZ", ">>> " + values[0]);
+					jsonStr = jsonParser.getHttpResultUrlPost(url, params,
+							values);
+
+					Log.e("doEditAvailability", "Result >>> " + jsonStr);
+				} catch (Exception e) {
+					jsonStr = null;
+				}
+
+				if (progress != null && progress.isShowing()) {
+					progress.dismiss();
+					mHandlerFeed.post(mUpdateResultsFeed);
+				}
+			}
+		}.start();
+	}
 
 	/**
 	 * NRIC type selection list-checkbox listener
 	 */
 	private OnClickListener nricTypeListener = new OnClickListener() {
-
 		@Override
 		public void onClick(View view) {
-
-			final CharSequence[] choiceList = { "Citizen", "Resident" };
-			final CharSequence selectedText = "";
-
 			AlertDialog.Builder builder = new AlertDialog.Builder(
 					ProfileRegistrationActivity.this);
-
 			// Set the dialog title
 			builder.setTitle("Select NRIC Type");
-
-			builder.setSingleChoiceItems(choiceList, nricSelected,
-					new DialogInterface.OnClickListener() {
-
+			builder.setSingleChoiceItems(
+					listNRICType.toArray(new CharSequence[listNRICType.size()]),
+					nricSelected, new DialogInterface.OnClickListener() {
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							nricSelected = which;
@@ -418,14 +633,15 @@ public class ProfileRegistrationActivity extends Activity {
 								@Override
 								public void onClick(DialogInterface dialog,
 										int which) {
-									nricTypeView
-											.setText(choiceList[nricSelected]);
+									if (nricSelected != -1) {
+										nricTypeView.setText(listNRICType
+												.get(nricSelected));
+									}
 								}
 							});
 
 			Dialog dialog = builder.create();
 			dialog.show();
-
 		}
 	};
 
@@ -436,68 +652,41 @@ public class ProfileRegistrationActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
-			final ArrayList<Integer> mSelectedItems = new ArrayList(); // Where
-			// we
-			// track
-			// the
-			// selected
-			// items
+			listSelectedItems = new ArrayList<Integer>();
 			final ArrayList<CharSequence> selectedSkills = new ArrayList<CharSequence>();
-			final List<CharSequence> items = new ArrayList<CharSequence>();
-
-			items.add("Accounting");
-			items.add("Ushering");
-			items.add("Waiting Tables");
-			items.add("Administration");
-			items.add("Cleaner");
-			items.add("HouseKeeper");
-			items.add("Writer");
-			items.add("IT Support");
-			items.add("Curator");
 
 			AlertDialog.Builder builder = new AlertDialog.Builder(
 					ProfileRegistrationActivity.this);
 
 			// Set the dialog title
 			builder.setTitle("Select Skills")
-					// Specify the list array, the items to be selected by
-					// default (null for none),
-					// and the listener through which to receive callbacks when
-					// items are selected
 					.setMultiChoiceItems(
-							items.toArray(new CharSequence[items.size()]),
+							listSkill
+									.toArray(new CharSequence[listSkill.size()]),
 							null,
 							new DialogInterface.OnMultiChoiceClickListener() {
 								@Override
 								public void onClick(DialogInterface dialog,
 										int which, boolean isChecked) {
 									if (isChecked) {
-										// If the user checked the item, add it
-										// to the selected items
-										mSelectedItems.add(which);
-									} else if (mSelectedItems.contains(which)) {
-										// Else, if the item is already in the
-										// array, remove it
-										mSelectedItems.remove(Integer
+										listSelectedItems.add(which);
+									} else if (listSelectedItems
+											.contains(which)) {
+										listSelectedItems.remove(Integer
 												.valueOf(which));
 									}
 								}
 							})
-					// Set the action buttons
 					.setPositiveButton(R.string.ok,
 							new DialogInterface.OnClickListener() {
 								@Override
 								public void onClick(DialogInterface dialog,
 										int id) {
-									// User clicked OK, so save the
-									// mSelectedItems results somewhere
-									// or return them to the component that
-									// opened the dialog
 									selectedSkills.clear();
-
-									for (int i = 0; i < mSelectedItems.size(); i++) {
-										selectedSkills.add(items
-												.get(mSelectedItems.get(i)));
+									for (int i = 0; i < listSelectedItems
+											.size(); i++) {
+										selectedSkills.add(listSkill
+												.get(listSelectedItems.get(i)));
 									}
 
 									// Convert ArrayList into String
@@ -511,112 +700,10 @@ public class ProfileRegistrationActivity extends Activity {
 											.replace(", ", ", ");
 									skillView.setText(selectedSkillsSet);
 								}
-							})
-					.setNegativeButton(R.string.cancel,
-							new DialogInterface.OnClickListener() {
-								@Override
-								public void onClick(DialogInterface dialog,
-										int id) {
-									// Nothing happened
-								}
 							});
 
 			Dialog dialog = builder.create();
 			dialog.show();
-		}
-	};
-
-	/**
-	 * Working experience list-checkbox listener
-	 */
-	private OnClickListener workingExperienceListener = new OnClickListener() {
-
-		@Override
-		public void onClick(View view) {
-			final ArrayList<Integer> mSelectedItems = new ArrayList(); // Where
-			// we
-			// track
-			// the
-			// selected
-			// items
-			final ArrayList<CharSequence> selectedExperiences = new ArrayList<CharSequence>();
-			final List<CharSequence> items = new ArrayList<CharSequence>();
-			items.add("1 Year");
-			items.add("2 Years");
-			items.add("3 Years");
-			items.add("3 Years+");
-
-			AlertDialog.Builder builder = new AlertDialog.Builder(
-					ProfileRegistrationActivity.this);
-
-			// Set the dialog title
-			builder.setTitle("Select Working Experience")
-					// Specify the list array, the items to be selected by
-					// default (null for none),
-					// and the listener through which to receive callbacks when
-					// items are selected
-					.setMultiChoiceItems(
-							items.toArray(new CharSequence[items.size()]),
-							null,
-							new DialogInterface.OnMultiChoiceClickListener() {
-								@Override
-								public void onClick(DialogInterface dialog,
-										int which, boolean isChecked) {
-									if (isChecked) {
-										// If the user checked the item, add it
-										// to the selected items
-										mSelectedItems.add(which);
-									} else if (mSelectedItems.contains(which)) {
-										// Else, if the item is already in the
-										// array, remove it
-										mSelectedItems.remove(Integer
-												.valueOf(which));
-									}
-								}
-							})
-					// Set the action buttons
-					.setPositiveButton(R.string.ok,
-							new DialogInterface.OnClickListener() {
-								@Override
-								public void onClick(DialogInterface dialog,
-										int id) {
-									// User clicked OK, so save the
-									// mSelectedItems results somewhere
-									// or return them to the component that
-									// opened the dialog
-									selectedExperiences.clear();
-
-									for (int i = 0; i < mSelectedItems.size(); i++) {
-										selectedExperiences.add(items
-												.get(mSelectedItems.get(i)));
-									}
-
-									// Convert ArrayList into String
-									// comma-separated
-									String selectedExperiencesList = selectedExperiences
-											.toString();
-									String selectedExperienceSet = selectedExperiencesList
-											.substring(
-													1,
-													selectedExperiencesList
-															.length() - 1)
-											.replace(", ", ", ");
-									experienceView
-											.setText(selectedExperienceSet);
-								}
-							})
-					.setNegativeButton(R.string.cancel,
-							new DialogInterface.OnClickListener() {
-								@Override
-								public void onClick(DialogInterface dialog,
-										int id) {
-
-								}
-							});
-
-			Dialog dialog = builder.create();
-			dialog.show();
-
 		}
 	};
 
@@ -657,10 +744,6 @@ public class ProfileRegistrationActivity extends Activity {
 		String[] params = { currentPhotoPath };
 
 		new postData().execute(params);
-		// File file = new File(currentPhotoPath);
-		// new backgroundUploadMultipart(SERVERURL +
-		// API_UPLOAD_FRONT_NRIC_PHOTOS, file).execute();
-
 	}
 
 	/**
@@ -707,8 +790,8 @@ public class ProfileRegistrationActivity extends Activity {
 	 * @throws IOException
 	 */
 	private File createPhotoFile() throws IOException {
-		String timestamp = new SimpleDateFormat("yyyyMMdd-HHmmss")
-				.format(new Date());
+		String timestamp = new SimpleDateFormat("yyyyMMdd-HHmmss",
+				Locale.getDefault()).format(new Date());
 		String imageFile = JPEG_FILE_PREFIX + timestamp + "_";
 		File albumF = getAlbumDir();
 		File imageF = File.createTempFile(imageFile, JPEG_FILE_SUFFIX, albumF);
@@ -746,9 +829,6 @@ public class ProfileRegistrationActivity extends Activity {
 				photo = setupPhotoFile();
 				takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT,
 						Uri.fromFile(photo));
-				ExifInterface exif = new ExifInterface(currentPhotoPath);
-				orientation = Integer.parseInt(exif
-						.getAttribute(ExifInterface.TAG_ORIENTATION));
 
 				setResult(Activity.RESULT_OK, takePhotoIntent);
 				takePhotoIntent.putExtra("return-data", true);
@@ -773,12 +853,11 @@ public class ProfileRegistrationActivity extends Activity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (requestCode) {
-		case CAMERA_REQUEST: {
+		case CAMERA_REQUEST:
 			if (resultCode == Activity.RESULT_OK) {
 				handleCameraPhoto(data);
 			}
 			break;
-		}
 		}
 	}
 
@@ -818,7 +897,7 @@ public class ProfileRegistrationActivity extends Activity {
 	 * @author Polatic
 	 * 
 	 */
-	private class postData extends AsyncTask<String, Void, Void> {
+	private class postData extends AsyncTask<String, Void, String> {
 		ProgressDialog dialog = new ProgressDialog(
 				ProfileRegistrationActivity.this);
 		Bitmap bm;
@@ -834,7 +913,7 @@ public class ProfileRegistrationActivity extends Activity {
 		}
 
 		@Override
-		protected Void doInBackground(String... params) {
+		protected String doInBackground(String... params) {
 
 			String filePath = params[0];
 			File file = new File(filePath);
@@ -848,8 +927,8 @@ public class ProfileRegistrationActivity extends Activity {
 
 				byte[] data = bos.toByteArray();
 				HttpClient httpClient = new DefaultHttpClient();
-				HttpPost postRequest = new HttpPost(SERVERURL
-						+ API_UPLOAD_FRONT_NRIC_PHOTOS);
+				HttpPost postRequest = new HttpPost(CommonUtilities.SERVERURL
+						+ CommonUtilities.API_UPLOAD_FRONT_NRIC_PHOTOS);
 
 				ByteArrayBody bab = new ByteArrayBody(data, filename);
 				MultipartEntity reqEntity = new MultipartEntity(
@@ -872,17 +951,22 @@ public class ProfileRegistrationActivity extends Activity {
 
 				// Saving user NRIC path
 				if (takeFrontNRIC) {
-					updateSettings(settings, USER_NRIC_FRONT, s.toString());
+					ApplicationUtils.copyFile(filePath,
+							ApplicationUtils.getAppRootDir() + "/front");
+					SharedUtils.updateSettings(settings,
+							CommonUtilities.USER_NRIC_FRONT, s.toString());
 				} else {
-					updateSettings(settings, USER_NRIC_BACK, s.toString());
+					ApplicationUtils.copyFile(filePath,
+							ApplicationUtils.getAppRootDir() + "/back");
+					SharedUtils.updateSettings(settings,
+							CommonUtilities.USER_NRIC_BACK, s.toString());
 				}
-
 			} catch (Exception e) {
 				// handle exception here
 				Log.e(e.getClass().getName(), e.getMessage());
 			}
 
-			return null;
+			return filePath;
 		}
 
 		@Override
@@ -890,138 +974,22 @@ public class ProfileRegistrationActivity extends Activity {
 		}
 
 		@Override
-		protected void onPostExecute(Void result) {
+		protected void onPostExecute(String result) {
 			super.onPostExecute(result);
 			dialog.dismiss();
-		}
-	}
 
-	/**
-	 * Add params POST to HTTP Multipart file
-	 * 
-	 * @param outputStream
-	 * @param key
-	 * @param value
-	 * @throws IOException
-	 */
-	private void addParams(DataOutputStream outputStream, String key,
-			String value) throws IOException {
-		outputStream.writeBytes(twoHyphens + boundary + lineEnd);
-		outputStream.writeBytes("Content-Disposition: form-data; name=\"" + key
-				+ "\"" + lineEnd);
-		outputStream.writeBytes("Content-Type: text/plain" + lineEnd);
-		outputStream.writeBytes(lineEnd + value + lineEnd);
-		outputStream.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
-	}
+			Bitmap original = BitmapFactory.decodeFile(result);
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			original.compress(Bitmap.CompressFormat.JPEG, 75, out);
+			Bitmap decoded = BitmapFactory
+					.decodeStream(new ByteArrayInputStream(out.toByteArray()));
 
-	private class backgroundUploadMultipart extends
-			AsyncTask<Void, Integer, Void> implements
-			DialogInterface.OnCancelListener {
-		private ProgressDialog progressDialog;
-		private String url;
-		private File file;
-
-		public backgroundUploadMultipart(String url, File file) {
-			this.url = url;
-			this.file = file;
-		}
-
-		@Override
-		protected void onPreExecute() {
-			progressDialog = new ProgressDialog(
-					ProfileRegistrationActivity.this);
-			progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-			progressDialog.setMessage("Uploading...");
-			progressDialog.setCancelable(false);
-			progressDialog.setMax((int) file.length());
-			progressDialog.show();
-		}
-
-		@Override
-		protected Void doInBackground(Void... v) {
-			HttpURLConnection.setFollowRedirects(false);
-			HttpURLConnection connection = null;
-			String fileName = file.getName();
-			try {
-				connection = (HttpURLConnection) new URL(url).openConnection();
-
-				// Allow Inputs & Outputs
-				connection.setDoInput(true);
-				connection.setDoOutput(true);
-				connection.setUseCaches(false);
-
-				// Enable POST method
-				connection.setRequestMethod("POST");
-				connection.setRequestProperty("Connection", "Keep-Alive");
-				connection.setRequestProperty("Content-Type",
-						"multipart/form-data;boundary=" + boundary);
-
-				outputStream = new DataOutputStream(
-						connection.getOutputStream());
-				String filename = new File(currentPhotoPath).getName();
-				addParams(outputStream, "filename", filename);
-
-				outputStream
-						.writeBytes("Content-Disposition: form-data; name=\"file\";filename=\""
-								+ fileName + "\"" + lineEnd);
-				outputStream.writeBytes(lineEnd);
-				outputStream.flush();
-
-				int progress = 0;
-				int bytesRead = 0;
-				byte buf[] = new byte[1024];
-				BufferedInputStream bufInput = new BufferedInputStream(
-						new FileInputStream(file));
-				while ((bytesRead = bufInput.read(buf)) != -1) {
-					// write output
-					outputStream.write(buf, 0, bytesRead);
-					outputStream.flush();
-					progress += bytesRead;
-					// update progress bar
-					publishProgress(progress);
-				}
-				outputStream.writeBytes(lineEnd);
-				outputStream.writeBytes(twoHyphens + boundary + twoHyphens
-						+ lineEnd);
-
-				outputStream.flush();
-				outputStream.close();
-
-				// Get server response
-				BufferedReader reader = new BufferedReader(
-						new InputStreamReader(connection.getInputStream()));
-				String line = "";
-				StringBuilder builder = new StringBuilder();
-				while ((line = reader.readLine()) != null) {
-					builder.append(line);
-				}
-
-				Log.d(TAG, builder.toString());
-
-			} catch (Exception e) {
-				// Exception
-			} finally {
-				if (connection != null)
-					connection.disconnect();
+			Drawable d = new BitmapDrawable(getResources(), decoded);
+			if (takeFrontNRIC) {
+				photoFrontNRIC.setBackgroundDrawable(d);
+			} else {
+				photoBackNRIC.setBackgroundDrawable(d);
 			}
-
-			return null;
-		}
-
-		@Override
-		protected void onProgressUpdate(Integer... progress) {
-			progressDialog.setProgress((int) (progress[0]));
-		}
-
-		@Override
-		protected void onPostExecute(Void v) {
-			progressDialog.dismiss();
-		}
-
-		@Override
-		public void onCancel(DialogInterface dialog) {
-			cancel(true);
-			dialog.dismiss();
 		}
 	}
 

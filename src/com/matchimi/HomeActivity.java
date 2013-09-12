@@ -14,7 +14,6 @@ import com.matchimi.options.JobsFragment;
 import com.matchimi.options.ProfileFragment;
 import com.matchimi.options.ScheduleFragment;
 import com.matchimi.registration.LoginActivity;
-import com.matchimi.registration.RegistrationActivity;
 
 public class HomeActivity extends TabSwipeActivity {
 
@@ -26,9 +25,10 @@ public class HomeActivity extends TabSwipeActivity {
 		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
 
 		// If user not logged, redirect to Login/Register page
-		if (settings != null && !settings.getBoolean(CommonUtilities.LOGIN, true)) {
-			Intent loginPage = new Intent(this,
-					RegistrationActivity.class);
+		// FIXME: change default value of login to false to go to login page
+		if (settings == null
+				|| !settings.getBoolean(CommonUtilities.LOGIN, false)) {
+			Intent loginPage = new Intent(this, LoginActivity.class);
 			loginPage.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(loginPage);
 			finish();

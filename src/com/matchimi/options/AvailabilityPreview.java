@@ -10,6 +10,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -27,7 +28,9 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.matchimi.CommonUtilities;
 import com.matchimi.R;
+import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
 
 public class AvailabilityPreview extends SherlockActivity {
@@ -44,6 +47,14 @@ public class AvailabilityPreview extends SherlockActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		SharedPreferences authenticationPref = getSharedPreferences(
+				CommonUtilities.APP_SETTING, Context.MODE_PRIVATE);
+		if (authenticationPref.getInt(CommonUtilities.SETTING_THEME,
+				CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
+			setTheme(ApplicationUtils.getTheme(true));
+		} else {
+			setTheme(ApplicationUtils.getTheme(false));
+		}
 		setContentView(R.layout.availability_preview);
 
 		context = this;
@@ -156,7 +167,6 @@ public class AvailabilityPreview extends SherlockActivity {
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
 				if (jsonStr != null) {
-					// FIXME: please check on server response
 					if (jsonStr.trim().equalsIgnoreCase("0")) {
 						Toast.makeText(context, "Delete availability Done.",
 								Toast.LENGTH_SHORT).show();

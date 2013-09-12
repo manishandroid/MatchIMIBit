@@ -3,6 +3,7 @@
 
     <string name="app_name">Matchimi</string>
     <string name="app_id">509335329136524</string>
+    <string name="facebook_app_id">509335329136524</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="price_hour">$13/hr</string>
@@ -10,8 +11,8 @@
     <string name="time_working">4pm - 11pm</string>
     <string name="address_working">Jumbo</string>
     <string name="place_working">Clark Quay</string>
-    <string name="menu_jobs">jobs</string>
-    <string name="menu_schedule">schedule</string>
+    <string name="menu_jobs">job offers</string>
+    <string name="menu_schedule">my jobs</string>
     <string name="menu_profile">profile</string>
     <string name="next">></string>
     <string name="registration_header">Get Started</string>
@@ -24,9 +25,9 @@
     <string name="registration_submit">Submit</string>
     <string name="registration_profile_fullname">Full Name</string>
     <string name="registration_profile_date_of_birth">Date of Birth</string>
-    <string name="registration_profile_nrictype">NRIC Type</string>
+    <string name="registration_profile_nrictype">Status</string>
     <string name="registration_profile_add_nric_photos">NRIC Type</string>
-    <string name="registration_profile_skills">Skills</string>
+    <string name="registration_profile_skills">Job Functions</string>
     <string name="registration_profile_work_experience">Work Experience</string>
     <string name="registration_profile_addnricphotos">Add NRIC Photos</string>
     <string name="registration_profile_addfrontphotos">FRONT</string>
@@ -38,12 +39,14 @@
     <string name="cancelled">Cancelled</string>
     <string name="permission_not_granted">Unable to perform selected action because permissions were not granted.</string>
     <string name="ok">OK</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
     <string name="hello_user">Hello %1$s!</string>
     <string name="success">Success</string>
     <string name="successfully_posted_post">Successfully posted \'%1$s\'.\nPost ID: %2$s</string>
     <string name="error">Error</string>
     <string name="album_name">Matchimi</string>
-    <string name="none_string">none</string>
+    <string name="none_string"></string>
     <string name="details">Details</string>
     <string name="requirements">Requirements</string>
     <string name="mandatory">Mandatory</string>
@@ -58,7 +61,7 @@
     <string name="confirm_submit">Confirm &amp; Submit</string>
     <string name="reject_offer">Reject Offer</string>
     <string name="accept_offer">Accept Offer</string>
-    <string name="cancel_offer">Cancel Offer</string>
+    <string name="cancel_offer">Cancel Job</string>
     <string name="cancel_availability">Cancel Availability</string>
     <string name="cancel_note">Please note that canceling your availability for an accepted offer, is not taken well by employers.\n\nThis will demote your ranking for some time in the Matchimi system and others will be given preference over you when matching job offers.</string>
     <string name="cancel_reason">Reason for cancellation</string>
@@ -87,7 +90,11 @@
     <string name="register">Register</string>
     <string name="login_fb">Please login using your facebook account</string>
     <string name="register_fb">Create a new profile or use your facebook account</string>
-    
+    <string name="total_work">Total worked:</string>
+    <string name="total_earning">Total Earnings:</string>
+    <string name="cancel_offer_receive">Do you want to receive offer again from the same outlet \?</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="notify_user_verification">Please activate your account by click validation link in your email inbox</string>
     <string-array name="repeat_value">
         <item>None</item>
         <item>Weekly</item>

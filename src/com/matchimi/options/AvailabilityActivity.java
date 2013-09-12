@@ -1,5 +1,9 @@
 package com.matchimi.options;
 
+import static com.matchimi.CommonUtilities.API_GET_AVAILABILITIES_BY_PT_ID;
+import static com.matchimi.CommonUtilities.PARAM_PT_ID;
+import static com.matchimi.CommonUtilities.SERVERURL;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -13,6 +17,7 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -27,7 +32,9 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.matchimi.CommonUtilities;
 import com.matchimi.R;
+import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
 
 public class AvailabilityActivity extends SherlockActivity {
@@ -57,6 +64,14 @@ public class AvailabilityActivity extends SherlockActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		SharedPreferences authenticationPref = getSharedPreferences(
+				CommonUtilities.APP_SETTING, Context.MODE_PRIVATE);
+		if (authenticationPref.getInt(CommonUtilities.SETTING_THEME,
+				CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
+			setTheme(ApplicationUtils.getTheme(true));
+		} else {
+			setTheme(ApplicationUtils.getTheme(false));
+		}
 		setContentView(R.layout.availability_menu);
 
 		context = this;
@@ -64,7 +79,7 @@ public class AvailabilityActivity extends SherlockActivity {
 		ActionBar ab = getSupportActionBar();
 		ab.setDisplayHomeAsUpEnabled(true);
 
-		pt_id = getIntent().getExtras().getString("pt_id");
+		pt_id = authenticationPref.getString(CommonUtilities.USER_PTID, null);
 
 		adapter = new AvailabilityAdapter(context);
 		listview = (ListView) findViewById(R.id.listview);
@@ -76,7 +91,6 @@ public class AvailabilityActivity extends SherlockActivity {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
-				// TODO Auto-generated method stub
 				Intent i = new Intent(context, AvailabilityPreview.class);
 				i.putExtra("id", pt_id);
 				i.putExtra("avail_id", listAvailID.get(arg2));
@@ -93,8 +107,8 @@ public class AvailabilityActivity extends SherlockActivity {
 	}
 
 	private void loadDate() {
-		final String url = "http://matchimi.buuukapps.com/get_availabilities_by_pt_id?pt_id="
-				+ pt_id;
+		final String url = SERVERURL + API_GET_AVAILABILITIES_BY_PT_ID + "?" +
+						PARAM_PT_ID + "=" + pt_id;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
@@ -207,12 +221,6 @@ public class AvailabilityActivity extends SherlockActivity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (resultCode == RESULT_OK) {
-			if (requestCode == RC_ADD_AVAILABILITY) {
-				// TODO
-			}
-			if (requestCode == RC_EDIT_AVAILABILITY) {
-				// TODO
-			}
 			availabilityChange = true;
 			loadDate();
 		}

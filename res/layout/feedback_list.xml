@@ -9,20 +9,10 @@
     android:paddingTop="10dp" >
 
     <TextView
-        android:id="@+id/feedback_branch_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/darktitle"
-        android:textSize="20sp" >
-    </TextView>
-    
-    <TextView
         android:id="@+id/feedback_company_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/darktitle"
-        android:textSize="13sp" >
-    </TextView>
+        android:textAppearance="@android:style/TextAppearance.Medium" />
 
     <RatingBar
         android:id="@+id/feedback_grade"
@@ -38,8 +28,6 @@
         android:id="@+id/feedback_comment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/darkdescription"
-        android:textSize="15sp" >
-    </TextView>
+        android:textAppearance="@android:style/TextAppearance.Small" />
 
 </LinearLayout>

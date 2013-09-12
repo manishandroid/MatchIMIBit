@@ -1,5 +1,7 @@
 package com.matchimi.options;
 
+import static com.matchimi.CommonUtilities.PREFS_NAME;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -12,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -26,6 +29,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.matchimi.CommonUtilities;
 import com.matchimi.R;
 import com.matchimi.utils.JSONParser;
 
@@ -48,7 +52,7 @@ public class ScheduleFragment extends Fragment {
 	private List<String> listRequirement = null;
 	private List<String> listOptional = null;
 
-	private String pt_id = "37";
+	private String pt_id = null;
 
 	public static final String EXTRA_TITLE = "title";
 	public static final int RC_SCHEDULE_DETAIL = 11;
@@ -57,6 +61,10 @@ public class ScheduleFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.schedule_menu, container, false);
+
+		SharedPreferences settings = this.getActivity().getSharedPreferences(
+				PREFS_NAME, 0);
+		pt_id = settings.getString(CommonUtilities.USER_PTID, null);
 
 		adapter = new ScheduleAdapter(getActivity());
 		listview = (ListView) view.findViewById(R.id.joblistview);
@@ -68,7 +76,6 @@ public class ScheduleFragment extends Fragment {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
-				// TODO Auto-generated method stub
 				Intent i = new Intent(getActivity(), JobDetails.class);
 				i.putExtra("price", listPrice.get(arg2));
 				i.putExtra("date", listSchedule.get(arg2));
@@ -102,8 +109,7 @@ public class ScheduleFragment extends Fragment {
 	}
 
 	private void loadData() {
-		// FIXME: sfog is Here...!
-		final String url = "http://matchimi.buuukapps.com/get_current_accepted_job_offers?pt_id=37";
+		final String url = "http://matchimi.buuukapps.com/get_current_accepted_job_offers?pt_id=" + pt_id;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {

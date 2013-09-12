@@ -5,6 +5,7 @@ import org.json.JSONObject;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,7 +25,9 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import static com.matchimi.CommonUtilities.*;
 import com.matchimi.R;
+import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
 
 public class JobDetails extends SherlockActivity {
@@ -46,6 +49,13 @@ public class JobDetails extends SherlockActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		SharedPreferences authenticationPref = getSharedPreferences(
+				APP_SETTING, Context.MODE_PRIVATE);
+		if (authenticationPref.getInt(SETTING_THEME, THEME_LIGHT) == THEME_LIGHT) {
+			setTheme(ApplicationUtils.getTheme(true));
+		} else {
+			setTheme(ApplicationUtils.getTheme(false));
+		}
 		setContentView(R.layout.job_detail);
 
 		context = this;
@@ -155,7 +165,6 @@ public class JobDetails extends SherlockActivity {
 	}
 
 	private void loadLocation() {
-		// TODO Auto-generated method stub
 		final String url = "http://matchimi.buuukapps.com/get_availability_by_avail_id?avail_id=";
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
@@ -205,23 +214,22 @@ public class JobDetails extends SherlockActivity {
 	}
 
 	protected void doCancelOffer(String reason) {
-		// TODO Auto-generated method stub
 		Log.e("Cancel", ">>> Reason: " + reason);
-		final String url = "http://matchimi.buuukapps.com/withdraw_job_offer";
+		final String url = SERVERURL+ API_WITHDRAW_AVAILABILITY;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
 				if (jsonStr != null) {
 					Log.e("Result", ">>> " + jsonStr + ".");
 					if (jsonStr.trim().equalsIgnoreCase("0")) {
-						Toast.makeText(context, "Rejecting offer Done.",
+						Toast.makeText(context, "Job canceled succesfully.",
 								Toast.LENGTH_SHORT).show();
 						setResult(RESULT_OK);
 						finish();
 					} else {
 						Toast.makeText(
 								context,
-								"Failed when rejecting offer, try again latter !",
+								"Failed when rejecting offer, please try again.",
 								Toast.LENGTH_LONG).show();
 					}
 				} else {
@@ -249,7 +257,6 @@ public class JobDetails extends SherlockActivity {
 	}
 
 	protected void doRejectOffer() {
-		// TODO Auto-generated method stub
 		final String url = "http://matchimi.buuukapps.com/reject_job_offer";
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
@@ -291,7 +298,6 @@ public class JobDetails extends SherlockActivity {
 	}
 
 	protected void doAcceptOffer() {
-		// TODO Auto-generated method stub
 		final String url = "http://matchimi.buuukapps.com/accept_job_offer";
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {

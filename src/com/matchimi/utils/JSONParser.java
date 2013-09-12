@@ -122,7 +122,7 @@ public class JSONParser {
 
 	public String getHttpResultUrlPost(String url, String[] params,
 			String[] values) {
-		Log.e("getHttpResultUrlPost", "Put to " + url + ": " + params[0] + "("
+		Log.e("getHttpResultUrlPost", "Post to " + url + ": " + params[0] + "("
 				+ values[0] + ")");
 		try {
 			// defaultHttpClient
@@ -142,13 +142,13 @@ public class JSONParser {
 			is = httpEntity.getContent();
 
 		} catch (UnsupportedEncodingException e) {
-			Log.e("getHttpResultUrlPut", "UnsupportedEncodingException, err: "
+			Log.e("getHttpResultUrlPost", "UnsupportedEncodingException, err: "
 					+ e.getMessage());
 		} catch (ClientProtocolException e) {
-			Log.e("getHttpResultUrlPut",
+			Log.e("getHttpResultUrlPost",
 					"ClientProtocolException, err: " + e.getMessage());
 		} catch (IOException e) {
-			Log.e("getHttpResultUrlPut", "IOException, err: " + e.getMessage());
+			Log.e("getHttpResultUrlPost", "IOException, err: " + e.getMessage());
 		}
 
 		try {

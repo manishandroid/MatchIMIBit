@@ -11,8 +11,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -26,13 +28,17 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.MenuItem;
+import com.matchimi.CommonUtilities;
 import com.matchimi.R;
+import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
 
 public class HistoryDetail extends SherlockActivity {
 
 	private Context context;
 	private String pt_id;
+
+	private ProgressDialog progress;
 
 	private JSONParser jsonParser = null;
 	private String jsonStr = null;
@@ -47,9 +53,22 @@ public class HistoryDetail extends SherlockActivity {
 	private List<String> listRequirement = null;
 	private List<String> listOptional = null;
 
+	private int totalHours = 0;
+	private int totalEarning = 0;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		SharedPreferences authenticationPref = getSharedPreferences(
+				CommonUtilities.APP_SETTING, Context.MODE_PRIVATE);
+		if (authenticationPref.getInt(CommonUtilities.SETTING_THEME,
+				CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
+			setTheme(ApplicationUtils.getTheme(true));
+		} else {
+			setTheme(ApplicationUtils.getTheme(false));
+		}
+		pt_id = authenticationPref.getString(CommonUtilities.USER_PTID, null);
+
 		setContentView(R.layout.history_detail);
 
 		context = this;
@@ -57,10 +76,10 @@ public class HistoryDetail extends SherlockActivity {
 		ActionBar ab = getSupportActionBar();
 		ab.setDisplayHomeAsUpEnabled(true);
 
-		pt_id = getIntent().getExtras().getString("pt_id");
-
-		final TextView textTotalHours = (TextView) findViewById(R.id.totalHours);
-		final TextView textTotalEarning = (TextView) findViewById(R.id.totalEarning);
+		TextView textTotalHours = (TextView) findViewById(R.id.totalHours);
+		TextView textTotalEarning = (TextView) findViewById(R.id.totalEarning);
+		textTotalHours.setText("0 Hrs");
+		textTotalEarning.setText("$0");
 
 		final JobAdapter adapter = new JobAdapter(context);
 		final ListView listview = (ListView) findViewById(R.id.joblistview);
@@ -105,6 +124,8 @@ public class HistoryDetail extends SherlockActivity {
 														.indexOf(".") + 1)) == 0) {
 											price = price.substring(0,
 													price.indexOf("."));
+											totalEarning += Integer
+													.parseInt(price);
 										}
 										listPrice
 												.add("<font color='#A4A9AF'>$</font><big><big><big><big><font color='#276289'>"
@@ -139,6 +160,9 @@ public class HistoryDetail extends SherlockActivity {
 												+ " - "
 												+ formatterTime.format(calEnd
 														.getTime()));
+										totalHours += (calEnd
+												.get(Calendar.HOUR_OF_DAY) - calStart
+												.get(Calendar.HOUR_OF_DAY));
 									}
 								} catch (JSONException e) {
 									Log.e("Parse Json Object",
@@ -156,16 +180,22 @@ public class HistoryDetail extends SherlockActivity {
 							Toast.LENGTH_SHORT).show();
 				}
 
+				updateTotals();
 				adapter.updateList(listPrice, listAddress, listCompany,
 						listSchedule, null);
 			}
 		};
 
+		progress = ProgressDialog.show(context, "History",
+				"Loading job history...", true, false);
 		new Thread() {
 			public void run() {
 				jsonParser = new JSONParser();
 				jsonStr = jsonParser.getHttpResultUrlGet(url);
-				mHandlerFeed.post(mUpdateResultsFeed);
+				if (progress != null && progress.isShowing()) {
+					progress.dismiss();
+					mHandlerFeed.post(mUpdateResultsFeed);
+				}
 			}
 		}.start();
 
@@ -174,7 +204,6 @@ public class HistoryDetail extends SherlockActivity {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
-				// TODO Auto-generated method stub
 				Intent i = new Intent(context, JobDetails.class);
 				i.putExtra("price", listPrice.get(arg2));
 				i.putExtra("date", listSchedule.get(arg2));
@@ -189,6 +218,13 @@ public class HistoryDetail extends SherlockActivity {
 				startActivity(i);
 			}
 		});
+	}
+
+	protected void updateTotals() {
+		TextView textTotalHours = (TextView) findViewById(R.id.totalHours);
+		TextView textTotalEarning = (TextView) findViewById(R.id.totalEarning);
+		textTotalHours.setText(totalHours + " Hrs");
+		textTotalEarning.setText("$" + totalEarning);
 	}
 
 	private Calendar generateCalendar(String str) {
