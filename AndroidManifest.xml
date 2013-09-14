@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="14"
+        android:minSdkVersion="10"
         android:targetSdkVersion="17" />
 
     <permission
@@ -33,10 +33,10 @@
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
     <application
-        android:largeHeap="true"
         android:allowBackup="true"
         android:icon="@drawable/icon"
         android:label="@string/app_name"
+        android:largeHeap="true"
         android:theme="@style/Theme.Sherlock.Light" >
         <activity
             android:name="com.matchimi.HomeActivity"
@@ -91,14 +91,12 @@
         <activity
             android:name="com.matchimi.options.MapsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/location"
-            android:theme="@android:style/Theme.Dialog" >
+            android:label="@string/location" >
         </activity>
         <activity
             android:name="com.matchimi.registration.RegistrationActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/app_name"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+            android:label="@string/app_name" >
         </activity>
         <activity
             android:name="com.matchimi.registration.ProfileRegistrationActivity"
@@ -108,8 +106,7 @@
         <activity
             android:name="com.matchimi.registration.LoginActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/login"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+            android:label="@string/login" >
         </activity>
         <activity
             android:name="com.facebook.LoginActivity"
@@ -119,14 +116,25 @@
         <activity
             android:name="com.matchimi.options.BlockedCompaniesActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/app_name">
+            android:label="@string/profile_blocked_companies" >
         </activity>
+        <activity
+            android:name="com.matchimi.registration.EditProfile"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/edit_profile" >
+        </activity>
+        
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyBO5x-qBO8YvNcIZp42whQd4-63JNEADgA" />
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
+
+        <activity
+            android:name="com.matchimi.SettingsActivity"
+            android:label="@string/settings_title" >
+        </activity>
     </application>
 
 </manifest>

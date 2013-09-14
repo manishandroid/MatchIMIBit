@@ -1,10 +1,6 @@
 package com.matchimi.registration;
 
-import static com.matchimi.CommonUtilities.CAMERA_REQUEST;
-import static com.matchimi.CommonUtilities.PREFS_NAME;
-import static com.matchimi.CommonUtilities.TAG;
-import static com.matchimi.CommonUtilities.USER_NRIC_BACK;
-import static com.matchimi.CommonUtilities.USER_NRIC_FRONT;
+import static com.matchimi.CommonUtilities.*;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -148,19 +144,19 @@ public class ProfileRegistrationActivity extends Activity {
 		nricTypeView.setOnClickListener(nricTypeListener);
 
 		// Set skills textview and listener
-		skillView = (TextView) findViewById(R.id.regprofile_skills);
-		skillView.setOnClickListener(skillsListener);
+//		skillView = (TextView) findViewById(R.id.regprofile_skills);
+//		skillView.setOnClickListener(skillsListener);
 
 		// Set experience textview and listener
 		editExperience = (EditText) findViewById(R.id.editExperience);
 
 		// Set take front NRIC button
-		photoFrontNRIC = (Button) findViewById(R.id.profile_reg_addfront_button);
-		photoFrontNRIC.setOnClickListener(frontNRICListener);
+//		photoFrontNRIC = (Button) findViewById(R.id.profile_reg_addfront_button);
+//		photoFrontNRIC.setOnClickListener(frontNRICListener);
 
 		// Set take back NRIC button
-		photoBackNRIC = (Button) findViewById(R.id.profile_reg_addback_button);
-		photoBackNRIC.setOnClickListener(backNRICListener);
+//		photoBackNRIC = (Button) findViewById(R.id.profile_reg_addback_button);
+//		photoBackNRIC.setOnClickListener(backNRICListener);
 
 		profileSubmit = (Button) findViewById(R.id.regprofile_submit_button);
 		profileSubmit.setOnClickListener(profileSubmitListener);
@@ -168,17 +164,15 @@ public class ProfileRegistrationActivity extends Activity {
 		bundleExtras = getIntent().getExtras();
 		pt_id = bundleExtras.getString(CommonUtilities.USER_PTID);
 
-		settings = getSharedPreferences(PREFS_NAME, 0);
+		settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
 		if (bundleExtras != null) {
 			Log.d(TAG, "Incoming intent to profile");
+			
 			String userFirstName = bundleExtras
 					.getString(CommonUtilities.USER_FIRSTNAME);
 			String userLastName = bundleExtras
 					.getString(CommonUtilities.USER_LASTNAME);
-			String userGender = bundleExtras
-					.getString(CommonUtilities.USER_GENDER);
-			Log.e("AAAA", ">>> " + userGender);
 
 			// Set default value for user fullname
 			if (userFirstName != null) {
@@ -202,7 +196,7 @@ public class ProfileRegistrationActivity extends Activity {
 	}
 
 	private void loadGender() {
-		final String url = "http://matchimi.buuukapps.com/get_genders";
+		final String url = SERVERURL + API_GET_GENDERS;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
@@ -222,18 +216,18 @@ public class ProfileRegistrationActivity extends Activity {
 						createGenderView();
 						loadNRICType();
 					} catch (JSONException e) {
-						Log.e("BBB", ">>> " + e.getMessage());
+						Log.e(TAG, "Error get genders >>> " + e.getMessage());
 					}
 				} else {
 					Toast.makeText(context,
-							"Failed to load all data. Try again later !",
+							getString(R.string.failed_load_data),
 							Toast.LENGTH_SHORT).show();
 				}
 			}
 		};
 
 		progress = ProgressDialog.show(context,
-				getResources().getString(R.string.app_name),
+				getResources().getString(R.string.registration_profile_title),
 				"Loading gender...", true, false);
 		new Thread() {
 			public void run() {
@@ -275,7 +269,7 @@ public class ProfileRegistrationActivity extends Activity {
 	}
 
 	protected void loadNRICType() {
-		final String url = "http://matchimi.buuukapps.com/get_ic_types";
+		final String url = SERVERURL + API_GET_IC_TYPES;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
@@ -292,20 +286,20 @@ public class ProfileRegistrationActivity extends Activity {
 							listNRICTypeId.add(obj.getString("nric_type_id"));
 						}
 
-						loadSkill();
+//						loadSkill();
 					} catch (JSONException e) {
-						Log.e("CCC", ">>> " + e.getMessage());
+						Log.e(TAG, "Error get ic types >>> " + e.getMessage());
 					}
 				} else {
 					Toast.makeText(context,
-							"Failed to load all data. Try again later !",
+							getString(R.string.failed_load_data),
 							Toast.LENGTH_SHORT).show();
 				}
 			}
 		};
 
 		progress = ProgressDialog.show(context,
-				getResources().getString(R.string.app_name),
+				getResources().getString(R.string.registration_profile_title),
 				"Loading NRIC type...", true, false);
 		new Thread() {
 			public void run() {
@@ -321,7 +315,7 @@ public class ProfileRegistrationActivity extends Activity {
 	}
 
 	protected void loadSkill() {
-		final String url = "http://matchimi.buuukapps.com/get_skills";
+		final String url = SERVERURL + API_GET_SKILLS;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
@@ -340,30 +334,30 @@ public class ProfileRegistrationActivity extends Activity {
 							listSkill.add(obj.getString("skill_name"));
 						}
 					} catch (JSONException e) {
-						Log.e("DDD", ">>> " + e.getMessage());
+						Log.e(TAG, "Error skills >>> " + e.getMessage());
 					}
 				} else {
 					Toast.makeText(context,
-							"Failed to load all data. Try again later !",
+							getString(R.string.failed_load_data),
 							Toast.LENGTH_SHORT).show();
 				}
 			}
 		};
 
-		progress = ProgressDialog.show(context,
-				getResources().getString(R.string.app_name),
-				"Loading skill...", true, false);
-		new Thread() {
-			public void run() {
-				jsonParser = new JSONParser();
-				jsonStr = jsonParser.getHttpResultUrlGet(url);
-
-				if (progress != null && progress.isShowing()) {
-					progress.dismiss();
-					mHandlerFeed.post(mUpdateResultsFeed);
-				}
-			}
-		}.start();
+//		progress = ProgressDialog.show(context,
+//				getResources().getString(R.string.app_name),
+//				"Loading skill...", true, false);
+//		new Thread() {
+//			public void run() {
+//				jsonParser = new JSONParser();
+//				jsonStr = jsonParser.getHttpResultUrlGet(url);
+//
+//				if (progress != null && progress.isShowing()) {
+//					progress.dismiss();
+//					mHandlerFeed.post(mUpdateResultsFeed);
+//				}
+//			}
+//		}.start();
 	}
 
 	/**
@@ -395,12 +389,11 @@ public class ProfileRegistrationActivity extends Activity {
 
 								// set title
 								alertDialogBuilder
-										.setTitle("Date Birth Restriction");
+										.setTitle(getString(R.string.registration_birthday_restriction_title));
 
 								// set dialog message
 								alertDialogBuilder
-										.setMessage(
-												"You must more than 16 years old")
+										.setMessage(getString(R.string.registration_birthday_restriction))
 										.setCancelable(false)
 										.setPositiveButton(
 												"OK",
@@ -408,7 +401,7 @@ public class ProfileRegistrationActivity extends Activity {
 													public void onClick(
 															DialogInterface dialog,
 															int id) {
-
+														// Nothing to do
 													}
 												});
 
@@ -439,19 +432,19 @@ public class ProfileRegistrationActivity extends Activity {
 			String errors = "";
 
 			if (fullName.getText().toString().trim().length() == 0) {
-				errors += "* Full name\n";
+				errors += "* " + getString(R.string.registration_profile_fullname) + "\n";
 			}
 
 			if (genderSelected == null) {
-				errors += "* Gender\n";
+				errors += "* " + getString(R.string.registration_profile_gender) + "\n";
 			}
 
 			if (birthView.getText().length() == 0) {
-				errors += "* Birthday\n";
+				errors += "* " + getString(R.string.registration_profile_date_of_birth) + "\n";
 			}
 
 			if (nricTypeView.getText().length() == 0) {
-				errors += "* NRIC Type\n";
+				errors += "* " + getString(R.string.registration_profile_nrictype) + "\n";
 			}
 
 			// if (userNRICFront == "") {
@@ -467,23 +460,25 @@ public class ProfileRegistrationActivity extends Activity {
 //			}
 
 			if (editExperience.getText().length() == 0) {
-				errors += "* Working Experience\n";
+				errors += "* " + getString(R.string.registration_profile_work_experience) +"\n";
 			}
 
 			if (phoneNumber.getText().length() == 0) {
-				errors += "* Phone Number\n";
+				errors += "* " + getString(R.string.registration_profile_phone_number) + "\n";
 			}
 
-			Log.e("ZZZZZ", ">>> selected: " + genderSelected);
+			// If all fields completed, then create profile
 			if (errors.length() == 0) {
 				doCreateProfile();
+				
 			} else {
+				// Showing errors if fields not completed
 				String showError = "Please complete :\n\n" + errors;
 				AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
 						ProfileRegistrationActivity.this);
 
 				// set title
-				alertDialogBuilder.setTitle("Invalid Data correct");
+				alertDialogBuilder.setTitle("Registration");
 				// set dialog message
 				alertDialogBuilder
 						.setMessage(showError)
@@ -492,7 +487,7 @@ public class ProfileRegistrationActivity extends Activity {
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int id) {
-
+										// Nothing to do here
 									}
 								});
 
@@ -505,7 +500,7 @@ public class ProfileRegistrationActivity extends Activity {
 	};
 
 	protected void doCreateProfile() {
-		final String url = "http://matchimi.buuukapps.com/create_and_part_timer_profile";
+		final String url = SERVERURL + API_CREATE_AND_PART_TIMER_PROFILE;		
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
@@ -520,21 +515,23 @@ public class ProfileRegistrationActivity extends Activity {
 						Intent intent = new Intent(context, HomeActivity.class);
 						startActivity(intent);
 						finish();
+					} else if (jsonStr.trim().equalsIgnoreCase("2")) {
+						resendLinkDialog(ProfileRegistrationActivity.this);
 					} else {
 						Toast.makeText(context,
-								"Creating profile Failed! Please try again !",
+								getString(R.string.registration_profile_failed),
 								Toast.LENGTH_LONG).show();
 					}
 				} else {
 					Toast.makeText(context,
-							"Creating profile Failed! Please try again !",
+							getString(R.string.registration_profile_failed),
 							Toast.LENGTH_LONG).show();
 				}
 			}
 		};
 
-		progress = ProgressDialog.show(context, "Basic Profile",
-				"Creating profile...", true, false);
+		progress = ProgressDialog.show(context, getString(R.string.registration_profile_title),
+				getString(R.string.registration_profile_progress), true, false);
 		new Thread() {
 			public void run() {
 				jsonParser = new JSONParser();
@@ -542,6 +539,7 @@ public class ProfileRegistrationActivity extends Activity {
 					JSONObject parentData = new JSONObject();
 					JSONObject childData = new JSONObject();
 					childData.put("pt_id", pt_id);
+					
 					String name = fullName.getText().toString().trim();
 					String fname = "";
 					String lname = "";
@@ -587,16 +585,15 @@ public class ProfileRegistrationActivity extends Activity {
 					childData.put("bank_account_type", "");
 					childData.put("bank_account_no", "");
 					childData.put("bank_branch_name", "");
-					childData.put("skills", listSelectedItems.toString());
+					childData.put("skills", "[]");
 					parentData.put("part_timer", childData);
 
 					String[] params = { "data" };
 					String[] values = { parentData.toString() };
-					Log.e("XYZZ", ">>> " + values[0]);
 					jsonStr = jsonParser.getHttpResultUrlPost(url, params,
 							values);
 
-					Log.e("doEditAvailability", "Result >>> " + jsonStr);
+					Log.e(TAG, "Create profile to " + url + " \nResult >>> " + jsonStr);
 				} catch (Exception e) {
 					jsonStr = null;
 				}
@@ -607,6 +604,35 @@ public class ProfileRegistrationActivity extends Activity {
 				}
 			}
 		}.start();
+	}
+	
+	
+	public void resendLinkDialog(Context context) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setTitle(context.getString(R.string.app_name));
+		builder.setMessage(getString(R.string.notify_user_verification))
+				.setCancelable(false)
+				.setPositiveButton(R.string.resend_link,
+						new DialogInterface.OnClickListener() {
+							public void onClick(
+									DialogInterface dialog,
+									int id) {
+								// resend link
+								resendLink();
+							}
+						})
+				.setNegativeButton(R.string.ok,
+						new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(
+									DialogInterface arg0,
+									int arg1) {
+							}
+						});
+
+		// Create the AlertDialog object and return it
+		AlertDialog alert = builder.create();
+		alert.show();
 	}
 
 	/**
@@ -645,6 +671,53 @@ public class ProfileRegistrationActivity extends Activity {
 		}
 	};
 
+	private void resendLink() {
+		final String url = SERVERURL + API_RESEND_VERIFICATION_EMAIL;
+		final Handler mHandlerFeed = new Handler();
+		final Runnable mUpdateResultsFeed = new Runnable() {
+			public void run() {
+				if (jsonStr != null) {
+					if (jsonStr.trim().equalsIgnoreCase("0")) {
+						Toast.makeText(context, getString(R.string.resend_email_validation_success),
+								Toast.LENGTH_SHORT).show();
+					} else {
+						Toast.makeText(context,
+								getString(R.string.resend_email_validation_failed),
+								Toast.LENGTH_LONG).show();
+					}
+				} else {
+					Toast.makeText(context,
+							getString(R.string.resend_email_validation_failed),
+							Toast.LENGTH_LONG).show();
+				}
+			}
+		};
+
+		progress = ProgressDialog.show(context,
+				context.getString(R.string.app_name), getString(R.string.please_wait),
+				true, false);
+		new Thread() {
+			public void run() {
+				jsonParser = new JSONParser();
+				try {
+					String[] params = { "pt_id" };
+					String[] values = { pt_id };
+					jsonStr = jsonParser.getHttpResultUrlPost(url, params,
+							values);
+
+					Log.e(TAG, "Resend email link Result >>> " + jsonStr);
+				} catch (Exception e) {
+					jsonStr = null;
+				}
+
+				if (progress != null && progress.isShowing()) {
+					progress.dismiss();
+					mHandlerFeed.post(mUpdateResultsFeed);
+				}
+			}
+		}.start();
+	}
+
 	/**
 	 * Skills selection list-checkbox listener
 	 */
@@ -654,6 +727,7 @@ public class ProfileRegistrationActivity extends Activity {
 		public void onClick(View view) {
 			listSelectedItems = new ArrayList<Integer>();
 			final ArrayList<CharSequence> selectedSkills = new ArrayList<CharSequence>();
+			final List<Integer> selectedIdx = new ArrayList<Integer>();
 
 			AlertDialog.Builder builder = new AlertDialog.Builder(
 					ProfileRegistrationActivity.this);
@@ -669,10 +743,15 @@ public class ProfileRegistrationActivity extends Activity {
 								public void onClick(DialogInterface dialog,
 										int which, boolean isChecked) {
 									if (isChecked) {
-										listSelectedItems.add(which);
+										listSelectedItems.add(Integer
+												.parseInt(listSkillId
+														.get(which)));
+										selectedIdx.add(which);
 									} else if (listSelectedItems
 											.contains(which)) {
 										listSelectedItems.remove(Integer
+												.valueOf(which));
+										selectedIdx.remove(Integer
 												.valueOf(which));
 									}
 								}
@@ -683,10 +762,9 @@ public class ProfileRegistrationActivity extends Activity {
 								public void onClick(DialogInterface dialog,
 										int id) {
 									selectedSkills.clear();
-									for (int i = 0; i < listSelectedItems
-											.size(); i++) {
+									for (int i = 0; i < selectedIdx.size(); i++) {
 										selectedSkills.add(listSkill
-												.get(listSelectedItems.get(i)));
+												.get(selectedIdx.get(i)));
 									}
 
 									// Convert ArrayList into String

@@ -28,9 +28,9 @@ public class CancelPreview extends SherlockActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		SharedPreferences authenticationPref = getSharedPreferences(
-				CommonUtilities.APP_SETTING, Context.MODE_PRIVATE);
-		if (authenticationPref.getInt(CommonUtilities.SETTING_THEME,
+		SharedPreferences settings = getSharedPreferences(
+				CommonUtilities.PREFS_NAME, Context.MODE_PRIVATE);
+		if (settings.getInt(CommonUtilities.SETTING_THEME,
 				CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
 			setTheme(ApplicationUtils.getTheme(true));
 		} else {

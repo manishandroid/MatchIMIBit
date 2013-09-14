@@ -1,8 +1,6 @@
 package com.matchimi.options;
 
-import static com.matchimi.CommonUtilities.API_CREATE_AVAILABILITY;
-import static com.matchimi.CommonUtilities.API_EDIT_AVAILABILITY;
-import static com.matchimi.CommonUtilities.SERVERURL;
+import static com.matchimi.CommonUtilities.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -43,21 +41,21 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.matchimi.CommonUtilities;
 import com.matchimi.R;
 import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
 
-public class CreateAvailability extends SherlockActivity {
+
+public class CreateAvailability extends SherlockFragmentActivity {
 
 	private Context context;
 
@@ -85,16 +83,14 @@ public class CreateAvailability extends SherlockActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		SharedPreferences authenticationPref = getSharedPreferences(
-				CommonUtilities.APP_SETTING, Context.MODE_PRIVATE);
-		if (authenticationPref.getInt(CommonUtilities.SETTING_THEME,
-				CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
+		SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+		if (settings.getInt(SETTING_THEME, THEME_LIGHT) == THEME_LIGHT) {
 			setTheme(ApplicationUtils.getTheme(true));
 		} else {
 			setTheme(ApplicationUtils.getTheme(false));
 		}
-		pt_id = authenticationPref.getString(CommonUtilities.USER_PTID, null);
 		
+		pt_id = settings.getString(USER_PTID, null);
 		setContentView(R.layout.edit_availability);
 
 		context = this;
@@ -214,7 +210,7 @@ public class CreateAvailability extends SherlockActivity {
 			ab.setTitle("Create Availability");
 		}
 
-		map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
+		map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
 				.getMap();
 		if (location != null && !location.equalsIgnoreCase("null")
 				&& location.length() > 1) {
@@ -279,7 +275,8 @@ public class CreateAvailability extends SherlockActivity {
 	}
 
 	private void loadLocation() {
-		Log.e("XXXX", "loadLocation()");
+		Log.e(TAG, "loadLocation()");
+		
 		LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 		boolean isGPSEnabled = locationManager
 				.isProviderEnabled(LocationManager.GPS_PROVIDER);
@@ -292,7 +289,7 @@ public class CreateAvailability extends SherlockActivity {
 		// Better solution would be to display a dialog and suggesting to
 		// go to the settings
 		if (!isGPSEnabled && !isNetworkEnabled) {
-			Log.e("Main", "NO NETWORK PROVIDER IS ENABLED !");
+			Log.e(TAG, "NO NETWORK PROVIDER IS ENABLED !");
 			Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 			startActivity(intent);
 		} else {
@@ -313,22 +310,22 @@ public class CreateAvailability extends SherlockActivity {
 	LocationListener locationListener = new LocationListener() {
 		@Override
 		public void onStatusChanged(String provider, int status, Bundle extras) {
-			Log.e("LocationListener", "onStatusChanged()");
+			Log.e(TAG, "onStatusChanged()");
 		}
 
 		@Override
 		public void onProviderEnabled(String provider) {
-			Log.e("LocationListener", "onProviderEnabled()");
+			Log.e(TAG, "onProviderEnabled()");
 		}
 
 		@Override
 		public void onProviderDisabled(String provider) {
-			Log.e("LocationListener", "onProviderDisabled()");
+			Log.e(TAG, "onProviderDisabled()");
 		}
 
 		@Override
 		public void onLocationChanged(Location location) {
-			Log.e("LocationListener", "onLocationChanged()");
+			Log.e(TAG, "onLocationChanged()");
 			if (!locationLoaded) {
 				loadMap(location.getLatitude() + "," + location.getLongitude());
 			}
@@ -343,6 +340,7 @@ public class CreateAvailability extends SherlockActivity {
 			LatLng pos = new LatLng(Double.parseDouble(latitude),
 					Double.parseDouble(longtitude));
 
+			map.clear();
 			map.addMarker(new MarkerOptions().position(pos).title("Matchimi")
 					.snippet("Your job area availability")
 					.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin)));
@@ -418,34 +416,39 @@ public class CreateAvailability extends SherlockActivity {
 	}
 
 	protected void doEditAvailability() {
-		final String url = SERVERURL + API_EDIT_AVAILABILITY;
+		final String url = SERVERURL + API_EDIT_AND_AVAILABILITY;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
 				if (jsonStr != null) {
 					if (jsonStr.trim().equalsIgnoreCase("0")) {
-						Toast.makeText(context, "Edit availability Done.",
+						Toast.makeText(context, getString(R.string.edit_availability_success),
 								Toast.LENGTH_SHORT).show();
 						Intent result = new Intent();
 						setResult(RESULT_OK, result);
 						finish();
-					} else {
+					} else if (jsonStr.trim().equalsIgnoreCase("1")) {
 						Toast.makeText(
 								context,
-								"Update availability is FAILED. Please try again !",
+								getString(R.string.edit_availability_failed),
+								Toast.LENGTH_LONG).show();
+					} else if (jsonStr.trim().equalsIgnoreCase("2")) {
+						Toast.makeText(
+								context,
+								getString(R.string.availability_adding_overlap),
 								Toast.LENGTH_LONG).show();
 					}
 				} else {
 					Toast.makeText(
 							context,
-							"Update availability is FAILED. Please try again !",
+							getString(R.string.something_wrong),
 							Toast.LENGTH_LONG).show();
 				}
 			}
 		};
 
-		progress = ProgressDialog.show(context, "Availability",
-				"Updating availability...", true, false);
+		progress = ProgressDialog.show(context, getString(R.string.menu_availability),
+				getString(R.string.edit_availability_progress), true, false);
 		new Thread() {
 			public void run() {
 				jsonParser = new JSONParser();
@@ -458,16 +461,17 @@ public class CreateAvailability extends SherlockActivity {
 					childData.put("start_date_time", start);
 					childData.put("end_date_time", end);
 					childData.put("repeat", repeat);
+					childData.put("location", location);
+					
 					parentData.put("availability", childData);
 
 					String[] params = { "data" };
 					String[] values = { parentData.toString() };
 					jsonStr = jsonParser.getHttpResultUrlPut(url, params,
 							values);
-
-					Log.e("doEditAvailability", "Result >>> " + jsonStr);
-					Log.e("doEditAvailability",
-							"Post >>> " + childData.toString());
+					
+					Log.e(TAG, "Post >>> " + childData.toString());
+					Log.e(TAG, "HttpPut to " + url +"Result >>> " + jsonStr);
 				} catch (Exception e) {
 					jsonStr = null;
 				}
@@ -481,34 +485,40 @@ public class CreateAvailability extends SherlockActivity {
 	}
 
 	protected void doAddAvailability() {
-		final String url = SERVERURL + API_CREATE_AVAILABILITY;
+		final String url = SERVERURL + API_CREATE_AND_AVAILABILITY;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
 				if (jsonStr != null) {
 					if (jsonStr.trim().equalsIgnoreCase("0")) {
-						Toast.makeText(context, "Add availability Done.",
+						Toast.makeText(context, getString(R.string.availability_adding_succesfully),
 								Toast.LENGTH_SHORT).show();
 						Intent result = new Intent();
 						setResult(RESULT_OK, result);
 						finish();
+					} else if (jsonStr.trim().equalsIgnoreCase("1")) {
+						Toast.makeText(context, getString(R.string.availability_adding_failed),
+								Toast.LENGTH_SHORT).show();
+					} else if (jsonStr.trim().equalsIgnoreCase("2")) {
+						Toast.makeText(context, getString(R.string.availability_adding_overlap),
+								Toast.LENGTH_SHORT).show();
 					} else {
 						Toast.makeText(
 								context,
-								"Create availability is FAILED. Please try again !",
+								getString(R.string.something_wrong),
 								Toast.LENGTH_LONG).show();
 					}
 				} else {
 					Toast.makeText(
 							context,
-							"Create availability is FAILED. Please try again !",
+							getString(R.string.something_wrong),
 							Toast.LENGTH_LONG).show();
 				}
 			}
 		};
 
-		progress = ProgressDialog.show(context, "Availability",
-				"Creating availability...", true, false);
+		progress = ProgressDialog.show(context, getString(R.string.menu_availability),
+				getString(R.string.add_availability_progress), true, false);
 		new Thread() {
 			public void run() {
 				jsonParser = new JSONParser();
@@ -527,10 +537,8 @@ public class CreateAvailability extends SherlockActivity {
 					String[] values = { parentData.toString() };
 					jsonStr = jsonParser.getHttpResultUrlPost(url, params,
 							values);
-
-					Log.e("doAddAvailability", "Result >>> " + jsonStr);
-					Log.e("doAddAvailability",
-							"Post >>> " + childData.toString());
+					Log.e(TAG, "Post data to " + url + " with data >>>\n" + childData.toString());					
+					Log.e(TAG, "Create Availability result >>> " + jsonStr);					
 				} catch (Exception e) {
 					jsonStr = null;
 				}

@@ -5,6 +5,7 @@ import static com.matchimi.CommonUtilities.PAGEPROFILE;
 import static com.matchimi.CommonUtilities.PREFS_NAME;
 import static com.matchimi.CommonUtilities.TAG;
 import static com.matchimi.CommonUtilities.USER_FIRSTNAME;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -22,7 +23,7 @@ public class HomeActivity extends TabSwipeActivity {
 		super.onCreate(savedInstanceState);
 
 		// Check if user not logged
-		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+		SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
 		// If user not logged, redirect to Login/Register page
 		// FIXME: change default value of login to false to go to login page

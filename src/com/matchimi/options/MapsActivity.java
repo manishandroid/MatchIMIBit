@@ -1,6 +1,5 @@
 package com.matchimi.options;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,18 +13,19 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
-import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.matchimi.CommonUtilities;
+import static com.matchimi.CommonUtilities.*;
 import com.matchimi.R;
 import com.matchimi.utils.ApplicationUtils;
 
-public class MapsActivity extends Activity {
+public class MapsActivity extends SherlockFragmentActivity {
 
 	private GoogleMap map;
 	private boolean locationLoaded = false;
@@ -34,10 +34,10 @@ public class MapsActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		SharedPreferences authenticationPref = getSharedPreferences(
-				CommonUtilities.APP_SETTING, Context.MODE_PRIVATE);
-		if (authenticationPref.getInt(CommonUtilities.SETTING_THEME,
-				CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
+		SharedPreferences settings = getSharedPreferences(
+				PREFS_NAME, Context.MODE_PRIVATE);
+		if (settings.getInt(SETTING_THEME,
+				THEME_LIGHT) == THEME_LIGHT) {
 			setTheme(ApplicationUtils.getTheme(true));
 		} else {
 			setTheme(ApplicationUtils.getTheme(false));
@@ -93,7 +93,7 @@ public class MapsActivity extends Activity {
 			}
 		});
 
-		map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
+		map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
 				.getMap();
 		location = getIntent().getExtras().getString("location");
 		if (location != null && !location.equalsIgnoreCase("null")
@@ -107,6 +107,8 @@ public class MapsActivity extends Activity {
 			@Override
 			public void onMapClick(LatLng point) {
 				location = point.latitude + "," + point.longitude;
+				Log.d(TAG, "Location selected " + location);
+				
 				map.clear();
 				map.addMarker(new MarkerOptions()
 						.position(point)
@@ -157,6 +159,7 @@ public class MapsActivity extends Activity {
 			LatLng pos = new LatLng(Double.parseDouble(latitude),
 					Double.parseDouble(longtitude));
 
+			map.clear();
 			map.addMarker(new MarkerOptions().position(pos).title("Matchimi")
 					.snippet("Your job area availability")
 					.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin)));

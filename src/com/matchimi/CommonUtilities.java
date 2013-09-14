@@ -17,6 +17,9 @@ public final class CommonUtilities {
 	public static final String USER_BIRTHDAY = "userbirthday";
 	public static final String USER_NRIC_FRONT = "usernricfront";
 	public static final String USER_NRIC_BACK = "usernricback";
+	public static final String USER_IS_VERIFIED = "is_verified";
+	public static final String USER_WORK_EXPERIENCE = "working_experience";
+	public static final String USER_PHONE_NUMBER = "phone_no";	
 	public static final String LOGOUT = "logout";
 
 	public static final String HOMEPAGE_OPTION = "homepageoption";
@@ -33,19 +36,27 @@ public final class CommonUtilities {
 
 	public static final String API_UPLOAD_FRONT_NRIC_PHOTOS = "upload_nric_front";
 	public static final String API_CREATE_PARTTIMER_PROFILE = "create_part_timer_profile";
+	public static final String API_CREATE_AND_PART_TIMER_PROFILE = "create_and_part_timer_profile";	
 	public static final String API_CREATE_PARTIMER_LOGIN = "create_part_timer_login";
-	public static final String API_CREATE_AVAILABILITY = "create_availability";
+	public static final String API_CREATE_AND_AVAILABILITY = "create_and_availability";
 	public static final String API_EDIT_AVAILABILITY = "edit_availability";
+	public static final String API_EDIT_AND_AVAILABILITY = "edit_and_availability";
 	public static final String API_GET_PART_TIMER_BY_PT_ID = "get_part_timer_by_pt_id";
 	public static final String API_GET_BLOCKED_COMPANIES_BY_PT_ID = "get_blocked_companies_by_pt_id";
 	public static final String API_GET_CURRENT_JOB_OFFERS = "get_current_job_offers";
 	public static final String API_GET_SCHOOLS = "get_schools";
 	public static final String API_GET_IC_TYPES = "get_ic_types";
+	public static final String API_GET_SKILLS = "get_skills";
 	public static final String API_GET_GENDERS = "get_genders";
 	public static final String API_GET_PART_TIMER_BY_AVAILABLE_ID = "get_part_timer_by_avail_id";
 	public static final String API_GET_AVAILABILITIES_BY_PT_ID = "get_availabilities_by_pt_id";
 	public static final String API_WITHDRAW_AVAILABILITY = "withdraw_availability";
+	public static final String API_RESEND_VERIFICATION_EMAIL = "resend_verification_email";
 	public static final String API_CHECK_PARTIMER_VERIFIED = "check_part_timer_verified";
+	public static final String API_DELETE_AVAILABILITY_BY_AVAIL_ID = "delete_availability_by_avail_id";
+	public static final String API_FREEZE_AVAILABILITY_BY_AVAIL_ID = "freeze_availability";
+	public static final String API_UNFREEZE_AVAILABILITY_BY_AVAIL_ID  = "unfreeze_availability";
+	public static final String API_GET_FREEZE_AVAILABILITY = "get_freeze_availabilities";
 	
 	// public static final String API_UPLOAD_FRONT_NRIC_PHOTOS =
 	// "posts/upload/";
@@ -115,7 +126,6 @@ public final class CommonUtilities {
 	public static final String PARAM_FEEDBACK_COMPANY_COMMENT = "feedback";
 	public static final String PARAM_FEEDBACK_COMPANY_GRADE = "grade";
 
-	public static final String APP_SETTING = "matchimi.setting";
 	public static final String SETTING_THEME = "setting.theme";
 	public static final int THEME_LIGHT = 0;
 	public static final int THEME_DARK = 1;

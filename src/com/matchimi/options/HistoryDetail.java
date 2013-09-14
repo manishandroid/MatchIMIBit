@@ -59,15 +59,15 @@ public class HistoryDetail extends SherlockActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		SharedPreferences authenticationPref = getSharedPreferences(
-				CommonUtilities.APP_SETTING, Context.MODE_PRIVATE);
-		if (authenticationPref.getInt(CommonUtilities.SETTING_THEME,
+		SharedPreferences settings = getSharedPreferences(
+				CommonUtilities.PREFS_NAME, Context.MODE_PRIVATE);
+		if (settings.getInt(CommonUtilities.SETTING_THEME,
 				CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
 			setTheme(ApplicationUtils.getTheme(true));
 		} else {
 			setTheme(ApplicationUtils.getTheme(false));
 		}
-		pt_id = authenticationPref.getString(CommonUtilities.USER_PTID, null);
+		pt_id = settings.getString(CommonUtilities.USER_PTID, null);
 
 		setContentView(R.layout.history_detail);
 

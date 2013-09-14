@@ -1,9 +1,6 @@
 package com.matchimi.options;
 
-import static com.matchimi.CommonUtilities.API_GET_BLOCKED_COMPANIES_BY_PT_ID;
-import static com.matchimi.CommonUtilities.PARAM_PT_ID;
-import static com.matchimi.CommonUtilities.SERVERURL;
-import static com.matchimi.CommonUtilities.TAG;
+import static com.matchimi.CommonUtilities.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,9 +51,8 @@ public class BlockedCompaniesActivity extends SherlockActivity {
 		ActionBar ab = getSupportActionBar();
 		ab.setDisplayHomeAsUpEnabled(true);
 
-		SharedPreferences authenticationPref = getSharedPreferences(
-				CommonUtilities.APP_SETTING, Context.MODE_PRIVATE);
-		pt_id = authenticationPref.getString(CommonUtilities.USER_PTID, null);
+		SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+		pt_id = settings.getString(USER_PTID, null);
 
 		listview = (ListView) findViewById(R.id.blocked_companies_listview);
 

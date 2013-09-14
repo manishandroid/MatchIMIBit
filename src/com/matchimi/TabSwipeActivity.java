@@ -1,11 +1,14 @@
 package com.matchimi;
 
+import static com.matchimi.CommonUtilities.LOGIN;
 import static com.matchimi.CommonUtilities.LOGOUT;
+import static com.matchimi.CommonUtilities.PREFS_NAME;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -28,6 +31,7 @@ import com.actionbarsherlock.widget.ShareActionProvider;
 import com.matchimi.options.AvailabilityActivity;
 import com.matchimi.options.HistoryDetail;
 import com.matchimi.options.JobsFragment;
+import com.matchimi.registration.LoginActivity;
 import com.matchimi.registration.RegistrationActivity;
 import com.matchimi.utils.ApplicationUtils;
 
@@ -36,18 +40,18 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 	private ViewPager mViewPager;
 	private TabsAdapter adapter;
 
-	private SharedPreferences authenticationPref;
+	private SharedPreferences settings;
 	private SharedPreferences.Editor prefEditor;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
 		/* load setting from pref */
-		authenticationPref = getSharedPreferences(CommonUtilities.APP_SETTING,
+		settings = getSharedPreferences(CommonUtilities.PREFS_NAME,
 				MODE_PRIVATE);
-		prefEditor = authenticationPref.edit();
+		prefEditor = settings.edit();
 
-		if (authenticationPref.getInt(CommonUtilities.SETTING_THEME,
+		if (settings.getInt(CommonUtilities.SETTING_THEME,
 				CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
 			setTheme(ApplicationUtils.getTheme(true));
 		} else {
@@ -240,7 +244,7 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 		actionProvider.setShareIntent(createAllShareIntent());
 
 		MenuItem actionNav = menu.findItem(R.id.menu_more);
-		if (authenticationPref.getInt(CommonUtilities.SETTING_THEME,
+		if (settings.getInt(CommonUtilities.SETTING_THEME,
 				CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
 			actionNav
 					.setIcon(R.drawable.abs__ic_menu_moreoverflow_normal_holo_light);
@@ -274,14 +278,22 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 						AvailabilityActivity.class);
 				startActivityForResult(i, JobsFragment.RC_JOB_DETAIL);
 				break;
-			case R.id.menu_logout:
+			case R.id.menu_logout:	
 				i = new Intent(getApplicationContext(),
-						RegistrationActivity.class);
-				i.putExtra(LOGOUT, "true");
+						LoginActivity.class);
+				
+				SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+				SharedPreferences.Editor editor = settings.edit();
+				editor.putBoolean(LOGIN, false);
+				editor.commit();
+				
 				startActivityForResult(i, JobsFragment.RC_JOB_DETAIL);
+				finish();
 				break;
 			case R.id.menu_setting:
-				showSettingMenu();
+				i = new Intent(getApplicationContext(),
+						SettingsActivity.class);
+				startActivityForResult(i, JobsFragment.RC_JOB_DETAIL);
 				break;
 			}
 		}

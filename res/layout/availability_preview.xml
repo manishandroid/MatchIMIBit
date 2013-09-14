@@ -144,7 +144,7 @@
                     android:id="@+id/map"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    class="com.google.android.gms.maps.MapFragment" />
+                    class="com.google.android.gms.maps.SupportMapFragment" />
 
                 <View
                     android:id="@+id/trans_img"
@@ -181,7 +181,7 @@
                 android:id="@+id/buttonDelete"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="6dp"
                 android:layout_marginLeft="12dp"
                 android:layout_marginRight="12dp"
                 android:layout_marginTop="6dp"
@@ -190,6 +190,21 @@
                 android:paddingBottom="12dp"
                 android:paddingTop="12dp"
                 android:text="@string/delete_availability"
+                android:textColor="@android:color/white" />
+            
+            <TextView
+                android:id="@+id/buttonFreeze"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:layout_marginLeft="12dp"
+                android:layout_marginRight="12dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/button_accept_offer"
+                android:gravity="center"
+                android:paddingBottom="12dp"
+                android:paddingTop="12dp"
+                android:text="@string/freeze_availability"
                 android:textColor="@android:color/white" />
         </LinearLayout>
     </LinearLayout>

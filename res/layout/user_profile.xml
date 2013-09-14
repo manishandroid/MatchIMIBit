@@ -57,6 +57,16 @@
                     android:numStars="5"
                     android:rating="2.0"
                     android:stepSize="1.0" />
+                
+                <Button 
+                    android:id="@+id/editProfile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp"
+                    android:text="@string/edit_profile"/>
             </LinearLayout>
         </RelativeLayout>
 
@@ -71,7 +81,8 @@
             android:paddingLeft="5dp"
             android:paddingTop="12dp"
             android:text="@string/profile_blocked_companies"
-            android:textColor="@color/blue_gray" />
+            android:textColor="@color/blue_gray"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/feedback"

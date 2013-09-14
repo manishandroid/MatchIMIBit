@@ -16,6 +16,7 @@ public class AvailabilityAdapter extends BaseAdapter {
 
 	private List<String> listDate = null;
 	private List<Integer> listRepeat = null;
+	private List<Boolean> listFrozen = null;	
 	private String[] repeatString = null;
 
 	public AvailabilityAdapter(Context context) {
@@ -24,10 +25,11 @@ public class AvailabilityAdapter extends BaseAdapter {
 				R.array.repeat_value);
 	}
 
-	public void updateList(List<String> date, List<Integer> repeat) {
+	public void updateList(List<String> date, List<Integer> repeat, List<Boolean> is_frozen) {
 		listDate = date;
 		listRepeat = repeat;
-
+		listFrozen = is_frozen;
+		
 		notifyDataSetChanged();
 	}
 
@@ -67,6 +69,7 @@ public class AvailabilityAdapter extends BaseAdapter {
 			// Set Text
 			holder.textDate = (TextView) v.findViewById(R.id.textDate);
 			holder.textRepeat = (TextView) v.findViewById(R.id.textRepeat);
+			holder.freezeStatus = (TextView) v.findViewById(R.id.detail_availability_freeze_status);
 
 			// Associate the holder with the view for latter lookup
 			v.setTag(holder);
@@ -74,13 +77,19 @@ public class AvailabilityAdapter extends BaseAdapter {
 			holder = (ViewHolder) v.getTag();
 		}
 
-		holder.textDate.setText(listDate.get(position));
+		holder.textDate.setText(listDate.get(position));		
 		if (listRepeat != null && position < listRepeat.size()
 				&& listRepeat.get(position) != null) {
 			holder.textRepeat.setText("Repeats "
 					+ repeatString[listRepeat.get(position)]);
 		} else {
 			holder.textRepeat.setText("Repeats None");
+		}
+		
+		if(listFrozen.get(position)) {
+			holder.freezeStatus.setVisibility(View.VISIBLE);
+		} else {
+			holder.freezeStatus.setVisibility(View.INVISIBLE);			
 		}
 
 		return v;
@@ -89,5 +98,6 @@ public class AvailabilityAdapter extends BaseAdapter {
 	static class ViewHolder {
 		TextView textDate;
 		TextView textRepeat;
+		TextView freezeStatus;		
 	}
 }

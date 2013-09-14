@@ -1,5 +1,7 @@
 package com.matchimi.options;
 
+import static com.matchimi.CommonUtilities.*;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -21,19 +23,20 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.matchimi.CommonUtilities;
 import com.matchimi.R;
 import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
 
-public class AvailabilityPreview extends SherlockActivity {
+
+public class AvailabilityPreview extends SherlockFragmentActivity {
 
 	private Context context;
 
@@ -47,10 +50,8 @@ public class AvailabilityPreview extends SherlockActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		SharedPreferences authenticationPref = getSharedPreferences(
-				CommonUtilities.APP_SETTING, Context.MODE_PRIVATE);
-		if (authenticationPref.getInt(CommonUtilities.SETTING_THEME,
-				CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
+		SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+		if (settings.getInt(SETTING_THEME, THEME_LIGHT) == THEME_LIGHT) {
 			setTheme(ApplicationUtils.getTheme(true));
 		} else {
 			setTheme(ApplicationUtils.getTheme(false));
@@ -63,13 +64,14 @@ public class AvailabilityPreview extends SherlockActivity {
 		ab.setDisplayHomeAsUpEnabled(true);
 
 		Bundle b = getIntent().getExtras();
-		final String id = b.getString("id");
+		final String pt_id = b.getString("pt_id");
 		final String avail_id = b.getString("avail_id");
 		final String start = b.getString("start");
 		final String end = b.getString("end");
 		final int repeat = b.getInt("repeat");
 		final String location = b.getString("location");
 		final String price = b.getString("price");
+		final Boolean is_frozen = b.getBoolean("is_frozen");
 
 		SimpleDateFormat formatterDate = new SimpleDateFormat("EE d, MMM",
 				Locale.getDefault());
@@ -98,7 +100,7 @@ public class AvailabilityPreview extends SherlockActivity {
 			@Override
 			public void onClick(View arg0) {
 				Intent i = new Intent(context, CreateAvailability.class);
-				i.putExtra("id", id);
+				i.putExtra("pt_id", pt_id);
 				i.putExtra("avail_id", avail_id);
 				i.putExtra("start", start);
 				i.putExtra("end", end);
@@ -115,8 +117,8 @@ public class AvailabilityPreview extends SherlockActivity {
 			@Override
 			public void onClick(View arg0) {
 				AlertDialog.Builder builder = new AlertDialog.Builder(context);
-				builder.setTitle("Availability");
-				builder.setMessage("Are you sure want to remove this availability ?");
+				builder.setTitle(getString(R.string.menu_availability));
+				builder.setMessage(getString(R.string.delete_availability_question));
 
 				builder.setPositiveButton("Delete",
 						new DialogInterface.OnClickListener() {
@@ -138,6 +140,45 @@ public class AvailabilityPreview extends SherlockActivity {
 			}
 		});
 
+		
+		final TextView buttonFreeze = (TextView) findViewById(R.id.buttonFreeze);
+		// If frozen, change into unfreeze
+		if(is_frozen) {
+			buttonFreeze.setText(getString(R.string.unfreeze_availability));
+		}
+		
+		buttonFreeze.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				// If status is_frozen true, then unfreze them
+				if(is_frozen) {
+					doUnfreezeAvailability(avail_id);	
+				} else {
+					AlertDialog.Builder builder = new AlertDialog.Builder(context);
+					builder.setTitle(getString(R.string.menu_availability));
+					builder.setMessage(getString(R.string.freeze_availability_question));
+					builder.setPositiveButton(getString(R.string.freeze_title),
+							new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int arg1) {
+									doFreezeAvailability(avail_id);									
+								}
+							});
+
+					builder.setNegativeButton("Cancel",
+							new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int arg1) {
+									// Nothing to do
+								}
+							});
+
+					AlertDialog dialog = builder.create();
+					dialog.show();	
+				}
+			}
+		});
+
 		loadMap(location);
 	}
 
@@ -149,9 +190,9 @@ public class AvailabilityPreview extends SherlockActivity {
 			LatLng pos = new LatLng(Double.parseDouble(latitude),
 					Double.parseDouble(longtitude));
 
-			GoogleMap map = ((MapFragment) getFragmentManager()
+			GoogleMap map = ((SupportMapFragment) getSupportFragmentManager()
 					.findFragmentById(R.id.map)).getMap();
-			map.addMarker(new MarkerOptions().position(pos).title("Matchimi")
+			map.addMarker(new MarkerOptions().position(pos).title(getString(R.string.app_name))
 					.snippet("Your job area availability")
 					.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin)));
 			// Move the camera instantly to hamburg with a zoom of 15.
@@ -162,13 +203,13 @@ public class AvailabilityPreview extends SherlockActivity {
 	}
 
 	protected void doDeleteAvailability(final String avail_id) {
-		final String url = "http://matchimi.buuukapps.com/delete_availability_by_avail_id";
+		final String url = SERVERURL + API_DELETE_AVAILABILITY_BY_AVAIL_ID;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
 				if (jsonStr != null) {
 					if (jsonStr.trim().equalsIgnoreCase("0")) {
-						Toast.makeText(context, "Delete availability Done.",
+						Toast.makeText(context, getString(R.string.delete_availability_success),
 								Toast.LENGTH_SHORT).show();
 						Intent result = new Intent();
 						setResult(RESULT_OK, result);
@@ -176,20 +217,20 @@ public class AvailabilityPreview extends SherlockActivity {
 					} else {
 						Toast.makeText(
 								context,
-								"Delete availability is FAILED. Please try again !",
+								getString(R.string.delete_availability_failed),
 								Toast.LENGTH_LONG).show();
 					}
 				} else {
 					Toast.makeText(
 							context,
-							"Delete availability is FAILED. Please try again !",
+							getString(R.string.something_wrong),
 							Toast.LENGTH_LONG).show();
 				}
 			}
 		};
 
-		progress = ProgressDialog.show(context, "Availability",
-				"Deleting availability...", true, false);
+		progress = ProgressDialog.show(context, getString(R.string.menu_availability),
+				getString(R.string.delete_availability_progress), true, false);
 		new Thread() {
 			public void run() {
 				jsonParser = new JSONParser();
@@ -198,7 +239,7 @@ public class AvailabilityPreview extends SherlockActivity {
 					String[] values = { avail_id };
 					jsonStr = jsonParser.getHttpResultUrlDelete(url, params,
 							values);
-					Log.e("doDeleteAvailability", "Result >>> " + jsonStr);
+					Log.e(TAG, "Deleting availability: " + url + " Result >>>\n" + jsonStr);
 				} catch (Exception e) {
 					jsonStr = null;
 				}
@@ -211,6 +252,102 @@ public class AvailabilityPreview extends SherlockActivity {
 		}.start();
 	}
 
+	/**
+	 * Freeze user availability
+	 * @param avail_id
+	 */
+	protected void doFreezeAvailability(final String avail_id) {
+		final String url = SERVERURL + API_FREEZE_AVAILABILITY_BY_AVAIL_ID;
+		final Handler mHandlerFeed = new Handler();
+		final Runnable mUpdateResultsFeed = new Runnable() {
+			public void run() {
+				if (jsonStr != null) {
+					if (jsonStr.trim().equalsIgnoreCase("0")) {
+						Toast.makeText(context, getString(R.string.freeze_availability_success),
+								Toast.LENGTH_SHORT).show();
+						Intent result = new Intent();
+						setResult(RESULT_OK, result);
+						finish();
+					} else {
+						Toast.makeText(
+								context,
+								getString(R.string.freeze_availability_failed),
+								Toast.LENGTH_LONG).show();
+					}
+				} else {
+					Toast.makeText(
+							context,
+							getString(R.string.something_wrong),
+							Toast.LENGTH_LONG).show();
+				}
+			}
+		};
+
+		progress = ProgressDialog.show(context, getString(R.string.menu_availability),
+				getString(R.string.freeze_availability_progress), true, false);
+		new Thread() {
+			public void run() {
+				jsonParser = new JSONParser();
+				String[] params = { "avail_id" };
+				String[] values = { avail_id };
+				jsonStr = jsonParser.getHttpResultUrlPut(url, params, values);
+
+				if (progress != null && progress.isShowing()) {
+					progress.dismiss();
+					mHandlerFeed.post(mUpdateResultsFeed);
+				}				
+			}
+		}.start();
+	}
+	
+	/**
+	 * Unfreeze availability
+	 * @param avail_id
+	 */
+	protected void doUnfreezeAvailability(final String avail_id) {
+		final String url = SERVERURL + API_UNFREEZE_AVAILABILITY_BY_AVAIL_ID;
+		final Handler mHandlerFeed = new Handler();
+		final Runnable mUpdateResultsFeed = new Runnable() {
+			public void run() {
+				if (jsonStr != null) {
+					if (jsonStr.trim().equalsIgnoreCase("0")) {
+						Toast.makeText(context, getString(R.string.unfreeze_availability_success),
+								Toast.LENGTH_SHORT).show();
+						Intent result = new Intent();
+						setResult(RESULT_OK, result);
+						finish();
+					} else {
+						Toast.makeText(
+								context,
+								getString(R.string.unfreeze_availability_failed),
+								Toast.LENGTH_LONG).show();
+					}
+				} else {
+					Toast.makeText(
+							context,
+							getString(R.string.something_wrong),
+							Toast.LENGTH_LONG).show();
+				}
+			}
+		};
+
+		progress = ProgressDialog.show(context, getString(R.string.menu_availability),
+				getString(R.string.unfreeze_availability_progress), true, false);
+		new Thread() {
+			public void run() {
+				jsonParser = new JSONParser();
+				String[] params = { "avail_id" };
+				String[] values = { avail_id };
+				jsonStr = jsonParser.getHttpResultUrlPut(url, params, values);
+
+				if (progress != null && progress.isShowing()) {
+					progress.dismiss();
+					mHandlerFeed.post(mUpdateResultsFeed);
+				}				
+			}
+		}.start();
+	}
+	
 	private Calendar generateCalendar(String str) {
 		Calendar calRes = new GregorianCalendar(Integer.parseInt(str.substring(
 				0, 4)), Integer.parseInt(str.substring(5, 7)) - 1,

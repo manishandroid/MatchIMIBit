@@ -1,8 +1,6 @@
 package com.matchimi.options;
 
-import static com.matchimi.CommonUtilities.API_GET_AVAILABILITIES_BY_PT_ID;
-import static com.matchimi.CommonUtilities.PARAM_PT_ID;
-import static com.matchimi.CommonUtilities.SERVERURL;
+import static com.matchimi.CommonUtilities.*;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,7 +27,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.matchimi.CommonUtilities;
@@ -37,7 +35,7 @@ import com.matchimi.R;
 import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
 
-public class AvailabilityActivity extends SherlockActivity {
+public class AvailabilityActivity extends SherlockFragmentActivity {
 
 	private Context context;
 	private String pt_id;
@@ -57,17 +55,18 @@ public class AvailabilityActivity extends SherlockActivity {
 	private List<Integer> listRepeat = null;
 	private List<String> listLocation = null;
 	private List<String> listPrice = null;
-
+	private List<Boolean> listFreeze = null;
+	
 	public static final int RC_EDIT_AVAILABILITY = 30;
 	public static final int RC_ADD_AVAILABILITY = 31;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		SharedPreferences authenticationPref = getSharedPreferences(
-				CommonUtilities.APP_SETTING, Context.MODE_PRIVATE);
-		if (authenticationPref.getInt(CommonUtilities.SETTING_THEME,
-				CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
+		
+		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 
+				Context.MODE_PRIVATE);
+		if (settings.getInt(SETTING_THEME, THEME_LIGHT) == THEME_LIGHT) {
 			setTheme(ApplicationUtils.getTheme(true));
 		} else {
 			setTheme(ApplicationUtils.getTheme(false));
@@ -79,7 +78,7 @@ public class AvailabilityActivity extends SherlockActivity {
 		ActionBar ab = getSupportActionBar();
 		ab.setDisplayHomeAsUpEnabled(true);
 
-		pt_id = authenticationPref.getString(CommonUtilities.USER_PTID, null);
+		pt_id = settings.getString(USER_PTID, null);
 
 		adapter = new AvailabilityAdapter(context);
 		listview = (ListView) findViewById(R.id.listview);
@@ -92,13 +91,15 @@ public class AvailabilityActivity extends SherlockActivity {
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
 				Intent i = new Intent(context, AvailabilityPreview.class);
-				i.putExtra("id", pt_id);
+				i.putExtra("pt_id", pt_id);
 				i.putExtra("avail_id", listAvailID.get(arg2));
 				i.putExtra("start", listStartTime.get(arg2));
 				i.putExtra("end", listEndTime.get(arg2));
 				i.putExtra("repeat", listRepeat.get(arg2));
 				i.putExtra("location", listLocation.get(arg2));
 				i.putExtra("price", listPrice.get(arg2));
+				i.putExtra("is_frozen", listFreeze.get(arg2));
+				
 				startActivityForResult(i, RC_EDIT_AVAILABILITY);
 			}
 		});
@@ -119,7 +120,8 @@ public class AvailabilityActivity extends SherlockActivity {
 				listLocation = new ArrayList<String>();
 				listDate = new ArrayList<String>();
 				listPrice = new ArrayList<String>();
-
+				listFreeze = new ArrayList<Boolean>();
+				
 				if (jsonStr != null) {
 					try {
 						JSONArray items = new JSONArray(jsonStr);
@@ -149,6 +151,8 @@ public class AvailabilityActivity extends SherlockActivity {
 												objs, "location"));
 										listPrice.add(jsonParser.getString(
 												objs, "asked_salary"));
+										listFreeze.add(jsonParser.getBoolean(
+												objs, "is_frozen"));
 
 										Calendar calStart = generateCalendar(startDate);
 										Calendar calEnd = generateCalendar(endDate);
@@ -171,6 +175,7 @@ public class AvailabilityActivity extends SherlockActivity {
 									Log.e("Parse Json Object",
 											">> " + e.getMessage());
 								}
+								Log.d(TAG, "Availability results >>>\n " + jsonStr.toString());
 							}
 						} else {
 							Log.e("Parse Json Object", ">> Array is null");
@@ -183,7 +188,7 @@ public class AvailabilityActivity extends SherlockActivity {
 							Toast.LENGTH_SHORT).show();
 				}
 
-				adapter.updateList(listDate, listRepeat);
+				adapter.updateList(listDate, listRepeat, listFreeze);
 
 				listview.setVisibility(View.VISIBLE);
 				progressBar.setVisibility(View.GONE);

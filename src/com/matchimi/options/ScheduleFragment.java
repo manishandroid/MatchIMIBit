@@ -13,6 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -63,7 +64,7 @@ public class ScheduleFragment extends Fragment {
 		View view = inflater.inflate(R.layout.schedule_menu, container, false);
 
 		SharedPreferences settings = this.getActivity().getSharedPreferences(
-				PREFS_NAME, 0);
+				PREFS_NAME, Context.MODE_PRIVATE);
 		pt_id = settings.getString(CommonUtilities.USER_PTID, null);
 
 		adapter = new ScheduleAdapter(getActivity());

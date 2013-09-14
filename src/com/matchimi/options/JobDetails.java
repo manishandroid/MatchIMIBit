@@ -1,5 +1,11 @@
 package com.matchimi.options;
 
+import static com.matchimi.CommonUtilities.API_WITHDRAW_AVAILABILITY;
+import static com.matchimi.CommonUtilities.PREFS_NAME;
+import static com.matchimi.CommonUtilities.SERVERURL;
+import static com.matchimi.CommonUtilities.SETTING_THEME;
+import static com.matchimi.CommonUtilities.THEME_LIGHT;
+
 import org.json.JSONObject;
 
 import android.app.ProgressDialog;
@@ -17,20 +23,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import static com.matchimi.CommonUtilities.*;
 import com.matchimi.R;
 import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
 
-public class JobDetails extends SherlockActivity {
+public class JobDetails extends SherlockFragmentActivity {
 
 	private Context context;
 
@@ -49,9 +54,9 @@ public class JobDetails extends SherlockActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		SharedPreferences authenticationPref = getSharedPreferences(
-				APP_SETTING, Context.MODE_PRIVATE);
-		if (authenticationPref.getInt(SETTING_THEME, THEME_LIGHT) == THEME_LIGHT) {
+		SharedPreferences settings = getSharedPreferences(
+				PREFS_NAME, Context.MODE_PRIVATE);
+		if (settings.getInt(SETTING_THEME, THEME_LIGHT) == THEME_LIGHT) {
 			setTheme(ApplicationUtils.getTheme(true));
 		} else {
 			setTheme(ApplicationUtils.getTheme(false));
@@ -159,7 +164,7 @@ public class JobDetails extends SherlockActivity {
 			buttonCancel.setVisibility(View.GONE);
 		}
 
-		map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
+		map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
 				.getMap();
 		loadLocation();
 	}

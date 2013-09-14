@@ -22,6 +22,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,11 +37,13 @@ import android.widget.Toast;
 
 import com.matchimi.CommonUtilities;
 import com.matchimi.R;
+import com.matchimi.registration.EditProfile;
 import com.matchimi.registration.Utilities;
 import com.matchimi.utils.JSONParser;
 
 public class ProfileFragment extends Fragment {
 
+	public static final int RC_EDIT_PROFILE = 90;
 	public static final String EXTRA_TITLE = "title";
 
 	private Context context;
@@ -50,7 +53,10 @@ public class ProfileFragment extends Fragment {
 
 	private ProgressDialog progress;
 
+	private SharedPreferences settings;
 	private LinearLayout layFeedback;
+	private View view;
+	
 	private List<String> listFeedbackTitle;
 	private List<String> listFeedbackComment;
 	private List<String> listFeedbackRating;
@@ -59,48 +65,31 @@ public class ProfileFragment extends Fragment {
 
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.user_profile, container, false);
+		view = inflater.inflate(R.layout.user_profile, container, false);
 
 		// Check if user not logged
-		SharedPreferences settings = this.getActivity().getSharedPreferences(
+		settings = this.getActivity().getSharedPreferences(
 				PREFS_NAME, 0);
 		pt_id = settings.getString(CommonUtilities.USER_PTID, null);
 
 		context = getActivity();
 
-		// Set user name
-		TextView usernameView = (TextView) view
-				.findViewById(R.id.profile_username);
-		String userName = settings.getString(USER_FIRSTNAME, "")
-				+ settings.getString(USER_LASTNAME, "");
-		usernameView.setText(userName);
-
-		// Set email name
-		TextView emailView = (TextView) view.findViewById(R.id.profile_email);
-		String userEmail = settings.getString(USER_EMAIL, "");
-		emailView.setText(userEmail);
-
-		// Set nric
-		TextView nricView = (TextView) view.findViewById(R.id.profile_nric);
-		String userNRIC = settings.getString(USER_NRIC, "");
-		nricView.setText(userNRIC);
-
-		// Set user profile
-		ImageView avatarView = (ImageView) view
-				.findViewById(R.id.profile_avatar);
-
-		Utilities util = new Utilities();
-		util.downloadAvatar(settings.getString(USER_FACEBOOK_ID, ""),
-				avatarView);
-
-		RatingBar ratingBar = (RatingBar) view.findViewById(R.id.ratingBar);
-		ratingBar.setRating(settings.getInt(USER_RATING, 4));
-
+		loadData();
+		
 		Button blockedCompanyButton = (Button) view
 				.findViewById(R.id.profile_blocked_companies_button);
 		blockedCompanyButton.setOnClickListener(blockedCompanyListener);
 		layFeedback = (LinearLayout) view.findViewById(R.id.layFeedback);
 
+		Button editProfile = (Button)view.findViewById(R.id.editProfile);
+		editProfile.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				Intent i = new Intent(getActivity(), EditProfile.class);
+				startActivityForResult(i, RC_EDIT_PROFILE);
+			}
+		});
+		
 		loadFeedback();
 
 		return view;
@@ -149,8 +138,8 @@ public class ProfileFragment extends Fragment {
 			}
 		};
 
-		progress = ProgressDialog.show(context, "Profile",
-				"Loading feedback...", true, false);
+		progress = ProgressDialog.show(context, context.getString(R.string.app_name),
+				"Loading...", true, false);
 		new Thread() {
 			public void run() {
 				jsonParser = new JSONParser();
@@ -199,4 +188,46 @@ public class ProfileFragment extends Fragment {
 		return bundle;
 	}
 
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		getActivity();
+		if (resultCode == FragmentActivity.RESULT_OK) {
+			if (requestCode == RC_EDIT_PROFILE) {
+				loadData();
+			}
+		}
+	}
+
+	private void loadData() {
+		// TODO Auto-generated method stub
+		// Set user name
+		TextView usernameView = (TextView) view
+				.findViewById(R.id.profile_username);
+		String userName = settings.getString(USER_FIRSTNAME, "")
+				+ settings.getString(USER_LASTNAME, "");
+		usernameView.setText(userName);
+
+		// Set email name
+		TextView emailView = (TextView) view.findViewById(R.id.profile_email);
+		String userEmail = settings.getString(USER_EMAIL, "");
+		emailView.setText(userEmail);
+
+		// Set nric
+		TextView nricView = (TextView) view.findViewById(R.id.profile_nric);
+		String userNRIC = settings.getString(USER_NRIC, "");
+		nricView.setText(userNRIC);
+
+		// Set user profile
+		ImageView avatarView = (ImageView) view
+				.findViewById(R.id.profile_avatar);
+
+		Utilities util = new Utilities();
+		util.downloadAvatar(settings.getString(USER_FACEBOOK_ID, ""),
+				avatarView);
+
+		RatingBar ratingBar = (RatingBar) view.findViewById(R.id.ratingBar);
+		ratingBar.setRating(settings.getInt(USER_RATING, 4));
+	}
+	
 }

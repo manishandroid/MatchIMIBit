@@ -32,7 +32,6 @@ import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.model.GraphUser;
 import com.facebook.widget.LoginButton;
-import static com.matchimi.CommonUtilities.*;
 import com.matchimi.HomeActivity;
 import com.matchimi.R;
 import com.matchimi.utils.JSONParser;
@@ -50,7 +49,13 @@ public class LoginActivity extends Activity {
 	private LoginButton fbLoginButton;
 	private Button submitButton;
 	private Button registerButton;
-	private String is_verified;
+	private String userIsVerified;
+	private String userPhoneNumber;
+	private String userWorkExperience;
+	private String userGender;
+	private String userDob;
+	private String userNRIC;
+	private boolean userBasicComplete = false;
 	
 	private Session.StatusCallback callback = new Session.StatusCallback() {
 		@Override
@@ -95,6 +100,7 @@ public class LoginActivity extends Activity {
 					extraBundle.putString(USER_LASTNAME, "");
 					extraBundle.putString(USER_FIRSTNAME, "");
 					extraBundle.putString(USER_GENDER, "");
+					extraBundle.putString(USER_IS_VERIFIED, "false");
 
 					loginPartTimer(emailText.getText().toString(), passwordText
 							.getText().toString());
@@ -124,7 +130,7 @@ public class LoginActivity extends Activity {
 
 	protected void showForgetDialog() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setTitle("Forget password");
+		builder.setTitle("Forgot password");
 		builder.setMessage("Enter your email address to reset password.");
 
 		final EditText input = new EditText(context);
@@ -258,11 +264,11 @@ public class LoginActivity extends Activity {
 					if (jsonStr.trim().equalsIgnoreCase("1")) {
 						closeSession();
 						Toast.makeText(context,
-								"Login failed. Please try again.",
+								getString(R.string.login_failed),
 								Toast.LENGTH_LONG).show();
 					} else {
 						SharedPreferences settings = getSharedPreferences(
-								PREFS_NAME, 0);
+								PREFS_NAME, Context.MODE_PRIVATE);
 						SharedPreferences.Editor editor = settings.edit();
 
 						String ptid = "";
@@ -272,36 +278,66 @@ public class LoginActivity extends Activity {
 							JSONObject partTimer = obj
 									.getJSONObject("part_timers");
 							ptid = partTimer.getString(PARAM_PT_ID);
-							is_verified = partTimer.getString(PARAM_PROFILE_IS_VERIFIED);
+							userIsVerified = partTimer.getString(PARAM_PROFILE_IS_VERIFIED);
+							userDob = partTimer.getString(PARAM_PROFILE_DATE_OF_BIRTH);
+							userWorkExperience = partTimer.getString(PARAM_PROFILE_WORK_EXPERIENCE);
+							userPhoneNumber = partTimer.getString(PARAM_PROFILE_PHONE_NUMBER);
+							userGender = partTimer.getString(PARAM_PROFILE_GENDER);
+							userNRIC = partTimer.getString(PARAM_PROFILE_IC_TYPE);
 							
 						} catch (JSONException e) {
-							Log.e(TAG, ">>> " + e.getMessage());
+							Log.e(TAG, "Error parsing JSON >>> " + e.getMessage());
 						}
 
 						editor.putString(USER_PTID, ptid);
 						extraBundle.putString(USER_PTID, ptid);
 						extraBundle.putString(USER_EMAIL, email);
+						extraBundle.putString(USER_IS_VERIFIED, userIsVerified);
+						extraBundle.putString(USER_BIRTHDAY, userDob);
+						extraBundle.putString(USER_GENDER, userGender);
+						extraBundle.putString(USER_IS_VERIFIED, userIsVerified);
+						extraBundle.putString(USER_WORK_EXPERIENCE, userWorkExperience);
+						extraBundle.putString(USER_PHONE_NUMBER, userPhoneNumber);
+						extraBundle.putString(USER_NRIC, userNRIC);
+						
+						// Check if basic profile user already completed
+						if(userGender != "null" && userDob != "null"
+								&& userPhoneNumber != "null"  &&
+								userWorkExperience != "null" &&
+								userNRIC != "null") {
+							userBasicComplete = true;							
+						}
 						
 						if (settings.getBoolean(REGISTERED, false)) {
 							editor.putBoolean(LOGIN, true);
 							editor.commit();
 							
-							Intent i = new Intent(context, HomeActivity.class);
-							i.putExtras(extraBundle);
-							startActivity(i);
-							finish();
+							// If user not verified, remind them
+							if(userIsVerified == "false") {
+								notifyUserVerification(extraBundle, editor, true);
+							} else {
+								goHome(extraBundle);
+							}
 							
 						} else {
-							if(is_verified == "true") {
-								notifyUserVerification(extraBundle, editor);
+							// Check if user already completed basic profile
+							if(userBasicComplete) {
+								editor.putBoolean(LOGIN, true);
+								editor.commit();
+								
+								// If user not verified, remind them
+								if(userIsVerified == "false") {
+									notifyUserVerification(extraBundle, editor, true);
+								} else {
+									goHome(extraBundle);
+								}
 							} else {
 								editor.commit();
-
-								Intent i = new Intent(context,
-										ProfileRegistrationActivity.class);		
-								i.putExtras(extraBundle);
-								startActivity(i);
-								finish();
+								if(userIsVerified == "false") {
+									notifyUserVerification(extraBundle, editor, false);
+								} else {
+									goRegistrationProfile(extraBundle);								
+								}
 							}
 						}
 
@@ -309,13 +345,13 @@ public class LoginActivity extends Activity {
 				} else {
 					closeSession();
 					Toast.makeText(context,
-							"Login failed. Please try again",
+							getString(R.string.login_failed),
 							Toast.LENGTH_LONG).show();
 				}
 			}
 		};
 
-		progress = ProgressDialog.show(context, "Login", "Please wait...", true,
+		progress = ProgressDialog.show(context, getString(R.string.login), getString(R.string.please_wait), true,
 				false);
 		new Thread() {
 			public void run() {
@@ -347,26 +383,39 @@ public class LoginActivity extends Activity {
 	}
 	
 	private void notifyUserVerification(final Bundle extraBundle, 
-			final Editor editor) {
+			final Editor editor, final boolean isCompleted) {
 		// Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(R.string.notify_user_verification)
         		.setCancelable(false)
                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                    public void onClick(DialogInterface dialog, int id) {
-						editor.putBoolean(LOGIN, true);
-						editor.commit();
-
-						Intent i = new Intent(context, HomeActivity.class);		
-						i.putExtras(extraBundle);
-						startActivity(i);
-						finish();
+                	   if(isCompleted) {
+                    	   goHome(extraBundle);                		   
+                	   } else {
+                		   goRegistrationProfile(extraBundle);
+                	   }
                    }
                });
         
         // Create the AlertDialog object and return it
         AlertDialog alert = builder.create();
         alert.show();
+	}
+	
+	private void goHome(Bundle extraBundle) {
+		Intent i = new Intent(context, HomeActivity.class);		
+		i.putExtras(extraBundle);
+		startActivity(i);
+		finish();
+	}
+	
+	private void goRegistrationProfile(Bundle extraBundle) {
+		Intent i = new Intent(context,
+				ProfileRegistrationActivity.class);		
+		i.putExtras(extraBundle);
+		startActivity(i);
+		finish();
 	}
 
 }
