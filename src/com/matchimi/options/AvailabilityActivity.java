@@ -219,6 +219,19 @@ public class AvailabilityActivity extends SherlockFragmentActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.ab_availability, menu);
+
+		MenuItem reload = menu.findItem(R.id.menu_reload);
+		MenuItem add = menu.findItem(R.id.menu_add_availability);
+		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 
+				Context.MODE_PRIVATE);
+		if (settings.getInt(SETTING_THEME, THEME_LIGHT) == THEME_LIGHT) {
+			reload.setIcon(R.drawable.navigation_refresh);
+			add.setIcon(R.drawable.add);
+		} else {
+			reload.setIcon(R.drawable.navigation_refresh_dark);
+			add.setIcon(R.drawable.add_dark);
+		}
+		
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -249,6 +262,9 @@ public class AvailabilityActivity extends SherlockFragmentActivity {
 			i.putExtra("id", pt_id);
 			i.putExtra("update", false);
 			startActivityForResult(i, RC_ADD_AVAILABILITY);
+			break;
+		case R.id.menu_reload:
+			loadDate();
 			break;
 		}
 		return super.onOptionsItemSelected(item);

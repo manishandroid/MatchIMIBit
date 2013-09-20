@@ -15,9 +15,10 @@
 
             <ImageView
                 android:id="@+id/profile_avatar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="120dp"
+                android:layout_height="200dp"
                 android:layout_alignParentLeft="true"
+                android:scaleType="fitCenter"
                 android:contentDescription="@string/none_string" />
 
             <LinearLayout

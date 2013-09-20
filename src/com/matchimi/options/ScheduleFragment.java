@@ -1,6 +1,6 @@
 package com.matchimi.options;
 
-import static com.matchimi.CommonUtilities.PREFS_NAME;
+import static com.matchimi.CommonUtilities.*;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,8 +13,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -94,14 +96,30 @@ public class ScheduleFragment extends Fragment {
 
 		loadData();
 
+		getActivity().registerReceiver(scheduleReceiver, new IntentFilter("schedule.receiver"));
+		
 		return view;
+	}
+
+	BroadcastReceiver scheduleReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context arg0, Intent arg1) {
+			// TODO Auto-generated method stub
+			loadData();
+		}
+	};
+	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		getActivity().unregisterReceiver(scheduleReceiver);
 	}
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		getActivity();
-		Log.e("JobsFragment", "onActivityResult()");
+		Log.e(TAG, "Schedule Fragment : onActivityResult()");
 		if (resultCode == FragmentActivity.RESULT_OK) {
 			if (requestCode == RC_SCHEDULE_DETAIL) {
 				loadData();
@@ -110,7 +128,7 @@ public class ScheduleFragment extends Fragment {
 	}
 
 	private void loadData() {
-		final String url = "http://matchimi.buuukapps.com/get_current_accepted_job_offers?pt_id=" + pt_id;
+		final String url = SERVERURL + API_GET_CURRENT_ACCEPTED_JOB_OFFERS + "?" + PARAM_PT_ID + "=" + pt_id;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
@@ -126,6 +144,8 @@ public class ScheduleFragment extends Fragment {
 
 				if (jsonStr != null) {
 					try {
+						Log.d(TAG, "Schedule results from " + url + ">>>\n" + jsonStr.toString());
+						
 						JSONArray items = new JSONArray(jsonStr);
 						if (items != null && items.length() > 0) {
 							Calendar calToday = new GregorianCalendar();

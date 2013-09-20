@@ -79,6 +79,7 @@
                 android:paddingLeft="16dp"
                 android:paddingTop="12dp"
                 android:text="@string/ask_salary"
+                android:visibility="gone"
                 android:textStyle="bold" />
 
             <LinearLayout
@@ -107,6 +108,7 @@
                     android:id="@+id/frame_layout"
                     android:layout_width="match_parent"
                     android:layout_height="240dp"
+                    android:visibility="gone"
                     android:background="@android:color/transparent" >
 
                     <fragment

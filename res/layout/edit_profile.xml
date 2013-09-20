@@ -4,7 +4,7 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content" >
 
-    <LinearLayout
+   <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -49,13 +49,26 @@
             android:layout_marginTop="5dp"
             android:background="@color/lightcolor" />
 
-        <Button 
-            android:id="@+id/buttonPicture"
+        <FrameLayout 
             android:layout_width="fill_parent"
-            android:layout_height="100dp"
-            style="?android:attr/buttonBarStyle"
-            android:gravity="center"
-            android:text="@string/profile_picture"/>
+            android:layout_height="wrap_content">
+
+	        <ImageView 
+	            android:id="@+id/buttonPicture"
+	            android:layout_width="fill_parent"
+	            android:layout_height="100dp"
+	            android:src="@drawable/icon"
+	            style="?android:attr/buttonStyle"
+	            android:contentDescription="@string/profile_picture"
+	            android:scaleType="centerInside" />
+	        
+            <TextView 
+                android:layout_width="fill_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:padding="8dp"
+                android:text="@string/profile_picture"/>
+        </FrameLayout>
         
         <View
             android:layout_width="fill_parent"
@@ -133,6 +146,7 @@
                 android:inputType="phone" />
         </RelativeLayout>
 
+        <!-- 
         <View
             android:layout_width="fill_parent"
             android:layout_height="1dip"
@@ -162,6 +176,7 @@
                 android:imeOptions="actionDone"
                 android:inputType="textPostalAddress" />
         </RelativeLayout>
+         
         
         <View
             android:layout_width="fill_parent"
@@ -192,7 +207,37 @@
                 android:imeOptions="actionDone"
                 android:inputType="number" />
         </RelativeLayout>
-        
+        -->
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/lightcolor" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/labelNricNumber"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/edit_profile_nric_number" />
+
+            <EditText
+                android:id="@+id/editNricNumber"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/labelNricNumber"
+                android:imeOptions="actionDone"
+                android:inputType="textCapSentences"
+                android:capitalize="characters" />
+        </RelativeLayout>
         <View
             android:layout_width="fill_parent"
             android:layout_height="1dip"
@@ -216,23 +261,53 @@
             <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:baselineAligned="false"
                 android:orientation="horizontal" >
 
-                <Button
-                    android:id="@+id/profile_reg_addfront_button"
-                    style="?android:attr/buttonBarButtonStyle"
+                <FrameLayout 
                     android:layout_width="0dp"
-                    android:layout_height="100dp"
                     android:layout_weight="1"
-                    android:text="@string/registration_profile_addfrontphotos" />
+                    android:layout_height="wrap_content">
 
-                <Button
-                    android:id="@+id/profile_reg_addback_button"
-                    style="?android:attr/buttonBarButtonStyle"
+	                <ImageView
+	                    android:id="@+id/profile_reg_addfront_button"
+	                    android:layout_width="match_parent"
+	                    android:layout_height="100dp"
+	                    android:src="@drawable/icon"
+			            style="?android:attr/buttonStyle"
+	                    android:contentDescription="@string/none_string"
+	                    android:scaleType="centerInside" />
+                    
+		            <TextView 
+		                android:layout_width="fill_parent"
+		                android:layout_height="match_parent"
+		                android:gravity="center"
+		                android:padding="8dp"
+		                android:text="@string/registration_profile_addfrontphotos"/>
+                </FrameLayout>
+
+                <FrameLayout 
                     android:layout_width="0dp"
-                    android:layout_height="100dp"
                     android:layout_weight="1"
-                    android:text="@string/registration_profile_addbackphotos" />
+                    android:layout_height="wrap_content">
+
+	                 <ImageView
+	                    android:id="@+id/profile_reg_addback_button"
+	                    android:layout_width="match_parent"
+	                    android:layout_height="100dp"
+	                    android:src="@drawable/icon"
+			            style="?android:attr/buttonStyle"
+	                    android:contentDescription="@string/none_string"
+	                    android:scaleType="centerInside" />
+                    
+		            <TextView 
+		                android:layout_width="fill_parent"
+		                android:layout_height="match_parent"
+		                android:gravity="center"
+		                android:padding="8dp"
+		                android:text="@string/registration_profile_addbackphotos"/>
+                </FrameLayout>
+
             </LinearLayout>
         </LinearLayout>
         
@@ -243,29 +318,6 @@
             android:layout_marginTop="5dp"
             android:background="@color/lightcolor" />
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
-
-            <TextView
-                android:id="@+id/labelExpireDate"
-                android:layout_width="110dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:paddingLeft="10dp"
-                android:text="@string/expire_date" />
-
-            <EditText
-                android:id="@+id/editExpireDate"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_marginRight="10dp"
-                android:layout_toRightOf="@id/labelExpireDate"
-                android:imeOptions="actionDone"
-                android:inputType="date" />
-        </RelativeLayout>
-        
         <View
             android:layout_width="fill_parent"
             android:layout_height="1dip"
@@ -305,6 +357,7 @@
             android:layout_marginTop="5dp"
             android:background="@color/lightcolor" />
         
+         
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content" >
@@ -316,18 +369,35 @@
                 android:layout_marginTop="10dp"
                 android:paddingLeft="10dp"
                 android:text="@string/registration_profile_work_experience" />
-
-            <EditText
+            
+            <!-- <EditText
                 android:id="@+id/editExperience"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="10dp"
                 android:layout_toRightOf="@id/profile_reg_workexperience"
-                android:imeOptions="actionDone"
-                android:inputType="phone" />
+                android:inputType="phone" /> -->
 
+            <TextView
+                 android:id="@+id/regprofile_work_experience"
+                 style="@android:style/Widget.EditText"
+                 android:layout_width="fill_parent"
+                 android:layout_height="wrap_content"
+                 android:layout_alignParentRight="true"
+                 android:layout_marginRight="10dp"
+                 android:layout_toRightOf="@id/profile_reg_workexperience"
+                 android:focusable="true"
+                 android:focusableInTouchMode="false"
+                 android:gravity="left" />
         </RelativeLayout>
+        
+         <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/lightcolor" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -354,6 +424,32 @@
                 android:gravity="left" />
         </RelativeLayout>
 
+        <RelativeLayout
+            android:id="@+id/expiry_date_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/labelExpireDate"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/expire_date" />
+
+            <TextView
+                android:id="@+id/editExpireDate"
+                style="@android:style/Widget.EditText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/labelExpireDate"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:gravity="left" />
+        </RelativeLayout>
+        
         <LinearLayout 
             android:id="@+id/layStudent"
             android:layout_width="fill_parent"
@@ -408,13 +504,27 @@
 	                android:inputType="number" />
 	        </RelativeLayout>
 	        
-	        <Button 
-	            android:id="@+id/buttonCardPicture"
+	        <FrameLayout 
 	            android:layout_width="fill_parent"
-	            android:layout_height="100dp"
-	            style="?android:attr/buttonBarStyle"
-	            android:gravity="center"
-	            android:text="@string/card_picture"/>
+	            android:layout_height="wrap_content">
+
+			    <ImageView
+		            android:id="@+id/buttonCardPicture"
+		            android:layout_width="fill_parent"
+		            android:layout_height="100dp"
+		            android:src="@drawable/icon"
+		            style="?android:attr/buttonStyle"
+	                android:contentDescription="@string/none_string"
+	                android:scaleType="centerInside" />
+		            	            	            
+	            <TextView 
+	                android:layout_width="fill_parent"
+	                android:layout_height="match_parent"
+	                android:gravity="center"
+	                android:padding="8dp"
+	                android:text="@string/card_picture"/>
+		        
+			</FrameLayout>
 	        
         </LinearLayout>
         
@@ -449,6 +559,7 @@
 
         </RelativeLayout>
 
+        <!-- 
         <View
             android:layout_width="fill_parent"
             android:layout_height="1dip"
@@ -492,25 +603,25 @@
             android:layout_height="wrap_content" >
 
             <TextView
-                android:id="@+id/labelEcPhone"
+                android:id="@+id/labelEcPostCode"
                 android:layout_width="110dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:paddingLeft="10dp"
-                android:text="@string/ec_phone" />
+                android:text="@string/ec_post_code" />
 
             <EditText
-                android:id="@+id/editEcPhone"
+                android:id="@+id/editEcPostCode"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="10dp"
-                android:layout_toRightOf="@id/labelEcPhone"
+                android:layout_toRightOf="@id/labelEcPostCode"
                 android:imeOptions="actionDone"
-                android:inputType="phone" />
+                android:inputType="number" />
 
         </RelativeLayout>
-        
+                
         <View
             android:layout_width="fill_parent"
             android:layout_height="1dip"
@@ -541,6 +652,7 @@
                 android:inputType="textPostalAddress" />
 
         </RelativeLayout>
+         -->
         
         <View
             android:layout_width="fill_parent"
@@ -554,24 +666,25 @@
             android:layout_height="wrap_content" >
 
             <TextView
-                android:id="@+id/labelEcPostCode"
+                android:id="@+id/labelEcPhone"
                 android:layout_width="110dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:paddingLeft="10dp"
-                android:text="@string/ec_post_code" />
+                android:text="@string/ec_phone" />
 
             <EditText
-                android:id="@+id/editEcPostCode"
+                android:id="@+id/editEcPhone"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="10dp"
-                android:layout_toRightOf="@id/labelEcPostCode"
+                android:layout_toRightOf="@id/labelEcPhone"
                 android:imeOptions="actionDone"
-                android:inputType="number" />
+                android:inputType="phone" />
 
         </RelativeLayout>
+
         
         <View
             android:layout_width="fill_parent"
@@ -592,7 +705,19 @@
                 android:paddingLeft="10dp"
                 android:text="@string/ec_relation" />
 
-            <EditText
+            <TextView
+                 android:id="@+id/regprofile_ECRelation"
+                 style="@android:style/Widget.EditText"
+                 android:layout_width="fill_parent"
+                 android:layout_height="wrap_content"
+                 android:layout_alignParentRight="true"
+                 android:layout_marginRight="10dp"
+                 android:layout_toRightOf="@id/labelEcRelation"
+                 android:focusable="true"
+                 android:focusableInTouchMode="false"
+                 android:gravity="left" />
+            
+            <!-- <EditText
                 android:id="@+id/editEcRelation"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -600,7 +725,7 @@
                 android:layout_marginRight="10dp"
                 android:layout_toRightOf="@id/labelEcRelation"
                 android:imeOptions="actionDone"
-                android:inputType="text" />
+                android:inputType="text" /> -->
 
         </RelativeLayout>
         
@@ -635,6 +760,7 @@
 
         </RelativeLayout>
         
+        <!-- 
         <View
             android:layout_width="fill_parent"
             android:layout_height="1dip"
@@ -665,7 +791,8 @@
                 android:inputType="text" />
 
         </RelativeLayout>
-        
+         -->
+         
         <View
             android:layout_width="fill_parent"
             android:layout_height="1dip"

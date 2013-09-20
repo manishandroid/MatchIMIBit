@@ -35,7 +35,6 @@ public class RegistrationActivity extends Activity {
 	private ProgressDialog progress;
 	private JSONParser jsonParser = null;
 	private String jsonStr = null;
-
 	private Bundle extraBundle;
 
 	private LoginButton fbLoginButton;
@@ -142,7 +141,7 @@ public class RegistrationActivity extends Activity {
 	}
 	
 	protected void createLogin(final String email, final String password) {
-		final String url = "http://matchimi.buuukapps.com/create_and_part_timer_login";
+		final String url = SERVERURL + API_CREATE_AND_PARTIMER_LOGIN;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
@@ -151,10 +150,11 @@ public class RegistrationActivity extends Activity {
 					if (jsonStr.trim().equalsIgnoreCase("1")) {
 						closeSession();
 						Toast.makeText(context,
-								"Failed to register. Please try again !",
+								getString(R.string.registration_failed),
 								Toast.LENGTH_LONG).show();
 					} else {
 						String ptid = "";
+
 						try {
 							JSONObject obj = new JSONObject(jsonStr);
 							JSONObject partTimer = obj
@@ -197,7 +197,8 @@ public class RegistrationActivity extends Activity {
 					jsonStr = jsonParser.getHttpResultUrlPost(url, params,
 							values);
 
-					Log.e(TAG, "Post data " + url + "\n\n Result >>> " + jsonStr);
+					Log.e(TAG, "Register to " + url + "\n\n Result >>> " + jsonStr);
+
 				} catch (Exception e) {
 					jsonStr = null;
 				}

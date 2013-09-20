@@ -1,5 +1,9 @@
 package com.matchimi.options;
 
+import static com.matchimi.CommonUtilities.PREFS_NAME;
+import static com.matchimi.CommonUtilities.SETTING_THEME;
+import static com.matchimi.CommonUtilities.THEME_LIGHT;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -27,6 +31,7 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.matchimi.CommonUtilities;
 import com.matchimi.R;
@@ -53,6 +58,8 @@ public class HistoryDetail extends SherlockActivity {
 	private List<String> listRequirement = null;
 	private List<String> listOptional = null;
 
+	private JobAdapter adapter;
+	
 	private int totalHours = 0;
 	private int totalEarning = 0;
 
@@ -81,10 +88,34 @@ public class HistoryDetail extends SherlockActivity {
 		textTotalHours.setText("0 Hrs");
 		textTotalEarning.setText("$0");
 
-		final JobAdapter adapter = new JobAdapter(context);
+		adapter = new JobAdapter(context);
 		final ListView listview = (ListView) findViewById(R.id.joblistview);
 		listview.setAdapter(adapter);
 
+		loadData();
+
+		listview.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				Intent i = new Intent(context, JobDetails.class);
+				i.putExtra("price", listPrice.get(arg2));
+				i.putExtra("date", listSchedule.get(arg2));
+				i.putExtra("place",
+						listCompany.get(arg2) + "\n" + listAddress.get(arg2));
+				i.putExtra("expire", "DONE");
+				i.putExtra("description", listDescription.get(arg2));
+				i.putExtra("requirement", listRequirement.get(arg2));
+				i.putExtra("optional", listOptional.get(arg2));
+				i.putExtra("id", listAvailID.get(arg2));
+				i.putExtra("type", "past");
+				startActivity(i);
+			}
+		});
+	}
+
+	private void loadData() {
 		final String url = "http://matchimi.buuukapps.com/get_past_accepted_job_offers?pt_id="
 				+ pt_id;
 		final Handler mHandlerFeed = new Handler();
@@ -186,6 +217,8 @@ public class HistoryDetail extends SherlockActivity {
 			}
 		};
 
+		totalEarning = 0;
+		totalHours = 0;
 		progress = ProgressDialog.show(context, "History",
 				"Loading job history...", true, false);
 		new Thread() {
@@ -198,26 +231,6 @@ public class HistoryDetail extends SherlockActivity {
 				}
 			}
 		}.start();
-
-		listview.setOnItemClickListener(new OnItemClickListener() {
-
-			@Override
-			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-					long arg3) {
-				Intent i = new Intent(context, JobDetails.class);
-				i.putExtra("price", listPrice.get(arg2));
-				i.putExtra("date", listSchedule.get(arg2));
-				i.putExtra("place",
-						listCompany.get(arg2) + "\n" + listAddress.get(arg2));
-				i.putExtra("expire", "DONE");
-				i.putExtra("description", listDescription.get(arg2));
-				i.putExtra("requirement", listRequirement.get(arg2));
-				i.putExtra("optional", listOptional.get(arg2));
-				i.putExtra("id", listAvailID.get(arg2));
-				i.putExtra("type", "past");
-				startActivity(i);
-			}
-		});
 	}
 
 	protected void updateTotals() {
@@ -238,13 +251,31 @@ public class HistoryDetail extends SherlockActivity {
 	}
 
 	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getSupportMenuInflater().inflate(R.menu.ab_history, menu);
+
+		MenuItem reload = menu.findItem(R.id.menu_reload);
+		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 
+				Context.MODE_PRIVATE);
+		if (settings.getInt(SETTING_THEME, THEME_LIGHT) == THEME_LIGHT) {
+			reload.setIcon(R.drawable.navigation_refresh);
+		} else {
+			reload.setIcon(R.drawable.navigation_refresh_dark);
+		}
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
 			Intent result = new Intent();
 			setResult(RESULT_CANCELED, result);
 			finish();
-			return true;
+			break;
+		case R.id.menu_reload:
+			loadData();
+			break;
 		}
 		return super.onOptionsItemSelected(item);
 	}

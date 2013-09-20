@@ -1,6 +1,7 @@
 package com.matchimi.options;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import android.app.AlertDialog;
@@ -10,6 +11,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
@@ -22,8 +24,8 @@ import com.matchimi.R;
 import com.matchimi.utils.ApplicationUtils;
 
 public class CancelPreview extends SherlockActivity {
-	private List<String> listReason;
 	private boolean receiveOffer = false;
+	private List<CharSequence> listReasons;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +42,9 @@ public class CancelPreview extends SherlockActivity {
 
 		ActionBar ab = getSupportActionBar();
 		ab.setDisplayHomeAsUpEnabled(true);
+		
+		CharSequence[] cancelReasonArray = getResources().getStringArray(R.array.cancelreason_array);
+		listReasons = Arrays.asList(cancelReasonArray);
 
 //		final EditText inputReason = (EditText) findViewById(R.id.inputReason);
 		final TextView buttonCancel = (TextView) findViewById(R.id.buttonCancel);
@@ -51,17 +56,11 @@ public class CancelPreview extends SherlockActivity {
 
 				AlertDialog.Builder builder = new AlertDialog.Builder(
 						CancelPreview.this);
-
-				listReason = new ArrayList<String>();
-				listReason.add("Don’t like the employer");				
-				listReason.add("Don’t like the job function");
-				listReason.add("Don’t like the location");
 				
 				// Set the dialog title
-				builder.setTitle("Your Reason")
+				builder.setTitle(getString(R.string.cancel_job_reason))
 						.setMultiChoiceItems(
-								listReason
-										.toArray(new CharSequence[listReason.size()]),
+								R.array.cancelreason_array,
 								null,
 								new DialogInterface.OnMultiChoiceClickListener() {
 									@Override
@@ -82,7 +81,7 @@ public class CancelPreview extends SherlockActivity {
 											int id) {
 										selectedReason.clear();
 										for (int i = 0; i < mSelectedItems.size(); i++) {
-											selectedReason.add(listReason
+											selectedReason.add(listReasons
 													.get(mSelectedItems.get(i)));
 										}
 
@@ -96,14 +95,15 @@ public class CancelPreview extends SherlockActivity {
 														selectedReasonList.length() - 1)
 												.replace(", ", ", ");
 										
-										dialogReceiveOffer(selectedReasonSet);
+										Log.d(CommonUtilities.TAG, "Selected reason " + selectedReasonSet);
+										
+										// ReceiveOffer default value is false
+				                       submitCancelJob(selectedReasonSet, receiveOffer); 
 									}
 								});
 
 				Dialog dialog = builder.create();
 				dialog.show();
-
-				
 			}
 		});
 

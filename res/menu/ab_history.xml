@@ -7,11 +7,4 @@
         android:title="@string/none_string">
     </item>
     
-    <item
-        android:id="@+id/menu_add_availability"
-        android:icon="@drawable/add"
-        android:showAsAction="always"
-        android:title="@string/none_string">
-    </item>
-
 </menu>

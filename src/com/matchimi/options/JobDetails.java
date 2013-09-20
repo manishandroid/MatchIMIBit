@@ -1,15 +1,20 @@
 package com.matchimi.options;
 
+import static com.matchimi.CommonUtilities.API_RESEND_VERIFICATION_EMAIL;
 import static com.matchimi.CommonUtilities.API_WITHDRAW_AVAILABILITY;
 import static com.matchimi.CommonUtilities.PREFS_NAME;
 import static com.matchimi.CommonUtilities.SERVERURL;
 import static com.matchimi.CommonUtilities.SETTING_THEME;
+import static com.matchimi.CommonUtilities.TAG;
 import static com.matchimi.CommonUtilities.THEME_LIGHT;
 
 import org.json.JSONObject;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -31,7 +36,9 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.matchimi.CommonUtilities;
 import com.matchimi.R;
+import com.matchimi.ValidationUtilities;
 import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
 
@@ -46,11 +53,16 @@ public class JobDetails extends SherlockFragmentActivity {
 
 	private String jsonStr = null;
 	private String jobID = null;
-
+	private String reasons = null;
+	
 	public static final int RC_CANCEL = 21;
 	public static final int RC_REJECT = 22;
 	public static final int RC_ACCEPT = 23;
-
+	
+	private String isVerified = "false";
+	private boolean isProfileComplete;
+	private String pt_id = "";
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -61,6 +73,10 @@ public class JobDetails extends SherlockFragmentActivity {
 		} else {
 			setTheme(ApplicationUtils.getTheme(false));
 		}
+		
+		isVerified = settings.getString(CommonUtilities.USER_IS_VERIFIED, "true");
+		isProfileComplete = settings.getBoolean(CommonUtilities.USER_PROFILE_COMPLETE, false);
+		pt_id = settings.getString(CommonUtilities.USER_PTID, "");
 		setContentView(R.layout.job_detail);
 
 		context = this;
@@ -120,14 +136,31 @@ public class JobDetails extends SherlockFragmentActivity {
 		buttonAccept.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-				Intent i = new Intent(context, RequirementsDetail.class);
-				i.putExtra("optional", optional);
-				if (requirement != null
-						&& !requirement.equalsIgnoreCase("null")
-						&& requirement.trim().length() > 1) {
-					i.putExtra("requirement", requirement.split("\n"));
+				if(isVerified == "false") {
+					ValidationUtilities.resendLinkDialog(JobDetails.this, pt_id);
+				} else if (isProfileComplete == false) {						
+					// Use the Builder class for convenient dialog construction
+			        AlertDialog.Builder builder = new AlertDialog.Builder(JobDetails.this);
+			        builder.setTitle(R.string.profile_header);
+			        builder.setMessage(R.string.profile_complete_question)
+			               .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+			                   public void onClick(DialogInterface dialog, int id) {
+			                      // Nothing here
+			                   }
+			               });
+			        Dialog dialog = builder.create();
+					dialog.show();
+
+				} else {
+					Intent i = new Intent(context, RequirementsDetail.class);
+					i.putExtra("optional", optional);
+					if (requirement != null
+							&& !requirement.equalsIgnoreCase("null")
+							&& requirement.trim().length() > 1) {
+						i.putExtra("requirement", requirement.split("\n"));
+					}
+					startActivityForResult(i, RC_ACCEPT);					
 				}
-				startActivityForResult(i, RC_ACCEPT);
 			}
 		});
 
@@ -168,6 +201,7 @@ public class JobDetails extends SherlockFragmentActivity {
 				.getMap();
 		loadLocation();
 	}
+	
 
 	private void loadLocation() {
 		final String url = "http://matchimi.buuukapps.com/get_availability_by_avail_id?avail_id=";
@@ -218,8 +252,9 @@ public class JobDetails extends SherlockFragmentActivity {
 		}
 	}
 
-	protected void doCancelOffer(String reason) {
-		Log.e("Cancel", ">>> Reason: " + reason);
+	protected void doCancelOffer(String inputReason) {
+		Log.e(TAG, ">>> Reason: " + inputReason);
+		reasons = inputReason;
 		final String url = SERVERURL+ API_WITHDRAW_AVAILABILITY;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
@@ -249,8 +284,8 @@ public class JobDetails extends SherlockFragmentActivity {
 		new Thread() {
 			public void run() {
 				jsonParser = new JSONParser();
-				String[] params = { "avail_id" };
-				String[] values = { jobID };
+				String[] params = { "avail_id", "reasons"};
+				String[] values = { jobID, reasons };
 				jsonStr = jsonParser.getHttpResultUrlPut(url, params, values);
 
 				if (progress != null && progress.isShowing()) {
@@ -348,6 +383,8 @@ public class JobDetails extends SherlockFragmentActivity {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (resultCode == RESULT_OK) {
 			if (requestCode == RC_ACCEPT) {
+				Intent i = new Intent("schedule.receiver");
+				sendBroadcast(i);
 				doAcceptOffer();
 			}
 			if (requestCode == RC_CANCEL) {

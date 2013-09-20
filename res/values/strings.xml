@@ -27,6 +27,7 @@
     <string name="registration_profile_date_of_birth">Date of Birth</string>
     <string name="registration_profile_gender">Gender</string>
     <string name="registration_profile_nrictype">Status</string>
+    <string name="registration_profile_school">School</string>
     <string name="registration_profile_add_nric_photos">NRIC Type</string>
     <string name="registration_profile_skills">Job Functions</string>
     <string name="registration_profile_work_experience">Work Experience</string>
@@ -37,14 +38,16 @@
     <string name="registration_profile_failed">Failed create profile. Please try again.</string>
     <string name="registration_profile_title">Registration</string>
     <string name="registration_profile_progress">Creating your profile ...</string>
-    <string name="registration_birthday_restriction">Minimum required age is 16 years old</string>
+    <string name="registration_birthday_restriction">Minimum required age is 14 years old</string>
     <string name="registration_birthday_restriction_title">Date Birth Restriction</string>    
+    <string name="registration_failed">Failed. Your email may already registered"</string>
     <string name="resend_email_validation_success">Email validation has been sent.\nPlease check your email inbox.</string>
     <string name="resend_email_validation_failed">Email validation failed. Please try again</string>
     
     <string name="please_wait">Please wait ...</string>
                     
     <string name="profile_header">Profile</string>
+    <string name="profile_complete_question">Please complete your profile before accepting first job</string>
     <string name="profile_blocked_companies">Blocked Companies</string>
     <string name="profile_feedback">Feedback</string>
     <string name="cancel">Cancel</string>
@@ -70,14 +73,15 @@
     <string name="mandatory_reqs">Mandatory Requirements:</string>
     <string name="optional_reqs">Optional Requirements:</string>
     <string name="accept_submit">Accept &amp; Submit</string>
+    <string name="cancel_job_reason">Reasons</string>
     <string name="confirm_submit">Confirm &amp; Submit</string>
     <string name="reject_offer">Reject Offer</string>
     <string name="accept_offer">Accept Offer</string>
     <string name="cancel_offer">Cancel Job</string>
-    <string name="cancel_availability">Cancel Availability</string>
+    <string name="cancel_availability">Cancel Job</string>
     <string name="cancel_note">Please note that canceling your availability for an accepted offer, is not taken well by employers.\n\nThis will demote your ranking for some time in the Matchimi system and others will be given preference over you when matching job offers.</string>
     <string name="cancel_reason">Reason for cancellation</string>
-    <string name="cancel_my_availabliity">Cancel my availability</string>
+    <string name="cancel_my_availabliity">Cancel my job</string>
     <string name="ill_keep_appoinment">I will keep this appointment</string>
     <string name="pas_job_info">Past job info</string>
     <string name="menu_history">Job History</string>
@@ -142,7 +146,8 @@
     <string name="resend_link">Resend Link</string>
     <string name="failed_load_data">Failed to load. Please try again</string>
     <string name="something_wrong">Something wrong. Please try again</string>
-    <string name="edit_profile">Edit Profile</string>        
+    <string name="edit_profile">Edit Profile</string>       
+    <string name="edit_profile_nric_number">IC Number</string>
     <string name="address">Address</string>
     <string name="profile_picture">Profile Picture</string>        
     <string name="postal_code">Postal Code</string>        
@@ -150,16 +155,26 @@
     <string name="school">School</string>
     <string name="card_number">Card Number</string>
     <string name="card_picture">Card Picture</string>
-    <string name="ec_name">EC Name</string>
-    <string name="ec_email">EC Email</string>
-    <string name="ec_phone">EC Phone</string>
-    <string name="ec_address">EC Address</string>
-    <string name="ec_post_code">EC Postal Code</string>
-    <string name="ec_relation">EC Relationship</string>
+    <string name="no_internet">Please check your internet connection</string>
+    <string name="ec_name">Emergency Contact Name</string>
+    <string name="ec_email">Emergency Contact Email</string>
+    <string name="ec_phone">Emergency Contact Phone</string>
+    <string name="ec_address">Emergency Contact Address</string>
+    <string name="ec_post_code">Emergency Contact Postal Code</string>
+    <string name="ec_relation">Emergency Contact Relationship</string>
     <string name="bank_name">Bank Name</string>
     <string name="acc_type">Bank Acc Type</string>
     <string name="acc_number">Bank Acc Number</string>
     <string name="branch_name">Bank Branch</string>
+    <string name="expired_date">Expired Date</string>
+    <string name="expired_date_err">Your card already expired. Please renew your card</string>
+    <string name="edit_profile_error">Failed to update profile. Please try again</string> 
+    <string name="edit_profile_success">Your profile has been updated successfully</string>    
+    <string name="edit_get_profile_error">Failed to get profile. Please try again</string>  
+    <string name="uploading">Uploading ... </string>  
+    <string name="updating_profile">Updating profile...</string>
+    <string name="server_error">Problem with server data. Please try again</string>
+    
     <string-array name="repeat_value">
         <item>None</item>
         <item>Weekly</item>
@@ -168,6 +183,32 @@
     <string-array name="theme_value">
         <item>Light</item>
         <item>Dark</item>
+    </string-array>
+    
+    <string-array name="workexperience_array">
+        <item>Less than 3 months</item>
+        <item>Between 3 and 12 months</item>
+        <item>More than 12 months</item>
+    </string-array>
+    
+    <string-array name="workexperience_id_array">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    
+    <string-array name="ecrelationship_array">
+        <item>Family Relative</item>
+        <item>Friend</item>
+        <item>Colleague</item>
+    </string-array>
+    
+    <string-array name="cancelreason_array">
+        <item>Don\'t like the employer</item>
+        <item>Don\'t like the job function</item>
+        <item>Don\'t like the location</item>
+        <item>Don\'t like the salary</item>
+        <item>Don\'t want to receive the same offer from the employer</item>
     </string-array>
 
     <string name="title_activity_settings">SettingsActivity</string>

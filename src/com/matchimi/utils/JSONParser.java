@@ -22,6 +22,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.matchimi.R;
+import static com.matchimi.CommonUtilities.*;
+
 import android.util.Log;
 
 public class JSONParser {
@@ -53,6 +56,7 @@ public class JSONParser {
 					"ClientProtocolException, err: " + e.getMessage());
 		} catch (IOException e) {
 			Log.e("getHttpResultUrlGet", "IOException, err: " + e.getMessage());
+			return NOINTERNET;
 		}
 
 		try {

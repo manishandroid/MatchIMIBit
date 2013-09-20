@@ -1,8 +1,24 @@
 package com.matchimi;
 
 import static com.matchimi.CommonUtilities.LOGIN;
-import static com.matchimi.CommonUtilities.LOGOUT;
+import static com.matchimi.CommonUtilities.PARAM_PROFILE_EMAIL;
+import static com.matchimi.CommonUtilities.PARAM_PROFILE_FIRSTNAME;
+import static com.matchimi.CommonUtilities.PARAM_PROFILE_GRADE_ID;
+import static com.matchimi.CommonUtilities.PARAM_PROFILE_IC_NUMBER;
+import static com.matchimi.CommonUtilities.PARAM_PROFILE_IC_TYPE;
+import static com.matchimi.CommonUtilities.PARAM_PROFILE_IC_TYPE_ID;
+import static com.matchimi.CommonUtilities.PARAM_PROFILE_LASTNAME;
+import static com.matchimi.CommonUtilities.PARAM_PROFILE_PICTURE;
 import static com.matchimi.CommonUtilities.PREFS_NAME;
+import static com.matchimi.CommonUtilities.USER_EMAIL;
+import static com.matchimi.CommonUtilities.USER_FIRSTNAME;
+import static com.matchimi.CommonUtilities.USER_LASTNAME;
+import static com.matchimi.CommonUtilities.USER_NRIC_NUMBER;
+import static com.matchimi.CommonUtilities.USER_NRIC_TYPE;
+import static com.matchimi.CommonUtilities.USER_NRIC_TYPE_ID;
+import static com.matchimi.CommonUtilities.USER_PROFILE_PICTURE;
+import static com.matchimi.CommonUtilities.USER_PTID;
+import static com.matchimi.CommonUtilities.USER_RATING;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +35,9 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
@@ -32,7 +51,6 @@ import com.matchimi.options.AvailabilityActivity;
 import com.matchimi.options.HistoryDetail;
 import com.matchimi.options.JobsFragment;
 import com.matchimi.registration.LoginActivity;
-import com.matchimi.registration.RegistrationActivity;
 import com.matchimi.utils.ApplicationUtils;
 
 public abstract class TabSwipeActivity extends SherlockFragmentActivity {
@@ -151,6 +169,7 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 			this.mPager = pager;
 
 			mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+			
 		}
 
 		private static class TabInfo {
@@ -202,7 +221,6 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 			/*
 			 * Select tab when user swiped
 			 */
-			Log.e("Page Selected", "" + position);
 			mActionBar.setSelectedNavigationItem(position);
 		}
 
@@ -244,15 +262,18 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 		actionProvider.setShareIntent(createAllShareIntent());
 
 		MenuItem actionNav = menu.findItem(R.id.menu_more);
+		MenuItem reload = menu.findItem(R.id.menu_reload);
 		if (settings.getInt(CommonUtilities.SETTING_THEME,
 				CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
 			actionNav
 					.setIcon(R.drawable.abs__ic_menu_moreoverflow_normal_holo_light);
+			reload.setIcon(R.drawable.navigation_refresh);
 		} else {
 			actionNav
 					.setIcon(R.drawable.abs__ic_menu_moreoverflow_normal_holo_dark);
+			reload.setIcon(R.drawable.navigation_refresh_dark);
 		}
-
+		
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -283,8 +304,11 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 						LoginActivity.class);
 				
 				SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+				// Clear stored data
+				settings.edit().clear().commit();
+				
 				SharedPreferences.Editor editor = settings.edit();
-				editor.putBoolean(LOGIN, false);
+				editor.putBoolean(LOGIN, false);				
 				editor.commit();
 				
 				startActivityForResult(i, JobsFragment.RC_JOB_DETAIL);
@@ -294,6 +318,21 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 				i = new Intent(getApplicationContext(),
 						SettingsActivity.class);
 				startActivityForResult(i, JobsFragment.RC_JOB_DETAIL);
+				break;
+			case R.id.menu_reload:
+				Intent iBroadcast = null;
+				switch (mViewPager.getCurrentItem()) {
+				case 0:
+					iBroadcast = new Intent("jobs.receiver");
+					break;
+				case 1:
+					iBroadcast = new Intent("schedule.receiver");
+					break;
+				case 2:
+					iBroadcast = new Intent("profile.receiver");
+					break;
+				}
+				sendBroadcast(iBroadcast);
 				break;
 			}
 		}

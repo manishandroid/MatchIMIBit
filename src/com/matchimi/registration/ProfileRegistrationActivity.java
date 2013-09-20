@@ -8,6 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -54,6 +55,7 @@ import android.provider.MediaStore;
 import android.text.format.DateFormat;
 import android.text.format.Time;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -63,12 +65,15 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.matchimi.CommonUtilities;
 import com.matchimi.HomeActivity;
 import com.matchimi.R;
+import com.matchimi.ValidationUtilities;
+import com.matchimi.options.JobDetails;
 import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
 
@@ -95,7 +100,7 @@ public class ProfileRegistrationActivity extends Activity {
 	private TextView nricTypeView;
 
 	private EditText fullName;
-	private EditText phoneNumber;
+//	private EditText phoneNumber;
 	private EditText editExperience;
 
 	private int nricSelected = -1;
@@ -117,9 +122,25 @@ public class ProfileRegistrationActivity extends Activity {
 	private String JPEG_FILE_PREFIX = R.string.album_name + "_";
 	private String JPEG_FILE_SUFFIX = ".jpg";
 	String currentPhotoPath = "";
-	public static final SimpleDateFormat formatter = new SimpleDateFormat(
-			"yyyy-MM-dd", Locale.US);
+	
+	private final String dobFormat = "dd/MM/yyyy";
+	private final SimpleDateFormat facebookDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+	private final SimpleDateFormat dobDateFormat = new SimpleDateFormat(dobFormat, Locale.US);	
+	private long birthdayRestriction = 0;
+	private Calendar defaultBirthday;
+	
+	private List<String> listSchool;
+	private List<String> listSchoolId;
+	private int selectedIdx = -1;
+	private TextView school;
+	private RelativeLayout schoolLayout;
+	private boolean isSchoolRequired = false;
 
+	private TextView workExperienceView;
+	private List<String> listWorkExperience;
+	private List<String> listWorkExpID;
+	private int selectedWorkIdx = -1;
+	
 	public AlbumStorageDirFactory mAlbumStorageDirFactory = null;
 	private SharedPreferences settings;
 	private RadioGroup genderView;
@@ -132,7 +153,7 @@ public class ProfileRegistrationActivity extends Activity {
 		context = this;
 
 		fullName = (EditText) findViewById(R.id.regprofile_fullname);
-		phoneNumber = (EditText) findViewById(R.id.editPhoneNumber);
+//		phoneNumber = (EditText) findViewById(R.id.editPhoneNumber);
 		genderView = (RadioGroup) findViewById(R.id.gender_group);
 
 		// Set date birth
@@ -148,8 +169,11 @@ public class ProfileRegistrationActivity extends Activity {
 //		skillView.setOnClickListener(skillsListener);
 
 		// Set experience textview and listener
-		editExperience = (EditText) findViewById(R.id.editExperience);
-
+//		editExperience = (EditText) findViewById(R.id.editExperience);
+		workExperienceView = (TextView) findViewById(R.id.regprofile_work_experience);
+		preparingWorkExperience();
+		workExperienceView.setOnClickListener(workExperienceListener);
+		
 		// Set take front NRIC button
 //		photoFrontNRIC = (Button) findViewById(R.id.profile_reg_addfront_button);
 //		photoFrontNRIC.setOnClickListener(frontNRICListener);
@@ -165,7 +189,16 @@ public class ProfileRegistrationActivity extends Activity {
 		pt_id = bundleExtras.getString(CommonUtilities.USER_PTID);
 
 		settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+		
+		// Set date now and birthday limitation
+		Date date = new Date();
+		defaultBirthday = Calendar.getInstance();
+		defaultBirthday.setTime(date);
+		defaultBirthday.add(Calendar.YEAR, -AGE_LIMITATION);
+		birthdayRestriction = defaultBirthday.getTimeInMillis();		
 
+		schoolLayout = (RelativeLayout) findViewById(R.id.schoolLayout);
+		
 		if (bundleExtras != null) {
 			Log.d(TAG, "Incoming intent to profile");
 			
@@ -181,9 +214,29 @@ public class ProfileRegistrationActivity extends Activity {
 
 			String bday = bundleExtras.getString(CommonUtilities.USER_BIRTHDAY);
 			if (bday.length() == 10) {
-				birthView.setText(bday);
+				try {
+					Date birthdayFromFacebook = facebookDateFormat.parse(bday);
+
+					if(birthdayFromFacebook.getTime() > birthdayRestriction) {
+						birthdayRestrictionDialog();
+					} else {
+						defaultBirthday.setTime(birthdayFromFacebook);
+						Log.e(TAG, "Facebook birthday " + birthdayFromFacebook.toString());
+						
+						facebookDateFormat.applyPattern(dobFormat);
+						birthView.setText(facebookDateFormat.format(birthdayFromFacebook));
+					}					
+
+					
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}			
 			}
 		}
+		
+		school = (TextView) findViewById(R.id.registrationTextSchool);
+		school.setOnClickListener(schoolListener);
 
 		// Load Album Storage Factory based on Android Version
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
@@ -285,8 +338,9 @@ public class ProfileRegistrationActivity extends Activity {
 							listNRICType.add(obj.getString("nric_type"));
 							listNRICTypeId.add(obj.getString("nric_type_id"));
 						}
-
+						loadSchool();
 //						loadSkill();
+
 					} catch (JSONException e) {
 						Log.e(TAG, "Error get ic types >>> " + e.getMessage());
 					}
@@ -314,6 +368,49 @@ public class ProfileRegistrationActivity extends Activity {
 		}.start();
 	}
 
+	protected void loadSchool() {
+		final String url = SERVERURL + API_GET_SCHOOLS;
+		final Handler mHandlerFeed = new Handler();
+		final Runnable mUpdateResultsFeed = new Runnable() {
+			public void run() {
+				if (jsonStr != null) {
+					try {
+						listSchool = new ArrayList<String>();
+						listSchoolId = new ArrayList<String>();
+
+						JSONArray jsonArray = new JSONArray(jsonStr);
+						for (int i = 0; i < jsonArray.length(); i++) {
+							JSONObject obj = jsonArray.getJSONObject(i);
+							obj = obj.getJSONObject("schools");
+							listSchool.add(obj.getString("school_name"));
+							listSchoolId.add(obj.getString("school_id"));
+						}
+					} catch (Exception e) {
+						Log.e(TAG, "Error schools >>> " + e.getMessage());
+					}
+				} else {
+					Toast.makeText(context,
+							getString(R.string.failed_load_data),
+							Toast.LENGTH_SHORT).show();
+				}
+			}
+		};
+
+		progress = ProgressDialog.show(context, "Registration", "Loading school...",
+				true, false);
+		new Thread() {
+			public void run() {
+				jsonParser = new JSONParser();
+				jsonStr = jsonParser.getHttpResultUrlGet(url);
+
+				if (progress != null && progress.isShowing()) {
+					progress.dismiss();
+					mHandlerFeed.post(mUpdateResultsFeed);
+				}
+			}
+		}.start();
+	}
+	
 	protected void loadSkill() {
 		final String url = SERVERURL + API_GET_SKILLS;
 		final Handler mHandlerFeed = new Handler();
@@ -344,22 +441,34 @@ public class ProfileRegistrationActivity extends Activity {
 			}
 		};
 
-//		progress = ProgressDialog.show(context,
-//				getResources().getString(R.string.app_name),
-//				"Loading skill...", true, false);
-//		new Thread() {
-//			public void run() {
-//				jsonParser = new JSONParser();
-//				jsonStr = jsonParser.getHttpResultUrlGet(url);
-//
-//				if (progress != null && progress.isShowing()) {
-//					progress.dismiss();
-//					mHandlerFeed.post(mUpdateResultsFeed);
-//				}
-//			}
-//		}.start();
+		progress = ProgressDialog.show(context,
+				getResources().getString(R.string.app_name),
+				"Loading skill...", true, false);
+		new Thread() {
+			public void run() {
+				jsonParser = new JSONParser();
+				jsonStr = jsonParser.getHttpResultUrlGet(url);
+
+				if (progress != null && progress.isShowing()) {
+					progress.dismiss();
+					mHandlerFeed.post(mUpdateResultsFeed);
+				}
+			}
+		}.start();
 	}
 
+	private void preparingWorkExperience() {
+		listWorkExperience = new ArrayList<String>();
+		listWorkExperience.add("Less than 3 months");
+		listWorkExperience.add("Between 3 and 12 months");
+		listWorkExperience.add("More than 12 months");
+		
+		listWorkExpID = new ArrayList<String>();
+		for (int i = 1; i < 4; i++) {
+			listWorkExpID.add(String.valueOf(i));
+		}		
+	}
+	
 	/**
 	 * Date birth selection dialog listener
 	 */
@@ -367,6 +476,18 @@ public class ProfileRegistrationActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
+			String birthValue = birthView.getText().toString().trim();
+			if(birthValue.length() == 10) {
+				try {
+					Date dobDate = dobDateFormat.parse(birthValue);
+					defaultBirthday.setTime(dobDate);					
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+			
 			DatePickerDialog dateDlg = new DatePickerDialog(
 					ProfileRegistrationActivity.this,
 					new DatePickerDialog.OnDateSetListener() {
@@ -379,51 +500,136 @@ public class ProfileRegistrationActivity extends Activity {
 							Date date = new Date();
 							Calendar cal = Calendar.getInstance();
 							cal.setTime(date);
-							cal.add(Calendar.YEAR, -16);
+							cal.add(Calendar.YEAR, -AGE_LIMITATION);
 							long limitation = cal.getTimeInMillis();
 
 							if (dtDob > limitation) {
 								birthView.setText("");
-								AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-										ProfileRegistrationActivity.this);
-
-								// set title
-								alertDialogBuilder
-										.setTitle(getString(R.string.registration_birthday_restriction_title));
-
-								// set dialog message
-								alertDialogBuilder
-										.setMessage(getString(R.string.registration_birthday_restriction))
-										.setCancelable(false)
-										.setPositiveButton(
-												"OK",
-												new DialogInterface.OnClickListener() {
-													public void onClick(
-															DialogInterface dialog,
-															int id) {
-														// Nothing to do
-													}
-												});
-
-								// create alert dialog
-								AlertDialog alertDialog = alertDialogBuilder
-										.create();
-
-								// show it
-								alertDialog.show();
+								birthdayRestrictionDialog();
 
 							} else {
 								CharSequence strDate = DateFormat.format(
-										"mm/dd/yyyy", dtDob);
+										"dd/MM/yyyy", dtDob);
 								birthView.setText(strDate);
 							}
 						}
-					}, 2011, 0, 1);
+					}, defaultBirthday.get(Calendar.YEAR),
+					defaultBirthday.get(Calendar.MONTH),
+					defaultBirthday.get(Calendar.DAY_OF_MONTH));
+			
 			dateDlg.setMessage("Your Birthday");
 			dateDlg.show();
 		}
 	};
+	
+	private void birthdayRestrictionDialog() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(
+				ProfileRegistrationActivity.this);
 
+		// set title
+		builder.setTitle(getString(R.string.registration_birthday_restriction_title));
+
+		// set dialog message
+		builder.setMessage(getString(R.string.registration_birthday_restriction))
+				.setPositiveButton(
+						"OK",
+						new DialogInterface.OnClickListener() {
+							public void onClick(
+									DialogInterface dialog,
+									int id) {
+								// Nothing to do
+							}
+						});
+
+		Dialog dialog = builder.create();
+		dialog.show();
+	}
+
+	private OnClickListener workExperienceListener = new OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(context);
+			// Set the dialog title
+			selectedIdx = -1;
+			builder.setTitle("Select " + getString(R.string.registration_profile_work_experience));
+			builder.setItems(listWorkExperience.toArray(new CharSequence[listWorkExperience.size()]), 
+					new DialogInterface.OnClickListener() {
+	               public void onClick(DialogInterface dialog, int which) {
+	            	   selectedWorkIdx = which;
+	            	   if (selectedWorkIdx != -1) {
+							workExperienceView.setText(listWorkExperience
+									.get(selectedWorkIdx));
+						}
+	               }
+            });
+
+			Dialog dialog = builder.create();
+			dialog.show();
+		}
+	};
+	
+	
+	private OnClickListener schoolListener = new OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(context);
+			// Set the dialog title
+			selectedIdx = -1;
+			builder.setTitle("Select " + getString(R.string.registration_profile_school));
+			builder.setItems(listSchool.toArray(new CharSequence[listSchool.size()]), new DialogInterface.OnClickListener() {
+		               public void onClick(DialogInterface dialog, int which) {
+		            	   selectedIdx = which;
+		            	   if(selectedIdx != -1) {
+			            	   school.setText(listSchool.get(selectedIdx));		            		   
+		            	   }
+		           }
+		    });
+	           
+			Dialog dialog = builder.create();
+			dialog.show();
+		}
+	};
+	
+	/**
+	 * NRIC type selection list-checkbox listener
+	 */
+	private OnClickListener nricTypeListener = new OnClickListener() {
+		@Override
+		public void onClick(View view) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(
+					ProfileRegistrationActivity.this);
+
+			// Set the dialog title
+			builder.setTitle("Select " + getString(R.string.registration_profile_nrictype));
+			builder.setItems(listNRICType.toArray(new CharSequence[listNRICType.size()]), new DialogInterface.OnClickListener() {
+	               public void onClick(DialogInterface dialog, int which) {
+	               // The 'which' argument contains the index position
+	               // of the selected item
+	            	   nricSelected = which;
+	            	   if (nricSelected != -1) {
+							nricTypeView.setText(listNRICType
+									.get(nricSelected));
+							
+							// If student selected, enable school
+							if(nricSelected == 2) {
+								schoolLayout.setVisibility(View.VISIBLE);
+								isSchoolRequired = true;
+							} else {
+								schoolLayout.setVisibility(View.GONE);											
+								school.setText("");
+								isSchoolRequired = false;
+							}
+						}
+	               }
+	        });
+			
+			Dialog dialog = builder.create();
+			dialog.show();
+		}
+	};
+	
 	private OnClickListener profileSubmitListener = new OnClickListener() {
 		@Override
 		public void onClick(View view) {
@@ -446,7 +652,15 @@ public class ProfileRegistrationActivity extends Activity {
 			if (nricTypeView.getText().length() == 0) {
 				errors += "* " + getString(R.string.registration_profile_nrictype) + "\n";
 			}
-
+			
+			if(isSchoolRequired == true && school.getText().length() == 0) {
+				errors += "* " + getString(R.string.registration_profile_school) + "\n";				
+			}
+			
+			if (workExperienceView.getText().length() == 0) {
+				errors += "* " + getString(R.string.registration_profile_work_experience) + "\n";
+			}
+			
 			// if (userNRICFront == "") {
 			// errors += "* NRIC front photo\n";
 			// }
@@ -459,13 +673,13 @@ public class ProfileRegistrationActivity extends Activity {
 //				errors += "* Skills\n";
 //			}
 
-			if (editExperience.getText().length() == 0) {
-				errors += "* " + getString(R.string.registration_profile_work_experience) +"\n";
-			}
+//			if (editExperience.getText().length() == 0) {
+//				errors += "* " + getString(R.string.registration_profile_work_experience) +"\n";
+//			}
 
-			if (phoneNumber.getText().length() == 0) {
-				errors += "* " + getString(R.string.registration_profile_phone_number) + "\n";
-			}
+//			if (phoneNumber.getText().length() == 0) {
+//				errors += "* " + getString(R.string.registration_profile_phone_number) + "\n";
+//			}
 
 			// If all fields completed, then create profile
 			if (errors.length() == 0) {
@@ -500,23 +714,45 @@ public class ProfileRegistrationActivity extends Activity {
 	};
 
 	protected void doCreateProfile() {
+		Log.d(TAG, "Create profile executed ");
+		
 		final String url = SERVERURL + API_CREATE_AND_PART_TIMER_PROFILE;		
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
+				Log.d(TAG, "Create profile running ... ");
+				
 				if (jsonStr != null) {
+					Log.d(TAG, "Result from " + url + " " + jsonStr.toString());
+					
 					// FIXME: please check on server response
 					if (jsonStr.trim().equalsIgnoreCase("0")) {
 						SharedPreferences.Editor editor = settings.edit();
 						editor.putBoolean(CommonUtilities.LOGIN, true);
 						editor.putBoolean(CommonUtilities.REGISTERED, true);
+						
+						String name = fullName.getText().toString().trim();
+						String fname = "";
+						String lname = "";
+						if (name.contains(" ")) {
+							fname = name.substring(0, name.lastIndexOf(" "));
+							lname = name.substring(name.lastIndexOf(" ") + 1);
+						} else {
+							fname = name;
+						}
+						
+						editor.putString(USER_FIRSTNAME, fname);
+						editor.putString(USER_LASTNAME, lname);
+						editor.putString(USER_NRIC_TYPE, listNRICType.get(nricSelected));
+						editor.putString(USER_NRIC_TYPE_ID, listNRICTypeId.get(nricSelected));						
 						editor.commit();
 
 						Intent intent = new Intent(context, HomeActivity.class);
 						startActivity(intent);
 						finish();
+						
 					} else if (jsonStr.trim().equalsIgnoreCase("2")) {
-						resendLinkDialog(ProfileRegistrationActivity.this);
+						ValidationUtilities.resendLinkDialog(ProfileRegistrationActivity.this, pt_id);
 					} else {
 						Toast.makeText(context,
 								getString(R.string.registration_profile_failed),
@@ -535,6 +771,8 @@ public class ProfileRegistrationActivity extends Activity {
 		new Thread() {
 			public void run() {
 				jsonParser = new JSONParser();
+				Log.d(TAG, "Dialog process profile running ... ");
+				
 				try {
 					JSONObject parentData = new JSONObject();
 					JSONObject childData = new JSONObject();
@@ -555,22 +793,31 @@ public class ProfileRegistrationActivity extends Activity {
 							genderSelected.toLowerCase(Locale.getDefault()));
 					childData.put("dob", birthView.getText().toString().trim());
 					childData.put("profile_picture", "");
-					childData.put("phone_no", phoneNumber.getText().toString()
-							.trim());
+					
+//					childData.put("phone_no", phoneNumber.getText().toString()
+//							.trim());
+					childData.put("phone_no", "");
 					childData.put("address", "");
 					childData.put("postal_code", "");
 					childData.put("ic_type", listNRICType.get(nricSelected));
 					childData.put("ic_type_id",
 							listNRICTypeId.get(nricSelected));
-					childData.put("school_id", "");
+					
+					if(isSchoolRequired) {
+						int tmp = listSchool.indexOf(school.getText().toString().trim());
+						childData.put("school_id", listSchoolId.get(tmp));
+					} else {
+						childData.put("school_id", "");						
+					}
 					childData.put("ic_expiry_date", "");
-
 					childData.put("ic_front_picture", settings.getString(
 							CommonUtilities.USER_NRIC_FRONT, ""));
 					childData.put("ic_back_picture", settings.getString(
 							CommonUtilities.USER_NRIC_BACK, ""));
-					childData.put("work_experience", editExperience.getText()
-							.toString().trim());
+					
+					int tmp = listWorkExperience.indexOf(workExperienceView.getText().toString().trim());
+					childData.put("work_experience", listWorkExpID.get(tmp));
+
 					childData.put("profile_source", "");
 					childData.put("matric_card_picture", "");
 					childData.put("matric_card_no", "");
@@ -590,12 +837,13 @@ public class ProfileRegistrationActivity extends Activity {
 
 					String[] params = { "data" };
 					String[] values = { parentData.toString() };
-					jsonStr = jsonParser.getHttpResultUrlPost(url, params,
-							values);
+					jsonStr = jsonParser.getHttpResultUrlPost(url, params, values);
 
-					Log.e(TAG, "Create profile to " + url + " \nResult >>> " + jsonStr);
+					Log.e(TAG, "Create profile to " + url + "with data  >>>\n" + childData.toString());
+					
 				} catch (Exception e) {
 					jsonStr = null;
+					Log.d(TAG, "Jsone null ... ");
 				}
 
 				if (progress != null && progress.isShowing()) {
@@ -635,41 +883,6 @@ public class ProfileRegistrationActivity extends Activity {
 		alert.show();
 	}
 
-	/**
-	 * NRIC type selection list-checkbox listener
-	 */
-	private OnClickListener nricTypeListener = new OnClickListener() {
-		@Override
-		public void onClick(View view) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(
-					ProfileRegistrationActivity.this);
-			// Set the dialog title
-			builder.setTitle("Select NRIC Type");
-			builder.setSingleChoiceItems(
-					listNRICType.toArray(new CharSequence[listNRICType.size()]),
-					nricSelected, new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							nricSelected = which;
-						}
-					})
-					.setCancelable(false)
-					.setPositiveButton(R.string.ok,
-							new DialogInterface.OnClickListener() {
-								@Override
-								public void onClick(DialogInterface dialog,
-										int which) {
-									if (nricSelected != -1) {
-										nricTypeView.setText(listNRICType
-												.get(nricSelected));
-									}
-								}
-							});
-
-			Dialog dialog = builder.create();
-			dialog.show();
-		}
-	};
 
 	private void resendLink() {
 		final String url = SERVERURL + API_RESEND_VERIFICATION_EMAIL;
@@ -721,69 +934,69 @@ public class ProfileRegistrationActivity extends Activity {
 	/**
 	 * Skills selection list-checkbox listener
 	 */
-	private OnClickListener skillsListener = new OnClickListener() {
-
-		@Override
-		public void onClick(View view) {
-			listSelectedItems = new ArrayList<Integer>();
-			final ArrayList<CharSequence> selectedSkills = new ArrayList<CharSequence>();
-			final List<Integer> selectedIdx = new ArrayList<Integer>();
-
-			AlertDialog.Builder builder = new AlertDialog.Builder(
-					ProfileRegistrationActivity.this);
-
-			// Set the dialog title
-			builder.setTitle("Select Skills")
-					.setMultiChoiceItems(
-							listSkill
-									.toArray(new CharSequence[listSkill.size()]),
-							null,
-							new DialogInterface.OnMultiChoiceClickListener() {
-								@Override
-								public void onClick(DialogInterface dialog,
-										int which, boolean isChecked) {
-									if (isChecked) {
-										listSelectedItems.add(Integer
-												.parseInt(listSkillId
-														.get(which)));
-										selectedIdx.add(which);
-									} else if (listSelectedItems
-											.contains(which)) {
-										listSelectedItems.remove(Integer
-												.valueOf(which));
-										selectedIdx.remove(Integer
-												.valueOf(which));
-									}
-								}
-							})
-					.setPositiveButton(R.string.ok,
-							new DialogInterface.OnClickListener() {
-								@Override
-								public void onClick(DialogInterface dialog,
-										int id) {
-									selectedSkills.clear();
-									for (int i = 0; i < selectedIdx.size(); i++) {
-										selectedSkills.add(listSkill
-												.get(selectedIdx.get(i)));
-									}
-
-									// Convert ArrayList into String
-									// comma-separated
-									String selectedSkillsList = selectedSkills
-											.toString();
-									String selectedSkillsSet = selectedSkillsList
-											.substring(
-													1,
-													selectedSkillsList.length() - 1)
-											.replace(", ", ", ");
-									skillView.setText(selectedSkillsSet);
-								}
-							});
-
-			Dialog dialog = builder.create();
-			dialog.show();
-		}
-	};
+//	private OnClickListener skillsListener = new OnClickListener() {
+//
+//		@Override
+//		public void onClick(View view) {
+//			listSelectedItems = new ArrayList<Integer>();
+//			final ArrayList<CharSequence> selectedSkills = new ArrayList<CharSequence>();
+//			final List<Integer> selectedIdx = new ArrayList<Integer>();
+//
+//			AlertDialog.Builder builder = new AlertDialog.Builder(
+//					ProfileRegistrationActivity.this);
+//
+//			// Set the dialog title
+//			builder.setTitle("Select Skills")
+//					.setMultiChoiceItems(
+//							listSkill
+//									.toArray(new CharSequence[listSkill.size()]),
+//							null,
+//							new DialogInterface.OnMultiChoiceClickListener() {
+//								@Override
+//								public void onClick(DialogInterface dialog,
+//										int which, boolean isChecked) {
+//									if (isChecked) {
+//										listSelectedItems.add(Integer
+//												.parseInt(listSkillId
+//														.get(which)));
+//										selectedIdx.add(which);
+//									} else if (listSelectedItems
+//											.contains(which)) {
+//										listSelectedItems.remove(Integer
+//												.valueOf(which));
+//										selectedIdx.remove(Integer
+//												.valueOf(which));
+//									}
+//								}
+//							})
+//					.setPositiveButton(R.string.ok,
+//							new DialogInterface.OnClickListener() {
+//								@Override
+//								public void onClick(DialogInterface dialog,
+//										int id) {
+//									selectedSkills.clear();
+//									for (int i = 0; i < selectedIdx.size(); i++) {
+//										selectedSkills.add(listSkill
+//												.get(selectedIdx.get(i)));
+//									}
+//
+//									// Convert ArrayList into String
+//									// comma-separated
+//									String selectedSkillsList = selectedSkills
+//											.toString();
+//									String selectedSkillsSet = selectedSkillsList
+//											.substring(
+//													1,
+//													selectedSkillsList.length() - 1)
+//											.replace(", ", ", ");
+//									skillView.setText(selectedSkillsSet);
+//								}
+//							});
+//
+//			Dialog dialog = builder.create();
+//			dialog.show();
+//		}
+//	};
 
 	/**
 	 * Take front NRIC photos listener
@@ -998,10 +1211,10 @@ public class ProfileRegistrationActivity extends Activity {
 			String filename = file.getName();
 
 			bm = BitmapFactory.decodeFile(filePath);
-
+			
 			try {
 				ByteArrayOutputStream bos = new ByteArrayOutputStream();
-				bm.compress(CompressFormat.JPEG, 95, bos);
+				bm.compress(CompressFormat.JPEG, 75, bos);
 
 				byte[] data = bos.toByteArray();
 				HttpClient httpClient = new DefaultHttpClient();

@@ -1,23 +1,19 @@
 package com.matchimi;
 
-import static com.matchimi.CommonUtilities.PREFS_NAME;
-import static com.matchimi.CommonUtilities.SETTING_THEME;
-import static com.matchimi.CommonUtilities.THEME_LIGHT;
+import static com.matchimi.CommonUtilities.*;
 
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.Spinner;
 
 import com.android.volley.Request;
@@ -31,20 +27,22 @@ import com.matchimi.utils.ApplicationUtils;
 public class SettingsActivity extends Activity {
 	private CheckBox freezeCheckbox;
 	private Spinner themeSpinner;
-
+	private int currentTheme;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.settings_menu);
 				
-		SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-		if (settings.getInt(SETTING_THEME, THEME_LIGHT) == THEME_LIGHT) {
+		SharedPreferences settings = getSharedPreferences(CommonUtilities.PREFS_NAME,
+				Context.MODE_PRIVATE);
+		if (settings.getInt(CommonUtilities.SETTING_THEME,
+				CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
 			setTheme(ApplicationUtils.getTheme(true));
 		} else {
 			setTheme(ApplicationUtils.getTheme(false));
 		}
 		
+		setContentView(R.layout.settings_menu);
 //		freezeCheckbox = (CheckBox) findViewById(R.id.settings_freeze_checkbox);
 //		freezeCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 //
@@ -67,11 +65,16 @@ public class SettingsActivity extends Activity {
 		// Apply the adapter to the spinner
 		themeSpinner.setAdapter(adapter);
 		
+		currentTheme = settings.getInt(SETTING_THEME, THEME_LIGHT);
+		themeSpinner.setSelection(currentTheme);
+		
 		themeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 				@Override
 				public void onItemSelected(AdapterView<?> parent, View view,
 						int post, long id) {
-					if(id > 0) {
+					Log.d(TAG, "Settings selection post, id " + post + " " + id);
+					
+					if (post != currentTheme) {
 						SharedPreferences settings = getSharedPreferences(PREFS_NAME, 
 								Context.MODE_PRIVATE);
 						SharedPreferences.Editor editor = settings.edit();
@@ -80,7 +83,7 @@ public class SettingsActivity extends Activity {
 						
 						// restart apps
 						ApplicationUtils.restartApp(getApplicationContext());
-						
+						finish();
 					}
 				}
 

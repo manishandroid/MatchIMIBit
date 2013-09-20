@@ -13,7 +13,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -21,6 +24,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -90,10 +94,19 @@ public class JobsFragment extends Fragment {
 		});
 
 		loadData();
+		getActivity().registerReceiver(jobsReceiver, new IntentFilter("jobs.receiver"));
 
 		return view;
 	}
 
+	BroadcastReceiver jobsReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context arg0, Intent arg1) {
+			// TODO Auto-generated method stub
+			loadData();
+		}
+	};
+	
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);

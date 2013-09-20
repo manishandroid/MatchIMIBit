@@ -1,13 +1,6 @@
 package com.matchimi.options;
 
-import static com.matchimi.CommonUtilities.PREFS_NAME;
-import static com.matchimi.CommonUtilities.USER_EMAIL;
-import static com.matchimi.CommonUtilities.USER_FACEBOOK_ID;
-import static com.matchimi.CommonUtilities.USER_FIRSTNAME;
-import static com.matchimi.CommonUtilities.USER_LASTNAME;
-import static com.matchimi.CommonUtilities.USER_NRIC;
-import static com.matchimi.CommonUtilities.USER_RATING;
-
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,9 +9,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -39,6 +38,7 @@ import com.matchimi.CommonUtilities;
 import com.matchimi.R;
 import com.matchimi.registration.EditProfile;
 import com.matchimi.registration.Utilities;
+import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
 
 public class ProfileFragment extends Fragment {
@@ -68,14 +68,12 @@ public class ProfileFragment extends Fragment {
 		view = inflater.inflate(R.layout.user_profile, container, false);
 
 		// Check if user not logged
-		settings = this.getActivity().getSharedPreferences(
-				PREFS_NAME, 0);
+
+		settings = getActivity().getSharedPreferences(CommonUtilities.PREFS_NAME, Context.MODE_PRIVATE);
 		pt_id = settings.getString(CommonUtilities.USER_PTID, null);
 
 		context = getActivity();
 
-		loadData();
-		
 		Button blockedCompanyButton = (Button) view
 				.findViewById(R.id.profile_blocked_companies_button);
 		blockedCompanyButton.setOnClickListener(blockedCompanyListener);
@@ -90,15 +88,29 @@ public class ProfileFragment extends Fragment {
 			}
 		});
 		
-		loadFeedback();
+		loadProfile();
+		getActivity().registerReceiver(profileReceiver, new IntentFilter("profile.receiver"));
 
 		return view;
 
 	}
 
+	private void loadProfile() {
+		loadData();
+		loadFeedback();
+	}
+
+	BroadcastReceiver profileReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context arg0, Intent arg1) {
+			// TODO Auto-generated method stub
+			loadProfile();
+		}
+	};
+	
 	private void loadFeedback() {
-		final String url = "http://matchimi.buuukapps.com/get_feedbacks_by_pt_id?pt_id="
-				+ pt_id;
+		final String url = CommonUtilities.SERVERURL + CommonUtilities.API_GET_FEEDBACKS_BY_PT_ID 
+				+ "?" + CommonUtilities.PARAM_PT_ID + "=" + pt_id;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
@@ -204,30 +216,43 @@ public class ProfileFragment extends Fragment {
 		// Set user name
 		TextView usernameView = (TextView) view
 				.findViewById(R.id.profile_username);
-		String userName = settings.getString(USER_FIRSTNAME, "")
-				+ settings.getString(USER_LASTNAME, "");
+		String userName = settings.getString(CommonUtilities.USER_FIRSTNAME, "")
+				+ settings.getString(CommonUtilities.USER_LASTNAME, "");
 		usernameView.setText(userName);
 
 		// Set email name
 		TextView emailView = (TextView) view.findViewById(R.id.profile_email);
-		String userEmail = settings.getString(USER_EMAIL, "");
+		String userEmail = settings.getString(CommonUtilities.USER_EMAIL, "");
 		emailView.setText(userEmail);
 
 		// Set nric
 		TextView nricView = (TextView) view.findViewById(R.id.profile_nric);
-		String userNRIC = settings.getString(USER_NRIC, "");
-		nricView.setText(userNRIC);
+		String userNRIC = settings.getString(CommonUtilities.USER_NRIC_NUMBER, "");
+		if(userNRIC == "") {
+			nricView.setVisibility(View.GONE);
+		} else {
+			nricView.setText(userNRIC);
+			nricView.setVisibility(View.VISIBLE);
+		}
 
 		// Set user profile
 		ImageView avatarView = (ImageView) view
 				.findViewById(R.id.profile_avatar);
 
-		Utilities util = new Utilities();
-		util.downloadAvatar(settings.getString(USER_FACEBOOK_ID, ""),
-				avatarView);
+		String profileFilename = CommonUtilities.FILE_IMAGE_PROFILE + pt_id + ".jpg";
+		File f = new File(CommonUtilities.IMAGE_ROOT, profileFilename);
+		
+		if (f.exists()) {
+			Bitmap b = BitmapFactory.decodeFile(f.getAbsolutePath());
+			avatarView.setImageBitmap(b);
+		} else {
+			Utilities util = new Utilities();
+			util.downloadAvatar(settings.getString(CommonUtilities.USER_FACEBOOK_ID, ""),
+					avatarView);
+		}
 
 		RatingBar ratingBar = (RatingBar) view.findViewById(R.id.ratingBar);
-		ratingBar.setRating(settings.getInt(USER_RATING, 4));
+		ratingBar.setRating(settings.getInt(CommonUtilities.USER_RATING, 0));
 	}
 	
 }

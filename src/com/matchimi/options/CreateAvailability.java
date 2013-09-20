@@ -36,6 +36,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -143,6 +144,7 @@ public class CreateAvailability extends SherlockFragmentActivity {
 		});
 
 		TextView labelSalary = (TextView) findViewById(R.id.labelSalary);
+		
 		labelSalary.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
@@ -209,9 +211,10 @@ public class CreateAvailability extends SherlockFragmentActivity {
 		} else {
 			ab.setTitle("Create Availability");
 		}
-
+		
 		map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
 				.getMap();
+
 		if (location != null && !location.equalsIgnoreCase("null")
 				&& location.length() > 1) {
 			loadMap(location);
@@ -353,7 +356,7 @@ public class CreateAvailability extends SherlockFragmentActivity {
 
 	protected void showDateDialog(boolean withDate) {
 		final SimpleDateFormat sdf = new SimpleDateFormat(
-				"yyyy-MM-dd'T'HH:mm:ssZZZZZ", Locale.getDefault());
+				"yyyy-MM-dd HH:mm:ss", Locale.getDefault());
 		final Calendar cal;
 		if (withDate) {
 			if (start != null) {
@@ -456,11 +459,18 @@ public class CreateAvailability extends SherlockFragmentActivity {
 					JSONObject parentData = new JSONObject();
 					JSONObject childData = new JSONObject();
 					childData.put("pt_id", pt_id);
-					childData.put("asked_salary",
-							price.substring(0, price.indexOf(".")));
+//					childData.put("asked_salary",
+//							price.substring(0, price.indexOf(".")));
+					childData.put("asked_salary", 0);					
 					childData.put("start_date_time", start);
 					childData.put("end_date_time", end);
 					childData.put("repeat", repeat);
+					childData.put("avail_id", avail_id);
+					if(location != null && !location.equalsIgnoreCase("null")
+							&& location.length() > 1) {
+						location = "";
+					}
+
 					childData.put("location", location);
 					
 					parentData.put("availability", childData);
@@ -470,7 +480,7 @@ public class CreateAvailability extends SherlockFragmentActivity {
 					jsonStr = jsonParser.getHttpResultUrlPut(url, params,
 							values);
 					
-					Log.e(TAG, "Post >>> " + childData.toString());
+					Log.e(TAG, "EDIT Post >>> " + childData.toString());
 					Log.e(TAG, "HttpPut to " + url +"Result >>> " + jsonStr);
 				} catch (Exception e) {
 					jsonStr = null;
@@ -526,8 +536,9 @@ public class CreateAvailability extends SherlockFragmentActivity {
 					JSONObject parentData = new JSONObject();
 					JSONObject childData = new JSONObject();
 					childData.put("pt_id", pt_id);
-					childData.put("asked_salary",
-							price.substring(0, price.indexOf(".")));
+//					childData.put("asked_salary",
+//							price.substring(0, price.indexOf(".")));
+					childData.put("asked_salary", 0);
 					childData.put("start_date_time", start);
 					childData.put("end_date_time", end);
 					childData.put("repeat", repeat);

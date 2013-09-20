@@ -1,6 +1,13 @@
 package com.matchimi.options;
 
-import static com.matchimi.CommonUtilities.*;
+import static com.matchimi.CommonUtilities.API_GET_BLOCKED_COMPANIES_BY_PT_ID;
+import static com.matchimi.CommonUtilities.PARAM_PT_ID;
+import static com.matchimi.CommonUtilities.PREFS_NAME;
+import static com.matchimi.CommonUtilities.SERVERURL;
+import static com.matchimi.CommonUtilities.SETTING_THEME;
+import static com.matchimi.CommonUtilities.TAG;
+import static com.matchimi.CommonUtilities.THEME_LIGHT;
+import static com.matchimi.CommonUtilities.USER_PTID;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +33,8 @@ import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
-import com.matchimi.CommonUtilities;
 import com.matchimi.R;
+import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONHelper;
 
 public class BlockedCompaniesActivity extends SherlockActivity {
@@ -45,13 +52,19 @@ public class BlockedCompaniesActivity extends SherlockActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 
+				Context.MODE_PRIVATE);
+		if (settings.getInt(SETTING_THEME, THEME_LIGHT) == THEME_LIGHT) {
+			setTheme(ApplicationUtils.getTheme(true));
+		} else {
+			setTheme(ApplicationUtils.getTheme(false));
+		}
 		setContentView(R.layout.blocked_companies);
 
 		context = this;
 		ActionBar ab = getSupportActionBar();
 		ab.setDisplayHomeAsUpEnabled(true);
 
-		SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 		pt_id = settings.getString(USER_PTID, null);
 
 		listview = (ListView) findViewById(R.id.blocked_companies_listview);

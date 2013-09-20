@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
@@ -64,5 +66,23 @@ public class ApplicationUtils {
 		} catch (Exception e) {
 			Log.e("CopyFile", ">>> " + e.getMessage());
 		}
+	}
+	
+	public static Bitmap resizeBitmap(String filename, int height) {
+		Bitmap originalBitmap = BitmapFactory.decodeFile(filename);
+		Bitmap res = null;
+		
+		if (originalBitmap != null) {
+			int heightofBitMap = originalBitmap.getHeight();
+			int widthofBitMap = originalBitmap.getWidth();
+
+			heightofBitMap = height;
+			widthofBitMap = height * widthofBitMap / heightofBitMap;
+
+			// Scaling the bitmap according to new height and width
+			res = Bitmap.createScaledBitmap(originalBitmap, widthofBitMap, heightofBitMap, true);
+		}
+
+		return res;
 	}
 }

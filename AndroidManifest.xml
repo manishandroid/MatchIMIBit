@@ -41,6 +41,7 @@
         <activity
             android:name="com.matchimi.HomeActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -51,21 +52,25 @@
         <activity
             android:name="com.matchimi.options.JobDetails"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:label="@string/details" >
         </activity>
         <activity
             android:name="com.matchimi.options.RequirementsDetail"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:label="@string/requirements" >
         </activity>
         <activity
             android:name="com.matchimi.options.RejectPreview"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:label="@string/reject_offer" >
         </activity>
         <activity
             android:name="com.matchimi.options.CancelPreview"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:label="@string/cancel_availability" >
         </activity>
         <activity
@@ -76,36 +81,43 @@
         <activity
             android:name="com.matchimi.options.AvailabilityActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:label="@string/menu_availability" >
         </activity>
         <activity
             android:name="com.matchimi.options.AvailabilityPreview"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:label="@string/availability_detail" >
         </activity>
         <activity
             android:name="com.matchimi.options.CreateAvailability"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:label="@string/add_availability" >
         </activity>
         <activity
             android:name="com.matchimi.options.MapsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:label="@string/location" >
         </activity>
         <activity
             android:name="com.matchimi.registration.RegistrationActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:label="@string/app_name" >
         </activity>
         <activity
             android:name="com.matchimi.registration.ProfileRegistrationActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:label="@string/app_name" >
         </activity>
         <activity
             android:name="com.matchimi.registration.LoginActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:label="@string/login" >
         </activity>
         <activity
@@ -121,6 +133,7 @@
         <activity
             android:name="com.matchimi.registration.EditProfile"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:label="@string/edit_profile" >
         </activity>
         

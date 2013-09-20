@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <style name="AppTheme" parent="Theme.Sherlock.Light"/>
-    
+    	    
     <style name="Theme.Yoers" parent="@style/Theme.Sherlock.Light">
         <item name="android:backgroundDimEnabled">false</item>
         <!-- <item name="actionBarStyle">@style/example_solid_ActionBar</item> -->

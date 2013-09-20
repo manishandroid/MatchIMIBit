@@ -25,6 +25,12 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -44,7 +50,10 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 
 	private JSONParser jsonParser = null;
 	private String jsonStr = null;
-
+	private TextView buttonFreeze;
+	private String avail_id;
+	private Boolean is_frozen = false;
+	
 	public static final int RC_PREV_AVAILABILITY_EDIT = 40;
 
 	@Override
@@ -65,13 +74,13 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 
 		Bundle b = getIntent().getExtras();
 		final String pt_id = b.getString("pt_id");
-		final String avail_id = b.getString("avail_id");
+		avail_id = b.getString("avail_id");
 		final String start = b.getString("start");
 		final String end = b.getString("end");
 		final int repeat = b.getInt("repeat");
 		final String location = b.getString("location");
 		final String price = b.getString("price");
-		final Boolean is_frozen = b.getBoolean("is_frozen");
+		is_frozen = b.getBoolean("is_frozen");
 
 		SimpleDateFormat formatterDate = new SimpleDateFormat("EE d, MMM",
 				Locale.getDefault());
@@ -141,47 +150,49 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 		});
 
 		
-		final TextView buttonFreeze = (TextView) findViewById(R.id.buttonFreeze);
+		buttonFreeze = (TextView) findViewById(R.id.buttonFreeze);
 		// If frozen, change into unfreeze
 		if(is_frozen) {
 			buttonFreeze.setText(getString(R.string.unfreeze_availability));
-		}
+		}		
+		buttonFreeze.setOnClickListener(freezeListener);
+		buttonFreeze.setVisibility(View.GONE);
 		
-		buttonFreeze.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				// If status is_frozen true, then unfreze them
-				if(is_frozen) {
-					doUnfreezeAvailability(avail_id);	
-				} else {
-					AlertDialog.Builder builder = new AlertDialog.Builder(context);
-					builder.setTitle(getString(R.string.menu_availability));
-					builder.setMessage(getString(R.string.freeze_availability_question));
-					builder.setPositiveButton(getString(R.string.freeze_title),
-							new DialogInterface.OnClickListener() {
-								@Override
-								public void onClick(DialogInterface dialog, int arg1) {
-									doFreezeAvailability(avail_id);									
-								}
-							});
-
-					builder.setNegativeButton("Cancel",
-							new DialogInterface.OnClickListener() {
-								@Override
-								public void onClick(DialogInterface dialog, int arg1) {
-									// Nothing to do
-								}
-							});
-
-					AlertDialog dialog = builder.create();
-					dialog.show();	
-				}
-			}
-		});
-
 		loadMap(location);
 	}
 
+	private OnClickListener freezeListener = new OnClickListener() {
+		@Override
+		public void onClick(View view) {
+			// If status is_frozen true, then unfreze them
+			if(is_frozen) {
+				doUnfreezeAvailability(avail_id);	
+			} else {
+				AlertDialog.Builder builder = new AlertDialog.Builder(context);
+				builder.setTitle(getString(R.string.menu_availability));
+				builder.setMessage(getString(R.string.freeze_availability_question));
+				builder.setPositiveButton(getString(R.string.freeze_title),
+						new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int arg1) {
+								doFreezeAvailability(avail_id);									
+							}
+						});
+
+				builder.setNegativeButton("Cancel",
+						new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int arg1) {
+								// Nothing to do
+							}
+						});
+
+				AlertDialog dialog = builder.create();
+				dialog.show();	
+			}
+		}
+	};
+	
 	protected void loadMap(String location) {
 		if (location != null && !location.equalsIgnoreCase("null")
 				&& location.length() > 1) {
@@ -203,12 +214,16 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 	}
 
 	protected void doDeleteAvailability(final String avail_id) {
-		final String url = SERVERURL + API_DELETE_AVAILABILITY_BY_AVAIL_ID;
-		final Handler mHandlerFeed = new Handler();
-		final Runnable mUpdateResultsFeed = new Runnable() {
-			public void run() {
-				if (jsonStr != null) {
-					if (jsonStr.trim().equalsIgnoreCase("0")) {
+		final String url = SERVERURL + API_DELETE_AVAILABILITY_BY_AVAIL_ID + "?" +
+							PARAM_AVAIL_ID + "=" + avail_id;
+		
+		RequestQueue queue = Volley.newRequestQueue(this); 
+		StringRequest dr = new StringRequest(Request.Method.DELETE, url, 
+		    new Response.Listener<String>() 
+		    {
+		        @Override
+		        public void onResponse(String response) {
+		        	if (response.equalsIgnoreCase("0")) {
 						Toast.makeText(context, getString(R.string.delete_availability_success),
 								Toast.LENGTH_SHORT).show();
 						Intent result = new Intent();
@@ -219,37 +234,71 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 								context,
 								getString(R.string.delete_availability_failed),
 								Toast.LENGTH_LONG).show();
+						Log.d(TAG, "Delete failed with result code " + response);
 					}
-				} else {
-					Toast.makeText(
-							context,
-							getString(R.string.something_wrong),
-							Toast.LENGTH_LONG).show();
+		        }
+		    }, 
+		    new Response.ErrorListener() 
+		    {
+				@Override
+				public void onErrorResponse(VolleyError error) {
+					Log.d(TAG, "error " + error.toString());
+					// TODO Auto-generated method stub
+		        	 Toast.makeText(
+								context,
+								getString(R.string.something_wrong),
+								Toast.LENGTH_LONG).show();
 				}
-			}
-		};
-
-		progress = ProgressDialog.show(context, getString(R.string.menu_availability),
-				getString(R.string.delete_availability_progress), true, false);
-		new Thread() {
-			public void run() {
-				jsonParser = new JSONParser();
-				try {
-					String[] params = { "avail_id" };
-					String[] values = { avail_id };
-					jsonStr = jsonParser.getHttpResultUrlDelete(url, params,
-							values);
-					Log.e(TAG, "Deleting availability: " + url + " Result >>>\n" + jsonStr);
-				} catch (Exception e) {
-					jsonStr = null;
-				}
-
-				if (progress != null && progress.isShowing()) {
-					progress.dismiss();
-					mHandlerFeed.post(mUpdateResultsFeed);
-				}
-			}
-		}.start();
+		    }
+		);
+		queue.add(dr);
+//		
+//		final Handler mHandlerFeed = new Handler();
+//		final Runnable mUpdateResultsFeed = new Runnable() {
+//			public void run() {
+//				if (jsonStr != null) {
+//					if (jsonStr.trim().equalsIgnoreCase("0")) {
+//						Toast.makeText(context, getString(R.string.delete_availability_success),
+//								Toast.LENGTH_SHORT).show();
+//						Intent result = new Intent();
+//						setResult(RESULT_OK, result);
+//						finish();
+//					} else {
+//						Toast.makeText(
+//								context,
+//								getString(R.string.delete_availability_failed),
+//								Toast.LENGTH_LONG).show();
+//					}
+//				} else {
+//					Toast.makeText(
+//							context,
+//							getString(R.string.something_wrong),
+//							Toast.LENGTH_LONG).show();
+//				}
+//			}
+//		};
+//
+//		progress = ProgressDialog.show(context, getString(R.string.menu_availability),
+//				getString(R.string.delete_availability_progress), true, false);
+//		new Thread() {
+//			public void run() {
+//				jsonParser = new JSONParser();
+//				try {
+//					String[] params = { "avail_id" };
+//					String[] values = { avail_id };
+//					jsonStr = jsonParser.getHttpResultUrlDelete(url, params,
+//							values);
+//					Log.e(TAG, "Deleting availability: " + url + " with avail_id " + avail_id + ". Result >>>\n" + jsonStr);
+//				} catch (Exception e) {
+//					jsonStr = null;
+//				}
+//
+//				if (progress != null && progress.isShowing()) {
+//					progress.dismiss();
+//					mHandlerFeed.post(mUpdateResultsFeed);
+//				}
+//			}
+//		}.start();
 	}
 
 	/**

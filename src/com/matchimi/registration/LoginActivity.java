@@ -34,6 +34,7 @@ import com.facebook.model.GraphUser;
 import com.facebook.widget.LoginButton;
 import com.matchimi.HomeActivity;
 import com.matchimi.R;
+import com.matchimi.ValidationUtilities;
 import com.matchimi.utils.JSONParser;
 
 public class LoginActivity extends Activity {
@@ -54,7 +55,8 @@ public class LoginActivity extends Activity {
 	private String userWorkExperience;
 	private String userGender;
 	private String userDob;
-	private String userNRIC;
+	private String userNRICType;
+	private String userNRICTypeID;
 	private boolean userBasicComplete = false;
 	
 	private Session.StatusCallback callback = new Session.StatusCallback() {
@@ -255,16 +257,23 @@ public class LoginActivity extends Activity {
 	}
 
 	protected void loginPartTimer(final String email, final String password) {
-		final String url = "http://matchimi.buuukapps.com/login_part_timer";
+		final String url = SERVERURL + API_LOGIN_PART_TIMER;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
 				if (jsonStr != null) {
+					Log.d(TAG, "Result from " + url + " >>>\n" + jsonStr.toString());
+					
 					// FIXME: please check on server response
 					if (jsonStr.trim().equalsIgnoreCase("1")) {
 						closeSession();
 						Toast.makeText(context,
 								getString(R.string.login_failed),
+								Toast.LENGTH_LONG).show();
+					} else if (jsonStr.trim().equalsIgnoreCase("2")) {
+						closeSession();
+						Toast.makeText(context,
+								getString(R.string.something_wrong),
 								Toast.LENGTH_LONG).show();
 					} else {
 						SharedPreferences settings = getSharedPreferences(
@@ -278,33 +287,56 @@ public class LoginActivity extends Activity {
 							JSONObject partTimer = obj
 									.getJSONObject("part_timers");
 							ptid = partTimer.getString(PARAM_PT_ID);
+							
 							userIsVerified = partTimer.getString(PARAM_PROFILE_IS_VERIFIED);
 							userDob = partTimer.getString(PARAM_PROFILE_DATE_OF_BIRTH);
 							userWorkExperience = partTimer.getString(PARAM_PROFILE_WORK_EXPERIENCE);
 							userPhoneNumber = partTimer.getString(PARAM_PROFILE_PHONE_NUMBER);
 							userGender = partTimer.getString(PARAM_PROFILE_GENDER);
-							userNRIC = partTimer.getString(PARAM_PROFILE_IC_TYPE);
+							userNRICType = partTimer.getString(PARAM_PROFILE_IC_TYPE);
+							userNRICTypeID = partTimer.getString(PARAM_PROFILE_IC_TYPE_ID);
+							
+							// Update settings
+							String nricNumber = partTimer.getString(PARAM_PROFILE_IC_NUMBER);
+							if(nricNumber == "null") {
+								nricNumber = "";
+							}
+							
+							editor.putString(USER_PTID, ptid);
+							editor.putString(USER_FIRSTNAME, partTimer.getString(PARAM_PROFILE_FIRSTNAME));
+							editor.putString(USER_LASTNAME, partTimer.getString(PARAM_PROFILE_LASTNAME));
+							editor.putString(USER_EMAIL, partTimer.getString(PARAM_PROFILE_EMAIL));
+							editor.putString(USER_NRIC_NUMBER, nricNumber);
+							editor.putString(USER_PROFILE_PICTURE, partTimer.getString(PARAM_PROFILE_PICTURE));
+							editor.putString(USER_NRIC_TYPE, userNRICType);
+							editor.putString(USER_NRIC_TYPE_ID, userNRICTypeID);
+							editor.putString(USER_IS_VERIFIED, userIsVerified);
+							editor.putInt(USER_RATING, (int) partTimer.getInt(PARAM_PROFILE_GRADE_ID));
+							editor.putBoolean(USER_PROFILE_COMPLETE, ValidationUtilities.checkProfileComplete(partTimer));							
 							
 						} catch (JSONException e) {
+							Toast.makeText(context,
+									getString(R.string.server_error),
+									Toast.LENGTH_LONG).show();
 							Log.e(TAG, "Error parsing JSON >>> " + e.getMessage());
+//							editor.putString(USER_PTID, "7");
 						}
-
-						editor.putString(USER_PTID, ptid);
+						
 						extraBundle.putString(USER_PTID, ptid);
 						extraBundle.putString(USER_EMAIL, email);
 						extraBundle.putString(USER_IS_VERIFIED, userIsVerified);
 						extraBundle.putString(USER_BIRTHDAY, userDob);
 						extraBundle.putString(USER_GENDER, userGender);
-						extraBundle.putString(USER_IS_VERIFIED, userIsVerified);
 						extraBundle.putString(USER_WORK_EXPERIENCE, userWorkExperience);
 						extraBundle.putString(USER_PHONE_NUMBER, userPhoneNumber);
-						extraBundle.putString(USER_NRIC, userNRIC);
+						extraBundle.putString(USER_NRIC_TYPE, userNRICType);
+						extraBundle.putString(USER_NRIC_TYPE_ID, userNRICTypeID);	
 						
 						// Check if basic profile user already completed
 						if(userGender != "null" && userDob != "null"
 								&& userPhoneNumber != "null"  &&
 								userWorkExperience != "null" &&
-								userNRIC != "null") {
+								userNRICType != "null") {
 							userBasicComplete = true;							
 						}
 						
@@ -369,7 +401,7 @@ public class LoginActivity extends Activity {
 					jsonStr = jsonParser.getHttpResultUrlPost(url, params,
 							values);
 
-					Log.e(TAG, "HTTPPOST to " + url + " >>>\n " + jsonStr);
+					Log.e(TAG, "HTTPPOST to " + url + " with data\n " + childData.toString());
 				} catch (Exception e) {
 					jsonStr = null;
 				}
