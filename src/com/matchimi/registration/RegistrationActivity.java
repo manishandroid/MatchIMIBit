@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,8 +27,11 @@ import com.facebook.SessionState;
 import com.facebook.model.GraphUser;
 import com.facebook.widget.LoginButton;
 import static com.matchimi.CommonUtilities.*;
+
+import com.matchimi.CommonUtilities;
 import com.matchimi.R;
 import com.matchimi.utils.JSONParser;
+import com.matchimi.utils.NetworkUtils;
 
 public class RegistrationActivity extends Activity {
 	private Context context;
@@ -75,6 +79,8 @@ public class RegistrationActivity extends Activity {
 				boolean validPassword = Validation
 						.isValidPassword(passwordText);
 				if (validEmail && validPassword) {
+					closeKeyboard();
+					
 					extraBundle = new Bundle();
 					extraBundle.putString(USER_BIRTHDAY, "");
 					extraBundle.putString(USER_FIRSTNAME, "");
@@ -88,6 +94,14 @@ public class RegistrationActivity extends Activity {
 				}
 			}
 		});
+	}
+	
+	private void closeKeyboard() {
+		InputMethodManager inputManager = (InputMethodManager)
+                getSystemService(Context.INPUT_METHOD_SERVICE); 
+
+		inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+		                   InputMethodManager.HIDE_NOT_ALWAYS);
 	}
 
 	protected void getUserInfo() {
@@ -152,7 +166,7 @@ public class RegistrationActivity extends Activity {
 						Toast.makeText(context,
 								getString(R.string.registration_failed),
 								Toast.LENGTH_LONG).show();
-					} else {
+					} else if (jsonStr.trim().length() > 0) {
 						String ptid = "";
 
 						try {
@@ -160,22 +174,25 @@ public class RegistrationActivity extends Activity {
 							JSONObject partTimer = obj
 									.getJSONObject("part_timers");
 							ptid = partTimer.getString("pt_id");
-						} catch (JSONException e) {
-							Log.e(TAG, ">>> " + e.getMessage());
-						}
 
-						extraBundle.putString(USER_PTID, ptid);
-						Intent i = new Intent(context,
-								ProfileRegistrationActivity.class);
-						i.putExtras(extraBundle);
-						startActivity(i);
-						finish();
+							extraBundle.putString(USER_PTID, ptid);
+							Intent i = new Intent(context,
+									ProfileRegistrationActivity.class);
+							i.putExtras(extraBundle);
+							startActivity(i);
+							finish();
+
+						} catch (JSONException e1) {						
+							NetworkUtils.connectionHandler(context, jsonStr);
+							
+							Log.e(CommonUtilities.TAG, "Load register result " +
+									jsonStr + " >> " + e1.getMessage());
+						}
 					}
 				} else {
 					closeSession();
 					Toast.makeText(context,
-							"Failed to register. Please try again !",
-							Toast.LENGTH_LONG).show();
+							getString(R.string.server_error), Toast.LENGTH_SHORT).show();
 				}
 			}
 		};

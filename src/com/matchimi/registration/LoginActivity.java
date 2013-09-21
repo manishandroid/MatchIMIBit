@@ -21,6 +21,7 @@ import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
@@ -32,10 +33,12 @@ import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.model.GraphUser;
 import com.facebook.widget.LoginButton;
+import com.matchimi.CommonUtilities;
 import com.matchimi.HomeActivity;
 import com.matchimi.R;
 import com.matchimi.ValidationUtilities;
 import com.matchimi.utils.JSONParser;
+import com.matchimi.utils.NetworkUtils;
 
 public class LoginActivity extends Activity {
 
@@ -87,7 +90,7 @@ public class LoginActivity extends Activity {
 		submitButton = (Button) findViewById(R.id.submit_button);
 		submitButton.setOnClickListener(new OnClickListener() {
 			@Override
-			public void onClick(View v) {
+			public void onClick(View v) {				
 				// Email validation
 				boolean validEmail = Validation.isValidEmail(emailText);
 
@@ -95,6 +98,8 @@ public class LoginActivity extends Activity {
 				boolean validPassword = Validation
 						.isValidPassword(passwordText);
 				if (validEmail && validPassword) {
+					closeKeyboard();
+
 					extraBundle = new Bundle();
 					extraBundle.putString(USER_BIRTHDAY, "");
 					extraBundle.putString(USER_FIRSTNAME, "");
@@ -124,10 +129,18 @@ public class LoginActivity extends Activity {
 		forgetButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
+				closeKeyboard();
 				showForgetDialog();
 			}
 		});
+	}
+	
+	private void closeKeyboard() {
+		InputMethodManager inputManager = (InputMethodManager)
+                getSystemService(Context.INPUT_METHOD_SERVICE); 
 
+		inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+		                   InputMethodManager.HIDE_NOT_ALWAYS);
 	}
 
 	protected void showForgetDialog() {
@@ -144,6 +157,7 @@ public class LoginActivity extends Activity {
 				new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface arg0, int arg1) {
+
 					}
 				});
 
@@ -170,19 +184,23 @@ public class LoginActivity extends Activity {
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
 				if (jsonStr != null) {
+					closeKeyboard();
+
 					if (jsonStr.trim().equalsIgnoreCase("1")) {
 						Toast.makeText(context,
-								"Failed to reset password. Please try again !",
+								getString(R.string.reset_password_failed),
 								Toast.LENGTH_LONG).show();
-					} else {
+					} else if (jsonStr.trim().equalsIgnoreCase("0")) {
 						Toast.makeText(
 								context,
-								"Reset password done. Please check your email.",
+								getString(R.string.reset_password_success),
 								Toast.LENGTH_LONG).show();
+					} else if (jsonStr.trim().length() > 0 && !jsonStr.trim().equalsIgnoreCase("0")) {
+						NetworkUtils.connectionHandler(context, jsonStr);
 					}
 				} else {
 					Toast.makeText(context,
-							"Failed to reset password. Please try again !",
+							getString(R.string.something_wrong),
 							Toast.LENGTH_LONG).show();
 				}
 			}
@@ -275,7 +293,7 @@ public class LoginActivity extends Activity {
 						Toast.makeText(context,
 								getString(R.string.something_wrong),
 								Toast.LENGTH_LONG).show();
-					} else {
+					} else if (jsonStr.trim().length() > 0){
 						SharedPreferences settings = getSharedPreferences(
 								PREFS_NAME, Context.MODE_PRIVATE);
 						SharedPreferences.Editor editor = settings.edit();
@@ -314,46 +332,26 @@ public class LoginActivity extends Activity {
 							editor.putInt(USER_RATING, (int) partTimer.getInt(PARAM_PROFILE_GRADE_ID));
 							editor.putBoolean(USER_PROFILE_COMPLETE, ValidationUtilities.checkProfileComplete(partTimer));							
 							
-						} catch (JSONException e) {
-							Toast.makeText(context,
-									getString(R.string.server_error),
-									Toast.LENGTH_LONG).show();
-							Log.e(TAG, "Error parsing JSON >>> " + e.getMessage());
-//							editor.putString(USER_PTID, "7");
-						}
-						
-						extraBundle.putString(USER_PTID, ptid);
-						extraBundle.putString(USER_EMAIL, email);
-						extraBundle.putString(USER_IS_VERIFIED, userIsVerified);
-						extraBundle.putString(USER_BIRTHDAY, userDob);
-						extraBundle.putString(USER_GENDER, userGender);
-						extraBundle.putString(USER_WORK_EXPERIENCE, userWorkExperience);
-						extraBundle.putString(USER_PHONE_NUMBER, userPhoneNumber);
-						extraBundle.putString(USER_NRIC_TYPE, userNRICType);
-						extraBundle.putString(USER_NRIC_TYPE_ID, userNRICTypeID);	
-						
-						// Check if basic profile user already completed
-						if(userGender != "null" && userDob != "null"
-								&& userPhoneNumber != "null"  &&
-								userWorkExperience != "null" &&
-								userNRICType != "null") {
-							userBasicComplete = true;							
-						}
-						
-						if (settings.getBoolean(REGISTERED, false)) {
-							editor.putBoolean(LOGIN, true);
-							editor.commit();
+
+							extraBundle.putString(USER_PTID, ptid);
+							extraBundle.putString(USER_EMAIL, email);
+							extraBundle.putString(USER_IS_VERIFIED, userIsVerified);
+							extraBundle.putString(USER_BIRTHDAY, userDob);
+							extraBundle.putString(USER_GENDER, userGender);
+							extraBundle.putString(USER_WORK_EXPERIENCE, userWorkExperience);
+							extraBundle.putString(USER_PHONE_NUMBER, userPhoneNumber);
+							extraBundle.putString(USER_NRIC_TYPE, userNRICType);
+							extraBundle.putString(USER_NRIC_TYPE_ID, userNRICTypeID);	
 							
-							// If user not verified, remind them
-							if(userIsVerified == "false") {
-								notifyUserVerification(extraBundle, editor, true);
-							} else {
-								goHome(extraBundle);
+							// Check if basic profile user already completed
+							if(userGender != "null" && userDob != "null"
+									&& userPhoneNumber != "null"  &&
+									userWorkExperience != "null" &&
+									userNRICType != "null") {
+								userBasicComplete = true;							
 							}
 							
-						} else {
-							// Check if user already completed basic profile
-							if(userBasicComplete) {
+							if (settings.getBoolean(REGISTERED, false)) {
 								editor.putBoolean(LOGIN, true);
 								editor.commit();
 								
@@ -363,22 +361,40 @@ public class LoginActivity extends Activity {
 								} else {
 									goHome(extraBundle);
 								}
+								
 							} else {
-								editor.commit();
-								if(userIsVerified == "false") {
-									notifyUserVerification(extraBundle, editor, false);
+								// Check if user already completed basic profile
+								if(userBasicComplete) {
+									editor.putBoolean(LOGIN, true);
+									editor.commit();
+									
+									// If user not verified, remind them
+									if(userIsVerified == "false") {
+										notifyUserVerification(extraBundle, editor, true);
+									} else {
+										goHome(extraBundle);
+									}
 								} else {
-									goRegistrationProfile(extraBundle);								
+									editor.commit();
+									if(userIsVerified == "false") {
+										notifyUserVerification(extraBundle, editor, false);
+									} else {
+										goRegistrationProfile(extraBundle);								
+									}
 								}
 							}
+							
+						} catch (JSONException e1) {						
+							NetworkUtils.connectionHandler(context, jsonStr);
+							
+							Log.e(CommonUtilities.TAG, "Load login result " +
+									jsonStr + " >> " + e1.getMessage());
 						}
-
 					}
 				} else {
 					closeSession();
 					Toast.makeText(context,
-							getString(R.string.login_failed),
-							Toast.LENGTH_LONG).show();
+							getString(R.string.server_error), Toast.LENGTH_SHORT).show();
 				}
 			}
 		};
@@ -403,6 +419,7 @@ public class LoginActivity extends Activity {
 
 					Log.e(TAG, "HTTPPOST to " + url + " with data\n " + childData.toString());
 				} catch (Exception e) {
+					Log.d(TAG, "Error HTTP POST " + e.toString());
 					jsonStr = null;
 				}
 

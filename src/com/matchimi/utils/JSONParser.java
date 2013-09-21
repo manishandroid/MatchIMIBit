@@ -22,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.matchimi.CommonUtilities;
 import com.matchimi.R;
 import static com.matchimi.CommonUtilities.*;
 
@@ -56,7 +57,14 @@ public class JSONParser {
 					"ClientProtocolException, err: " + e.getMessage());
 		} catch (IOException e) {
 			Log.e("getHttpResultUrlGet", "IOException, err: " + e.getMessage());
-			return NOINTERNET;
+			JSONObject json = new JSONObject(); 
+			try {
+				json.put("status", CommonUtilities.NOINTERNET);
+			} catch (JSONException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} 
+			return json.toString();
 		}
 
 		try {
@@ -72,7 +80,6 @@ public class JSONParser {
 		} catch (Exception e) {
 			Log.e("getHttpResultUrlGet", "Exception, err: " + e.getMessage());
 		}
-
 		return httpResponse;
 	}
 
@@ -104,7 +111,16 @@ public class JSONParser {
 			Log.e("getHttpResultUrlPut",
 					"ClientProtocolException, err: " + e.getMessage());
 		} catch (IOException e) {
+			JSONObject json = new JSONObject(); 
+			try {
+				json.put("status", CommonUtilities.NOINTERNET);
+			} catch (JSONException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} 
+
 			Log.e("getHttpResultUrlPut", "IOException, err: " + e.getMessage());
+			return json.toString();
 		}
 
 		try {
@@ -152,7 +168,16 @@ public class JSONParser {
 			Log.e("getHttpResultUrlPost",
 					"ClientProtocolException, err: " + e.getMessage());
 		} catch (IOException e) {
+			JSONObject json = new JSONObject(); 
+			try {
+				json.put("status", CommonUtilities.NOINTERNET);
+			} catch (JSONException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} 
+
 			Log.e("getHttpResultUrlPost", "IOException, err: " + e.getMessage());
+			return json.toString();
 		}
 
 		try {
@@ -200,8 +225,17 @@ public class JSONParser {
 			Log.e("getHttpResultUrlDelete", "ClientProtocolException, err: "
 					+ e.getMessage());
 		} catch (IOException e) {
+			JSONObject json = new JSONObject(); 
+			try {
+				json.put("status", CommonUtilities.NOINTERNET);
+			} catch (JSONException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} 
+
 			Log.e("getHttpResultUrlDelete",
 					"IOException, err: " + e.getMessage());
+			return json.toString();
 		}
 
 		try {

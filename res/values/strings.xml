@@ -155,7 +155,7 @@
     <string name="school">School</string>
     <string name="card_number">Card Number</string>
     <string name="card_picture">Card Picture</string>
-    <string name="no_internet">Please check your internet connection</string>
+    <string name="no_internet">No internet connection. Please try again</string>
     <string name="ec_name">Emergency Contact Name</string>
     <string name="ec_email">Emergency Contact Email</string>
     <string name="ec_phone">Emergency Contact Phone</string>
@@ -174,7 +174,9 @@
     <string name="uploading">Uploading ... </string>  
     <string name="updating_profile">Updating profile...</string>
     <string name="server_error">Problem with server data. Please try again</string>
-    
+    <string name="reset_password_success">Your password has been reset succesfully.\nPlease check your email.</string>
+    <string name="reset_password_failed">Failed to reset password. Please try again.</string>
+        
     <string-array name="repeat_value">
         <item>None</item>
         <item>Weekly</item>

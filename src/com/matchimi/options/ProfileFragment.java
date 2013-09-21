@@ -40,6 +40,7 @@ import com.matchimi.registration.EditProfile;
 import com.matchimi.registration.Utilities;
 import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
+import com.matchimi.utils.NetworkUtils;
 
 public class ProfileFragment extends Fragment {
 
@@ -139,12 +140,15 @@ public class ProfileFragment extends Fragment {
 						} else {
 							Log.e("Parse Json Object", ">> Array is null");
 						}
-					} catch (JSONException e1) {
-						Log.e("loadFeedback", ">> " + e1.getMessage());
+					} catch (JSONException e1) {						
+						NetworkUtils.connectionHandler(getActivity(), jsonStr);
+						
+						Log.e(CommonUtilities.TAG, "Load feedback result " +
+								jsonStr + " >> " + e1.getMessage());
 					}
 				} else {
-					Toast.makeText(context, "jsonObj is Null",
-							Toast.LENGTH_SHORT).show();
+					Toast.makeText(getActivity().getApplicationContext(),
+							getString(R.string.server_error), Toast.LENGTH_SHORT).show();
 				}
 				createLayout();
 			}

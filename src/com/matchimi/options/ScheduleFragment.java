@@ -35,6 +35,7 @@ import android.widget.Toast;
 import com.matchimi.CommonUtilities;
 import com.matchimi.R;
 import com.matchimi.utils.JSONParser;
+import com.matchimi.utils.NetworkUtils;
 
 public class ScheduleFragment extends Fragment {
 
@@ -231,12 +232,15 @@ public class ScheduleFragment extends Fragment {
 						} else {
 							Log.e("Parse Json Object", ">> Array is null");
 						}
-					} catch (JSONException e1) {
-						Log.e("updateUIFromJSON", ">> " + e1.getMessage());
+					} catch (JSONException e1) {						
+						NetworkUtils.connectionHandler(getActivity(), jsonStr);
+						
+						Log.e(CommonUtilities.TAG, "Load schedule " +
+								jsonStr + " >> " + e1.getMessage());
 					}
 				} else {
 					Toast.makeText(getActivity().getApplicationContext(),
-							"jsonObj is Null", Toast.LENGTH_SHORT).show();
+							getString(R.string.server_error), Toast.LENGTH_SHORT).show();
 				}
 
 				adapter.updateList(listPrice, listAddress, listCompany,

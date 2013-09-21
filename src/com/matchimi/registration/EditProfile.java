@@ -38,6 +38,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -160,6 +162,8 @@ public class EditProfile extends SherlockActivity {
 	private String icFrontImagePath;
 	private String icBackImagePath;
 	
+	private String uploadImage = null;
+	private String uploadURL = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -293,9 +297,22 @@ public class EditProfile extends SherlockActivity {
 		cardImagePath = CommonUtilities.FILE_CARD + pt_id + ".jpg";	
 		
 		showStudentInfo(false);
-		loadGender();
+
+		if (savedInstanceState == null) {
+			loadGender(false);
+		} else {
+			uploadImage = savedInstanceState.getString("uploadImage");	
+			uploadURL = savedInstanceState.getString("uploadURL");
+			selectedPhotoId = savedInstanceState.getInt("selectedPhotoId");				
+			
+			loadGender(true);
+		}
+		
 	}
 
+	/**
+	 * Working experience listener
+	 */
 	private OnClickListener workExperienceListener = new OnClickListener() {
 
 		@Override
@@ -321,6 +338,9 @@ public class EditProfile extends SherlockActivity {
 		}
 	};
 	
+	/**
+	 * Emergency Contact Relationship listener
+	 */
 	private OnClickListener ECRelationListener = new OnClickListener() {
 
 		@Override
@@ -346,6 +366,9 @@ public class EditProfile extends SherlockActivity {
 		}
 	};
 
+	/**
+	 * Card expired for student listener
+	 */
 	private OnClickListener expiredListener = new OnClickListener() {
 		
 		@Override
@@ -419,7 +442,9 @@ public class EditProfile extends SherlockActivity {
 	};
 	
 	
-	// Date of birth listener
+	/**
+	 * Date of birth listener
+	 */
 	private OnClickListener dobListener = new OnClickListener() {
 		
 		@Override
@@ -494,6 +519,9 @@ public class EditProfile extends SherlockActivity {
 		}
 	};
 	
+	/**
+	 * School list listener for Student IC Type
+	 */
 	private OnClickListener schoolListener = new OnClickListener() {
 		
 		@Override
@@ -519,7 +547,9 @@ public class EditProfile extends SherlockActivity {
 	};
 	
 	
-	// Skills click listener
+	/**
+	 * Skills list listener
+	 */
 	private OnClickListener skillsListener = new OnClickListener() {
 		
 		@Override
@@ -585,6 +615,9 @@ public class EditProfile extends SherlockActivity {
 		}
 	};
 	
+	/**
+	 * IC Type listener
+	 */
 	private OnClickListener statusListener = new OnClickListener() {
 		
 		@Override
@@ -841,7 +874,7 @@ public class EditProfile extends SherlockActivity {
 		}
 	}
 
-	private void loadGender() {
+	private void loadGender(final boolean isUpload) {
 		final String url = SERVERURL + API_GET_GENDERS;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
@@ -859,7 +892,7 @@ public class EditProfile extends SherlockActivity {
 							listGenderId.add(obj.getString("gender_id"));
 						}
 
-						loadNRICType();
+						loadNRICType(isUpload);
 					} catch (JSONException e) {
 						Log.e(TAG, "Error get genders >>> " + e.getMessage());
 					}
@@ -886,7 +919,7 @@ public class EditProfile extends SherlockActivity {
 		}.start();
 	}
 
-	protected void loadNRICType() {
+	protected void loadNRICType(final boolean isUpload) {
 		final String url = SERVERURL + API_GET_IC_TYPES;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
@@ -904,7 +937,7 @@ public class EditProfile extends SherlockActivity {
 							listNRICTypeId.add(obj.getString("nric_type_id"));
 						}
 
-						loadSkill();
+						loadSkill(isUpload);
 					} catch (JSONException e) {
 						Log.e(TAG, "Error get ic types >>> " + e.getMessage());
 					}
@@ -931,7 +964,7 @@ public class EditProfile extends SherlockActivity {
 		}.start();
 	}
 
-	protected void loadSkill() {
+	protected void loadSkill(final boolean isUpload) {
 		final String url = SERVERURL + API_GET_SKILLS;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
@@ -951,7 +984,7 @@ public class EditProfile extends SherlockActivity {
 							listSkill.add(obj.getString("skill_name"));
 						}
 
-						loadSchool();
+						loadSchool(isUpload);
 					} catch (JSONException e) {
 						Log.e(TAG, "Error skills >>> " + e.getMessage());
 					}
@@ -978,7 +1011,7 @@ public class EditProfile extends SherlockActivity {
 		}.start();
 	}
 
-	protected void loadSchool() {
+	protected void loadSchool(final boolean isUpload) {
 		final String url = SERVERURL + CommonUtilities.API_GET_SCHOOLS;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
@@ -996,7 +1029,7 @@ public class EditProfile extends SherlockActivity {
 							listSchoolId.add(obj.getString("school_id"));
 						}
 
-						loadProfile();
+						loadProfile(isUpload);
 					} catch (Exception e) {
 						Log.e(TAG, "Error skills >>> " + e.getMessage());
 					}
@@ -1023,7 +1056,7 @@ public class EditProfile extends SherlockActivity {
 		}.start();
 	}
 
-	private void loadProfile() {
+	private void loadProfile(final boolean isUpload) {
 		Log.d(TAG, "Load profile called");
 		
 		final String url = SERVERURL + CommonUtilities.API_GET_PROFILE + "?"
@@ -1122,6 +1155,11 @@ public class EditProfile extends SherlockActivity {
 								.getString("ec_relationship"));
 						
 						updateLayout();
+						
+						if(isUpload) {
+							uploadImageToServer(uploadImage, uploadURL, selectedPhotoId);
+						}
+						
 //						loadBankInfo();
 					} catch (Exception e) {
 						Log.e(TAG, "Get profile error >> " + e.getMessage());
@@ -1446,6 +1484,10 @@ public class EditProfile extends SherlockActivity {
 		
 	}
 	
+	/**
+	 * Listener for IC Front, IC Back, Profile and Matric card listener
+	 * @param idx
+	 */
 	protected void askImageFrom(final int idx) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		CharSequence[] choice = { "Gallery", "Camera" };
@@ -1467,41 +1509,44 @@ public class EditProfile extends SherlockActivity {
 	}
 
 	protected void takeImageFromCamera(int idx) {
-		String file = "";
+		uploadImage = "";
+		selectedPhotoId = idx;
+		uploadURL = CommonUtilities.SERVERURL;
 		String selectedFileName = "";
 		
 		switch (idx) {
 		
 		case TAKE_IMG_PROFILE:
 			selectedFileName = CommonUtilities.FILE_IMAGE_PROFILE + pt_id + ".jpg";
-			file = CommonUtilities.IMAGE_ROOT + selectedFileName;
+			uploadImage = CommonUtilities.IMAGE_ROOT + selectedFileName;
+			uploadURL += CommonUtilities.API_UPLOAD_PROFILE_PICTURE;
 			break;
 			
 		case TAKE_IMG_CARD:
 			selectedFileName = CommonUtilities.FILE_CARD + pt_id + ".jpg";
-			file = CommonUtilities.IMAGE_ROOT + selectedFileName;
+			uploadImage = CommonUtilities.IMAGE_ROOT + selectedFileName;
+			uploadURL += CommonUtilities.API_UPLOAD_MATRIC_PHOTOS;
 			break;
 			
 		case TAKE_IMG_IC_BACK:
 			selectedFileName =  CommonUtilities.FILE_IC_BACK + pt_id + ".jpg";
-			file = CommonUtilities.IMAGE_ROOT + selectedFileName;
+			uploadImage = CommonUtilities.IMAGE_ROOT + selectedFileName;
+			uploadURL += CommonUtilities.API_UPLOAD_BACK_NRIC_PHOTOS;
 			break;
 			
 		case TAKE_IMG_IC_FRONT:
 			selectedFileName =  CommonUtilities.FILE_IC_FRONT + pt_id + ".jpg";
-			file = CommonUtilities.IMAGE_ROOT + selectedFileName;
+			uploadImage = CommonUtilities.IMAGE_ROOT + selectedFileName;
+			uploadURL += CommonUtilities.API_UPLOAD_FRONT_NRIC_PHOTOS;
 			break;
 		}
 		
-        File newfile = new File(file);
+        File newfile = new File(uploadImage);
         try {
             newfile.createNewFile();
         } catch (Exception e) {
         	Log.e("takeImageFromCamera", ">>> " + e.getMessage());
         }
-
-        selectedPhotoId = idx;
-        Log.d(TAG, "Set selectedPhotoId" + selectedPhotoId);
         
         Uri outputFileUri = Uri.fromFile(newfile);
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE); 
@@ -1512,98 +1557,80 @@ public class EditProfile extends SherlockActivity {
 	protected void takeImageFromGallery(int idx) {
 		// TODO Auto-generated method stub
 		selectedPhotoId = idx;
+		uploadImage = "";
+		selectedPhotoId = idx;
+		uploadURL = CommonUtilities.SERVERURL;
+		String selectedFileName = "";
+		
+		switch (selectedPhotoId) {
+		
+		case TAKE_IMG_PROFILE:
+			selectedFileName = CommonUtilities.FILE_IMAGE_PROFILE + pt_id + ".jpg";
+			uploadImage = CommonUtilities.IMAGE_ROOT + selectedFileName;
+			uploadURL += CommonUtilities.API_UPLOAD_PROFILE_PICTURE;
+			break;
+			
+		case TAKE_IMG_CARD:
+			selectedFileName = CommonUtilities.FILE_CARD + pt_id + ".jpg";
+			uploadImage = CommonUtilities.IMAGE_ROOT + selectedFileName;
+			uploadURL += CommonUtilities.API_UPLOAD_MATRIC_PHOTOS;
+			break;
+			
+		case TAKE_IMG_IC_BACK:
+			selectedFileName =  CommonUtilities.FILE_IC_BACK + pt_id + ".jpg";
+			uploadImage = CommonUtilities.IMAGE_ROOT + selectedFileName;
+			uploadURL += CommonUtilities.API_UPLOAD_BACK_NRIC_PHOTOS;
+			break;
+			
+		case TAKE_IMG_IC_FRONT:
+			selectedFileName =  CommonUtilities.FILE_IC_FRONT + pt_id + ".jpg";
+			uploadImage = CommonUtilities.IMAGE_ROOT + selectedFileName;
+			uploadURL += CommonUtilities.API_UPLOAD_FRONT_NRIC_PHOTOS;
+			break;
+		}
+		
 		Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent,"Select Picture"), SELECT_PHOTO);
 	}
 	
-
+	/**
+	 * Execute upload to Server
+	 */
+	private void uploadAction(String uploadImage, String uploadURL, 
+			int selectedPhotoId) {
+		if(uploadImage != null && uploadURL != null) {
+			uploadImageToServer(uploadImage, uploadURL, selectedPhotoId);
+			uploadImage = null;
+			uploadURL = null;
+			selectedPhotoId = -1;					
+		}
+	}
+	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-		String file = "";
-		String url = CommonUtilities.SERVERURL;
-		
-		Log.d(TAG, "Selected photo ID " + selectedPhotoId);
-		
-		if (requestCode == TAKE_PHOTO_CODE && resultCode == RESULT_OK) {
-			String selectedFileName = "";			
-			Log.d(TAG, "TAKE PHOTO DONE " + selectedPhotoId);
-			
-    		switch (selectedPhotoId) {
-    		
-    		case TAKE_IMG_PROFILE:
-    			selectedFileName = CommonUtilities.FILE_IMAGE_PROFILE + pt_id + ".jpg";
-    			file = CommonUtilities.IMAGE_ROOT + selectedFileName;
-    			url += CommonUtilities.API_UPLOAD_PROFILE_PICTURE;
-    			break;
-    		
-    		case TAKE_IMG_CARD:
-    			selectedFileName = CommonUtilities.FILE_CARD + pt_id + ".jpg";
-    			file = CommonUtilities.IMAGE_ROOT + selectedFileName;
-    			url += CommonUtilities.API_UPLOAD_MATRIC_PHOTOS;
-    			break;
-    		
-    		case TAKE_IMG_IC_BACK:
-    			selectedFileName =  CommonUtilities.FILE_IC_BACK + pt_id + ".jpg";
-    			file = CommonUtilities.IMAGE_ROOT + selectedFileName;
-    			url += CommonUtilities.API_UPLOAD_BACK_NRIC_PHOTOS;
-    			break;
-    			
-    		case TAKE_IMG_IC_FRONT:
-    			selectedFileName =  CommonUtilities.FILE_IC_FRONT + pt_id + ".jpg";
-    			file = CommonUtilities.IMAGE_ROOT + selectedFileName;
-    			url += CommonUtilities.API_UPLOAD_FRONT_NRIC_PHOTOS;
-    			break;
-    		}
-    		
-    		Log.d(TAG, "File and URL " + file + " " + url);
-    		
-    		String[] params = { file, url };
-    		new postData().execute(params);
-			updateImageLayout();
-		}
-		
-		if (requestCode == SELECT_PHOTO && resultCode == RESULT_OK) {
-			Uri selectedImageUri = data.getData();
-            String selectedImagePath = getPath(selectedImageUri);
-            
-            Log.d(TAG, "Image Path : " + selectedImagePath);
-            String selectedFileName = "";
-            
-    		switch (selectedPhotoId) {
-    		
-    		case TAKE_IMG_PROFILE:
-    			selectedFileName = CommonUtilities.FILE_IMAGE_PROFILE + pt_id + ".jpg";
-    			file = CommonUtilities.IMAGE_ROOT + selectedFileName;
-    			url += CommonUtilities.API_UPLOAD_PROFILE_PICTURE;
-    			break;
-    			
-    		case TAKE_IMG_CARD:
-    			selectedFileName = CommonUtilities.FILE_CARD + pt_id + ".jpg";
-    			file = CommonUtilities.IMAGE_ROOT + selectedFileName;
-    			url += CommonUtilities.API_UPLOAD_MATRIC_PHOTOS;
-    			break;
-    			
-    		case TAKE_IMG_IC_BACK:
-    			selectedFileName =  CommonUtilities.FILE_IC_BACK + pt_id + ".jpg";
-    			file = CommonUtilities.IMAGE_ROOT + selectedFileName;
-    			url += CommonUtilities.API_UPLOAD_BACK_NRIC_PHOTOS;
-    			break;
-    			
-    		case TAKE_IMG_IC_FRONT:
-    			selectedFileName =  CommonUtilities.FILE_IC_FRONT + pt_id + ".jpg";
-    			file = CommonUtilities.IMAGE_ROOT + selectedFileName;
-    			url += CommonUtilities.API_UPLOAD_FRONT_NRIC_PHOTOS;
-    			break;
-    		}
-			ApplicationUtils.copyFile(selectedImagePath, file);
-			
-    		String[] params = { file, url };
-    		new postData().execute(params);
-			updateImageLayout();
-		}
+		super.onActivityResult(requestCode, resultCode, data);		
+		switch (requestCode) {
+		case TAKE_PHOTO_CODE: {
+			if (resultCode == RESULT_OK) {
+				uploadAction(uploadImage, uploadURL, selectedPhotoId);
+			}
+			break;
+		} // ACTION_TAKE_PHOTO_B
+
+		case SELECT_PHOTO: {
+			if (resultCode == RESULT_OK) {
+				
+				Uri selectedImageUri = data.getData();
+	            String selectedImagePath = getPath(selectedImageUri);
+	            ApplicationUtils.copyFile(selectedImagePath, uploadImage);	            
+
+				uploadAction(uploadImage, uploadURL, selectedPhotoId);
+			}
+			break;
+		} // ACTION_TAKE_PHOTO_S
+		} // switch		
 	}
 
 	public String getPath(Uri uri) {
@@ -1624,121 +1651,108 @@ public class EditProfile extends SherlockActivity {
 	    return Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, true);
 	}
 	
-	private class postData extends AsyncTask<String, Void, String> {
-		ProgressDialog dialog = new ProgressDialog(
-				context);
-		Bitmap bm;
+	private void uploadImageToServer(final String filePath, final String url, final int outputPhotoId) {
+		final int getSelectedPhoto;
+		
+		final Handler mHandlerFeed = new Handler();
+		final Runnable mUpdateResultsFeed = new Runnable() {
+			public void run() {
+				updateImageLayout();
+			}
+		};
 
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-			dialog.setMessage(getString(R.string.uploading));
-			dialog.setIndeterminate(true);
-			dialog.setCanceledOnTouchOutside(false);
-			dialog.setCancelable(false);
-			dialog.show();
-		}
-
-		@Override
-		protected String doInBackground(String... params) {
-
-			String filePath = params[0];
-			String url = params[1];
-			File file = new File(filePath);
-			String filename = file.getName();
-			
-			Log.d(TAG, "Upload file " + filePath);			
-			Log.d(TAG, "Upload photo to " + url);			
-			
-			BitmapFactory.Options options = new BitmapFactory.Options();
-			options.inSampleSize = 2;
-			options.inScaled = false;
-			bm = BitmapFactory.decodeFile(filePath, options);
-			
-			// Fix S3 bug image orientation
-			ExifInterface exif;
-			try {
-				exif = new ExifInterface(filePath);
+		progress = ProgressDialog.show(context, getString(R.string.profile_header),
+				getString(R.string.uploading),
+				true, false);
+		new Thread() {
+			public void run() {				
+				File file = new File(filePath);
+				String filename = file.getName();
 				
-				Log.d(TAG, "Exif value " + exif.getAttribute(ExifInterface.TAG_ORIENTATION));
-				if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("6")){
-					bm=imageRotate(bm, 90);
-				} else if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("8")){
-					bm=imageRotate(bm, 270);
-				} else if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("3")){
-					bm=imageRotate(bm, 180);
+				Log.d(TAG, "Upload file " + filePath);			
+				Log.d(TAG, "Upload photo to " + url);			
+				
+				BitmapFactory.Options options = new BitmapFactory.Options();
+				options.inSampleSize = 2;
+				options.inScaled = false;
+				Bitmap bm = BitmapFactory.decodeFile(filePath, options);
+				
+				// Fix S3 bug image orientation
+				ExifInterface exif;
+				try {
+					exif = new ExifInterface(filePath);
+					
+					Log.d(TAG, "Exif value " + exif.getAttribute(ExifInterface.TAG_ORIENTATION));
+					if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("6")){
+						bm=imageRotate(bm, 90);
+					} else if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("8")){
+						bm=imageRotate(bm, 270);
+					} else if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("3")){
+						bm=imageRotate(bm, 180);
+					}
+
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
 				
+				try {
+					ByteArrayOutputStream bos = new ByteArrayOutputStream();
+					bm.compress(CompressFormat.JPEG, 75, bos);
+					
+					byte[] data = bos.toByteArray();
+					
+					// Replacing image in local storage
+					FileOutputStream fos = new FileOutputStream(file);
+					fos.write(data);
 
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			
-			try {
-				ByteArrayOutputStream bos = new ByteArrayOutputStream();
-				bm.compress(CompressFormat.JPEG, 75, bos);
-				
-				byte[] data = bos.toByteArray();
-				
-				// Replacing image in local storage
-				FileOutputStream fos = new FileOutputStream(file);
-				fos.write(data);
+					HttpClient httpClient = new DefaultHttpClient();
+					HttpPost postRequest = new HttpPost(url);
 
-				HttpClient httpClient = new DefaultHttpClient();
-				HttpPost postRequest = new HttpPost(url);
+					ByteArrayBody bab = new ByteArrayBody(data, filename);
+					MultipartEntity reqEntity = new MultipartEntity(
+							HttpMultipartMode.BROWSER_COMPATIBLE);
+					reqEntity.addPart("file", bab);
+					reqEntity.addPart("filename", new StringBody(filename));
+					postRequest.setEntity(reqEntity);
+					HttpResponse response = httpClient.execute(postRequest);
+					BufferedReader reader = new BufferedReader(
+							new InputStreamReader(
+									response.getEntity().getContent(), "UTF-8"));
+					String sResponse;
+					StringBuilder s = new StringBuilder();
 
-				ByteArrayBody bab = new ByteArrayBody(data, filename);
-				MultipartEntity reqEntity = new MultipartEntity(
-						HttpMultipartMode.BROWSER_COMPATIBLE);
-				reqEntity.addPart("file", bab);
-				reqEntity.addPart("filename", new StringBody(filename));
-				postRequest.setEntity(reqEntity);
-				HttpResponse response = httpClient.execute(postRequest);
-				BufferedReader reader = new BufferedReader(
-						new InputStreamReader(
-								response.getEntity().getContent(), "UTF-8"));
-				String sResponse;
-				StringBuilder s = new StringBuilder();
-
-				while ((sResponse = reader.readLine()) != null) {
-					s = s.append(sResponse);
+					while ((sResponse = reader.readLine()) != null) {
+						s = s.append(sResponse);
+					}
+					
+					Log.d(TAG, "Upload result: " + s.toString());
+					
+					switch (outputPhotoId) {
+		    		case TAKE_IMG_PROFILE:
+		    			profileInfo.setProfile_pic(s.toString());
+		    			break;
+		    		case TAKE_IMG_CARD:
+		    			profileInfo.setCard_picture(s.toString());
+		    			break;
+		    		case TAKE_IMG_IC_BACK:
+		    			profileInfo.setIc_back_picture(s.toString());
+		    			break;
+		    		case TAKE_IMG_IC_FRONT:
+		    			profileInfo.setIc_front_picture(s.toString());
+		    			break;
+		    		}
+					
+				} catch (Exception e) {
+					Log.e(e.getClass().getName(), e.getMessage());
 				}
 
-				Log.d(TAG, "Result "  + s.toString());
-				
-	    		switch (selectedPhotoId) {
-	    		case TAKE_IMG_PROFILE:
-	    			profileInfo.setProfile_pic(s.toString());
-	    			break;
-	    		case TAKE_IMG_CARD:
-	    			profileInfo.setCard_picture(s.toString());
-	    			break;
-	    		case TAKE_IMG_IC_BACK:
-	    			profileInfo.setIc_back_picture(s.toString());
-	    			break;
-	    		case TAKE_IMG_IC_FRONT:
-	    			profileInfo.setIc_front_picture(s.toString());
-	    			break;
-	    		}
-			} catch (Exception e) {
-				Log.e(e.getClass().getName(), e.getMessage());
+				if (progress != null && progress.isShowing()) {
+					progress.dismiss();
+					mHandlerFeed.post(mUpdateResultsFeed);
+				}
 			}
-
-			return filePath;
-		}
-
-		@Override
-		protected void onProgressUpdate(Void... values) {
-			
-		}
-
-		@Override
-		protected void onPostExecute(String result) {
-			super.onPostExecute(result);
-			dialog.dismiss();
-			updateImageLayout();
-		}
+		}.start();
 	}
 	
 
@@ -1860,5 +1874,50 @@ public class EditProfile extends SherlockActivity {
 			}
 		}.start();
 	}
+	
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+        outState.putString("uploadImage", uploadImage);
+        outState.putString("uploadURL", uploadURL);
+        outState.putInt("selectedPhotoId", selectedPhotoId);
+        
+		Log.d(TAG, "On Save Instance : " + uploadImage + " " + uploadURL + " " + selectedPhotoId);
+		super.onSaveInstanceState(outState);
+	}
+
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		super.onRestoreInstanceState(savedInstanceState);
+		
+		uploadImage = savedInstanceState.getString("uploadImage");
+		uploadURL = savedInstanceState.getString("uploadURL");
+		selectedPhotoId = savedInstanceState.getInt("selectedPhotoId");
+		
+		Log.d(TAG, "On Restore Instance : " + uploadImage + " " + uploadURL + " " + selectedPhotoId);
+	}
+
+	/**
+	 * Indicates whether the specified action can be used as an intent. This
+	 * method queries the package manager for installed packages that can
+	 * respond to an intent with the specified action. If no suitable package is
+	 * found, this method returns false.
+	 * http://android-developers.blogspot.com/2009/01/can-i-use-this-intent.html
+	 *
+	 * @param context The application's environment.
+	 * @param action The Intent action to check for availability.
+	 *
+	 * @return True if an Intent with the specified action can be sent and
+	 *         responded to, false otherwise.
+	 */
+	public static boolean isIntentAvailable(Context context, String action) {
+		final PackageManager packageManager = context.getPackageManager();
+		final Intent intent = new Intent(action);
+		List<ResolveInfo> list =
+			packageManager.queryIntentActivities(intent,
+					PackageManager.MATCH_DEFAULT_ONLY);
+		return list.size() > 0;
+	}
+	
 
 }
