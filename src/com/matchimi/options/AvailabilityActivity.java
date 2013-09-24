@@ -34,6 +34,7 @@ import com.matchimi.CommonUtilities;
 import com.matchimi.R;
 import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
+import com.matchimi.utils.NetworkUtils;
 
 public class AvailabilityActivity extends SherlockFragmentActivity {
 
@@ -172,8 +173,8 @@ public class AvailabilityActivity extends SherlockFragmentActivity {
 																Locale.getDefault()));
 									}
 								} catch (JSONException e) {
-									Log.e("Parse Json Object",
-											">> " + e.getMessage());
+									Log.e(CommonUtilities.TAG,
+											"Error array >> " + e.getMessage());
 								}
 								Log.d(TAG, "Availability results >>>\n " + jsonStr.toString());
 							}
@@ -181,10 +182,11 @@ public class AvailabilityActivity extends SherlockFragmentActivity {
 							Log.e("Parse Json Object", ">> Array is null");
 						}
 					} catch (JSONException e1) {
-						Log.e("updateUIFromJSON", ">> " + e1.getMessage());
+						NetworkUtils.connectionHandler(context, jsonStr);
+						Log.e(TAG, " Error results >> " + e1.getMessage());
 					}
 				} else {
-					Toast.makeText(context, "jsonObj is Null",
+					Toast.makeText(context, getString(R.string.server_error),
 							Toast.LENGTH_SHORT).show();
 				}
 

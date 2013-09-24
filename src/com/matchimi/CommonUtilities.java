@@ -30,7 +30,9 @@ public final class CommonUtilities {
 	public static final String USER_PROFILE_COMPLETE = "user_profile_complete";
 	public static final String LOGOUT = "logout";
 	public static final String NOINTERNET = "nointernet";
+	public static final String FILECORRUPT = "filecorrupt";
 	public static final int AGE_LIMITATION = 14;
+	
 
 	public static final String HOMEPAGE_OPTION = "homepageoption";
 	public static final String PAGEPROFILE = "pageprofile";
@@ -44,6 +46,7 @@ public final class CommonUtilities {
 	public static final String REGISTERFORM_INVALID_PASSWORD = "Minimum 4 characters required";
 	public static final int CAMERA_REQUEST = 686868;
 
+	public static final String API_ACCEPT_JOB_OFFER = "accept_job_offer";
 	public static final String API_UPLOAD_PROFILE_PICTURE = "upload_profile_pic";
 //	public static final String API_UPLOAD_PROFILE_PICTURE = "posts/upload/";	
 	public static final String API_UPLOAD_FRONT_NRIC_PHOTOS = "upload_nric_front";
@@ -60,6 +63,7 @@ public final class CommonUtilities {
 	public static final String API_EDIT_AND_PART_TIMER_PROFILE = "edit_and_part_timer_profile";
 	public static final String API_EDIT_AND_AVAILABILITY = "edit_and_availability";
 	public static final String API_FREEZE_AVAILABILITY_BY_AVAIL_ID = "freeze_availability";	
+	public static final String API_GET_AVAILABILITY_BY_AVAIL_ID = "get_availability_by_avail_id";
 	public static final String API_GET_PART_TIMER_BY_PT_ID = "get_part_timer_by_pt_id";
 	public static final String API_GET_BLOCKED_COMPANIES_BY_PT_ID = "get_blocked_companies_by_pt_id";
 	public static final String API_GET_CURRENT_JOB_OFFERS = "get_current_job_offers";
@@ -77,6 +81,7 @@ public final class CommonUtilities {
 	public static final String API_GET_AVAILABILITIES_BY_PT_ID = "get_availabilities_by_pt_id";
 	public static final String API_LOGIN_PART_TIMER = "login_part_timer";
 	public static final String API_RESEND_VERIFICATION_EMAIL = "resend_verification_email";	
+	public static final String API_REJECT_JOB_OFFER = "reject_job_offer";
 	public static final String API_UNFREEZE_AVAILABILITY_BY_AVAIL_ID  = "unfreeze_availability";	
 	public static final String API_WITHDRAW_AVAILABILITY = "withdraw_availability";
 	

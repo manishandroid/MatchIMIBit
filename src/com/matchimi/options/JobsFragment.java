@@ -121,8 +121,9 @@ public class JobsFragment extends Fragment {
 	}
 
 	private void loadData() {
-		final String url = "http://matchimi.buuukapps.com/get_current_job_offers?pt_id="
-				+ pt_id;
+		final String url = CommonUtilities.SERVERURL + 
+				CommonUtilities.API_GET_CURRENT_JOB_OFFERS + "?" +
+				CommonUtilities.PARAM_PT_ID + "=" + pt_id;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
@@ -139,6 +140,7 @@ public class JobsFragment extends Fragment {
 				if (jsonStr != null) {
 					try {
 						JSONArray items = new JSONArray(jsonStr);
+						
 						if (items != null && items.length() > 0) {
 							Calendar calToday = new GregorianCalendar();
 							SimpleDateFormat formatterDate = new SimpleDateFormat(

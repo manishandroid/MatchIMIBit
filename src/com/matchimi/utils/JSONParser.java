@@ -190,6 +190,8 @@ public class JSONParser {
 			}
 			is.close();
 			httpResponse = sb.toString();
+			Log.e("getHttpResultUrlPost", "Result" + ": " + httpResponse);
+
 		} catch (Exception e) {
 			Log.e("getHttpResultUrlPut", "Exception, err: " + e.getMessage());
 		}

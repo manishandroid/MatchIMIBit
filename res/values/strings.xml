@@ -45,7 +45,7 @@
     <string name="resend_email_validation_failed">Email validation failed. Please try again</string>
     
     <string name="please_wait">Please wait ...</string>
-                    
+    <string name="job_menu">Job</string>    
     <string name="profile_header">Profile</string>
     <string name="profile_complete_question">Please complete your profile before accepting first job</string>
     <string name="profile_blocked_companies">Blocked Companies</string>
@@ -77,6 +77,12 @@
     <string name="confirm_submit">Confirm &amp; Submit</string>
     <string name="reject_offer">Reject Offer</string>
     <string name="accept_offer">Accept Offer</string>
+    <string name="job_accept_offer_progress">Accepting job ...</string>    
+    <string name="job_accept_offer_success">Job has been accepted successfuly</string>
+    <string name="job_accept_offer_failed">Failed to accept job. Please try again</string>    
+    <string name="job_reject_offer_success">Offer has been rejected successfuly</string>
+    <string name="job_reject_offer_failed">Failed to reject offer. Please try again</string>    
+    <string name="job_reject_progress">Rejecting job ...</string>    
     <string name="cancel_offer">Cancel Job</string>
     <string name="cancel_availability">Cancel Job</string>
     <string name="cancel_note">Please note that canceling your availability for an accepted offer, is not taken well by employers.\n\nThis will demote your ranking for some time in the Matchimi system and others will be given preference over you when matching job offers.</string>
@@ -127,6 +133,11 @@
     <string name="unfreeze_availability_success">Availability has been unfreezed succesfully</string>
     <string name="unfreeze_availability_failed">Failed to unfreeze availability. Please try again</string>
     
+    <string name="job_cancel_success">Job has been cancelled succesfully</string>
+    <string name="job_cancel_failed">Failed to cancel job. Please try again</string>
+    <string name="job_cancel_progress">Canceling job...</string>
+    
+    
     <string name="add_availability_progress">Creating availability...</string>
     <string name="login">Login</string>
     <string name="login_failed">Login failed. Please check your email &amp; password.</string>
@@ -155,7 +166,8 @@
     <string name="school">School</string>
     <string name="card_number">Card Number</string>
     <string name="card_picture">Card Picture</string>
-    <string name="no_internet">No internet connection. Please try again</string>
+    <string name="no_internet">Network error. Please check your internet connection</string>
+    <string name="file_corrupt">File is corrupt. Please use another image</string>
     <string name="ec_name">Emergency Contact Name</string>
     <string name="ec_email">Emergency Contact Email</string>
     <string name="ec_phone">Emergency Contact Phone</string>

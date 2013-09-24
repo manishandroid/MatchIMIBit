@@ -75,8 +75,10 @@ import com.actionbarsherlock.view.MenuItem;
 import com.matchimi.CommonUtilities;
 import com.matchimi.ProfileModel;
 import com.matchimi.R;
+import com.matchimi.ValidationUtilities;
 import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
+import com.matchimi.utils.NetworkUtils;
 
 public class EditProfile extends SherlockActivity {
 
@@ -893,12 +895,14 @@ public class EditProfile extends SherlockActivity {
 						}
 
 						loadNRICType(isUpload);
+						
 					} catch (JSONException e) {
+						NetworkUtils.connectionHandler(EditProfile.this, jsonStr);
 						Log.e(TAG, "Error get genders >>> " + e.getMessage());
 					}
 				} else {
 					Toast.makeText(context,
-							getString(R.string.failed_load_data),
+							getString(R.string.server_error),
 							Toast.LENGTH_SHORT).show();
 				}
 			}
@@ -939,11 +943,12 @@ public class EditProfile extends SherlockActivity {
 
 						loadSkill(isUpload);
 					} catch (JSONException e) {
+						NetworkUtils.connectionHandler(EditProfile.this, jsonStr);
 						Log.e(TAG, "Error get ic types >>> " + e.getMessage());
 					}
 				} else {
 					Toast.makeText(context,
-							getString(R.string.failed_load_data),
+							getString(R.string.server_error),
 							Toast.LENGTH_SHORT).show();
 				}
 			}
@@ -986,11 +991,12 @@ public class EditProfile extends SherlockActivity {
 
 						loadSchool(isUpload);
 					} catch (JSONException e) {
+						NetworkUtils.connectionHandler(EditProfile.this, jsonStr);
 						Log.e(TAG, "Error skills >>> " + e.getMessage());
 					}
 				} else {
 					Toast.makeText(context,
-							getString(R.string.failed_load_data),
+							getString(R.string.server_error),
 							Toast.LENGTH_SHORT).show();
 				}
 			}
@@ -1030,12 +1036,14 @@ public class EditProfile extends SherlockActivity {
 						}
 
 						loadProfile(isUpload);
+						
 					} catch (Exception e) {
+						NetworkUtils.connectionHandler(EditProfile.this, jsonStr);
 						Log.e(TAG, "Error skills >>> " + e.getMessage());
 					}
 				} else {
 					Toast.makeText(context,
-							getString(R.string.failed_load_data),
+							getString(R.string.server_error),
 							Toast.LENGTH_SHORT).show();
 				}
 			}
@@ -1070,8 +1078,8 @@ public class EditProfile extends SherlockActivity {
 						JSONObject obj = new JSONObject(jsonStr);
 						obj = obj.getJSONObject("part_timers");
 
-						profileInfo.setAddress(obj.getString("address"));
-						profileInfo.setPost_code(obj.getString("postal_code"));
+//						profileInfo.setAddress(obj.getString("address"));
+//						profileInfo.setPost_code(obj.getString("postal_code"));
 						
 						// Convert date birth format
 						Date dobDate = facebookDateFormat.parse(obj.getString("dob"));
@@ -1117,9 +1125,9 @@ public class EditProfile extends SherlockActivity {
 								String expireConvert = dobDateFormat.format(expireDate);
 								profileInfo.setIc_expired(expireConvert);								
 							}
-							expiryDateView.setVisibility(View.VISIBLE);
+							expiryDateLayout.setVisibility(View.VISIBLE);
 						} else {
-							expiryDateView.setVisibility(View.GONE);
+							expiryDateLayout.setVisibility(View.GONE);
 						}
 
 						String s = obj.getString("skills");
@@ -1138,19 +1146,19 @@ public class EditProfile extends SherlockActivity {
 						profileInfo.setBank_name(obj.getString("bank_name"));
 						profileInfo.setBank_acc_number(obj
 								.getString("bank_account_no"));
-						profileInfo.setBank_acc_type(obj
-								.getString("bank_account_type"));
+//						profileInfo.setBank_acc_type(obj
+//								.getString("bank_account_type"));
 						profileInfo.setBank_acc_branch(obj
 								.getString("bank_branch_name"));
 						
 						// Loading EC data
-						profileInfo.setEc_address(obj.getString("ec_address"));
-						profileInfo.setEc_email(obj.getString("ec_email"));
+//						profileInfo.setEc_address(obj.getString("ec_address"));
+//						profileInfo.setEc_email(obj.getString("ec_email"));
 						profileInfo.setEc_name(obj.getString("ec_first_name")
 								+ " " + obj.getString("ec_last_name"));
 						profileInfo.setEc_phone(obj.getString("ec_phone_no"));
-						profileInfo.setEc_post_code(obj
-								.getString("ec_postal_code"));
+//						profileInfo.setEc_post_code(obj
+//								.getString("ec_postal_code"));
 						profileInfo.setEc_relationship(obj
 								.getString("ec_relationship"));
 						
@@ -1162,6 +1170,8 @@ public class EditProfile extends SherlockActivity {
 						
 //						loadBankInfo();
 					} catch (Exception e) {
+						NetworkUtils.connectionHandler(EditProfile.this, jsonStr);
+
 						Log.e(TAG, "Get profile error >> " + e.getMessage());
 						Toast.makeText(context,
 								getString(R.string.edit_get_profile_error),
@@ -1169,7 +1179,7 @@ public class EditProfile extends SherlockActivity {
 					}
 				} else {
 					Toast.makeText(context,
-							getString(R.string.something_wrong),
+							getString(R.string.server_error),
 							Toast.LENGTH_SHORT).show();
 				}
 			}
@@ -1225,7 +1235,13 @@ public class EditProfile extends SherlockActivity {
 			skillView.setText(skillString);
 		}
 
-		int selectedWorkID = listWorkExpID.indexOf(profileInfo.getWork_exp());
+		int selectedWorkID = Integer.parseInt(profileInfo.getWork_exp());
+		if(selectedWorkID > 3) {
+			selectedWorkID = 0;
+		} else {
+			selectedWorkID = listWorkExpID.indexOf(profileInfo.getWork_exp());						
+		}
+
 		String workExperienceText = (String) listWorkExperience.get(selectedWorkID);
 		workExperienceView.setText(workExperienceText);
 
@@ -1350,10 +1366,14 @@ public class EditProfile extends SherlockActivity {
 						
 						setResult(RESULT_OK);
 						finish();
-					} else {
+					} else if (jsonStr.trim().equalsIgnoreCase("1")) {
 						Toast.makeText(context,
 								getString(R.string.edit_profile_error),
 								Toast.LENGTH_LONG).show();
+					} else if (jsonStr.trim().equalsIgnoreCase("2")) {
+						ValidationUtilities.resendLinkDialog(EditProfile.this, pt_id);
+					} else {
+						NetworkUtils.connectionHandler(EditProfile.this, jsonStr);
 					}
 				} else {
 					Toast.makeText(context,
@@ -1691,9 +1711,17 @@ public class EditProfile extends SherlockActivity {
 						bm=imageRotate(bm, 180);
 					}
 
-				} catch (IOException e1) {
+				} catch (IOException e) {
+					JSONObject json = new JSONObject(); 
 					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					try {
+						json.put("status", CommonUtilities.FILECORRUPT);
+					} catch (JSONException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					NetworkUtils.connectionHandler(context, jsonStr.toString());						
+					Log.e(CommonUtilities.TAG, "Error uploading image " + " >> " + e.getMessage());
 				}
 				
 				try {
@@ -1743,8 +1771,19 @@ public class EditProfile extends SherlockActivity {
 		    			break;
 		    		}
 					
+				} catch (IOException e) {
+					JSONObject json = new JSONObject(); 
+					try {
+						json.put("status", CommonUtilities.NOINTERNET);
+						NetworkUtils.connectionHandler(context, jsonStr.toString());						
+					} catch (JSONException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} 
+					Log.e(CommonUtilities.TAG, "Error uploading image " + " >> " + e.getMessage());
+				
 				} catch (Exception e) {
-					Log.e(e.getClass().getName(), e.getMessage());
+					Log.e(CommonUtilities.TAG, "Error uploading image" + e.getMessage());
 				}
 
 				if (progress != null && progress.isShowing()) {

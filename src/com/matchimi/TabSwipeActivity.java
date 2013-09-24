@@ -231,7 +231,7 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 			TabInfo tabInfo = (TabInfo) tab.getTag();
 			for (int i = 0; i < mTabs.size(); i++) {
 				if (mTabs.get(i) == tabInfo) {
-					Log.e("Page Selected", "" + i);
+					Log.e(CommonUtilities.TAG, "Page Selected : " + i);
 					mPager.setCurrentItem(i);
 				}
 			}

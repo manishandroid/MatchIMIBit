@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -30,6 +31,7 @@ import static com.matchimi.CommonUtilities.*;
 
 import com.matchimi.CommonUtilities;
 import com.matchimi.R;
+import com.matchimi.ValidationUtilities;
 import com.matchimi.utils.JSONParser;
 import com.matchimi.utils.NetworkUtils;
 
@@ -157,9 +159,13 @@ public class RegistrationActivity extends Activity {
 	protected void createLogin(final String email, final String password) {
 		final String url = SERVERURL + API_CREATE_AND_PARTIMER_LOGIN;
 		final Handler mHandlerFeed = new Handler();
+		Log.d(CommonUtilities.TAG, "Create login");
+		
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
 				if (jsonStr != null) {
+					Log.d(CommonUtilities.TAG, "Result " + jsonStr);
+
 					// FIXME: please check on server response
 					if (jsonStr.trim().equalsIgnoreCase("1")) {
 						closeSession();
@@ -174,8 +180,17 @@ public class RegistrationActivity extends Activity {
 							JSONObject partTimer = obj
 									.getJSONObject("part_timers");
 							ptid = partTimer.getString("pt_id");
-
+							
+							SharedPreferences settings = getSharedPreferences(
+									PREFS_NAME, Context.MODE_PRIVATE);
+							SharedPreferences.Editor editor = settings.edit();
+							editor.putString(USER_PTID, ptid);
+							editor.putString(USER_EMAIL, partTimer.getString(PARAM_PROFILE_EMAIL));
+							editor.commit();
 							extraBundle.putString(USER_PTID, ptid);
+							
+							Log.d(CommonUtilities.TAG, "User with PT ID " + ptid + " has been created");
+							
 							Intent i = new Intent(context,
 									ProfileRegistrationActivity.class);
 							i.putExtras(extraBundle);
@@ -188,11 +203,15 @@ public class RegistrationActivity extends Activity {
 							Log.e(CommonUtilities.TAG, "Load register result " +
 									jsonStr + " >> " + e1.getMessage());
 						}
+					} else {
+						closeSession();
+						Toast.makeText(context,
+								getString(R.string.server_error), Toast.LENGTH_SHORT).show();
 					}
 				} else {
 					closeSession();
 					Toast.makeText(context,
-							getString(R.string.server_error), Toast.LENGTH_SHORT).show();
+							getString(R.string.something_wrong), Toast.LENGTH_SHORT).show();
 				}
 			}
 		};
@@ -214,7 +233,7 @@ public class RegistrationActivity extends Activity {
 					jsonStr = jsonParser.getHttpResultUrlPost(url, params,
 							values);
 
-					Log.e(TAG, "Register to " + url + "\n\n Result >>> " + jsonStr);
+					Log.e(TAG, "Result >>> " + jsonStr);
 
 				} catch (Exception e) {
 					jsonStr = null;

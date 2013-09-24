@@ -1,6 +1,13 @@
 package com.matchimi.options;
 
-import static com.matchimi.CommonUtilities.*;
+import static com.matchimi.CommonUtilities.API_CREATE_AND_AVAILABILITY;
+import static com.matchimi.CommonUtilities.API_EDIT_AND_AVAILABILITY;
+import static com.matchimi.CommonUtilities.PREFS_NAME;
+import static com.matchimi.CommonUtilities.SERVERURL;
+import static com.matchimi.CommonUtilities.SETTING_THEME;
+import static com.matchimi.CommonUtilities.TAG;
+import static com.matchimi.CommonUtilities.THEME_LIGHT;
+import static com.matchimi.CommonUtilities.USER_PTID;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -14,8 +21,6 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.ProgressDialog;
-import android.app.TimePickerDialog;
-import android.app.TimePickerDialog.OnTimeSetListener;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -36,9 +41,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.FrameLayout;
+import android.widget.NumberPicker;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -54,6 +58,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.matchimi.R;
 import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
+import com.matchimi.utils.NetworkUtils;
 
 
 public class CreateAvailability extends SherlockFragmentActivity {
@@ -373,18 +378,54 @@ public class CreateAvailability extends SherlockFragmentActivity {
 							cal.set(Calendar.YEAR, arg1);
 							cal.set(Calendar.MONTH, arg2);
 							cal.set(Calendar.DAY_OF_MONTH, arg3);
-							TimePickerDialog dialogTime = new TimePickerDialog(
-									context, new OnTimeSetListener() {
-										@Override
-										public void onTimeSet(TimePicker arg0,
-												int arg1, int arg2) {
-											cal.set(Calendar.HOUR_OF_DAY, arg1);
-											cal.set(Calendar.MINUTE, arg2);
-											start = sdf.format(cal.getTime());
-											reloadView();
-										}
-									}, cal.get(Calendar.HOUR_OF_DAY), cal
-											.get(Calendar.MINUTE), true);
+							AlertDialog.Builder builder = new AlertDialog.Builder(context);
+							final View view = LayoutInflater.from(context).inflate(R.layout.custome_time, null);
+							builder.setView(view);
+							
+							builder.setTitle("Set Time");
+							
+							final NumberPicker np1 = (NumberPicker)view.findViewById(R.id.numberPicker1);
+							final String[] nums1 = {"00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"};
+							np1.setMaxValue(23);
+							np1.setMinValue(0);
+							np1.setWrapSelectorWheel(false);
+							np1.setDisplayedValues(nums1);
+							
+							final NumberPicker np2 = (NumberPicker)view.findViewById(R.id.numberPicker2);
+							final String[] nums2 = {"00", "15", "30", "45"};
+							np2.setMaxValue(3);
+							np2.setMinValue(0);
+							np2.setWrapSelectorWheel(false);
+							np2.setDisplayedValues(nums2);
+							
+							builder.setPositiveButton("Set", new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface arg0, int arg1) {
+									cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(nums1[np1.getValue()]));
+									cal.set(Calendar.MINUTE, Integer.parseInt(nums2[np2.getValue()]));
+									start = sdf.format(cal.getTime());
+									reloadView();
+								}
+							});
+							
+							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface arg0, int arg1) {
+								}
+							});
+							AlertDialog dialogTime = builder.create();
+//							TimePickerDialog dialogTime = new TimePickerDialog(
+//									context, new OnTimeSetListener() {
+//										@Override
+//										public void onTimeSet(TimePicker arg0,
+//												int arg1, int arg2) {
+//											cal.set(Calendar.HOUR_OF_DAY, arg1);
+//											cal.set(Calendar.MINUTE, arg2);
+//											start = sdf.format(cal.getTime());
+//											reloadView();
+//										}
+//									}, cal.get(Calendar.HOUR_OF_DAY), cal
+//											.get(Calendar.MINUTE), true);
 							dialogTime.show();
 						}
 					}, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH),
@@ -392,18 +433,54 @@ public class CreateAvailability extends SherlockFragmentActivity {
 			dialogDate.show();
 		} else {
 			cal = generateCalendar(start);
-			TimePickerDialog dialogTime = new TimePickerDialog(context,
-					new OnTimeSetListener() {
-						@Override
-						public void onTimeSet(TimePicker arg0, int arg1,
-								int arg2) {
-							cal.set(Calendar.HOUR_OF_DAY, arg1);
-							cal.set(Calendar.MINUTE, arg2);
-							end = sdf.format(cal.getTime());
-							reloadView();
-						}
-					}, cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE),
-					true);
+			AlertDialog.Builder builder = new AlertDialog.Builder(context);
+			final View view = LayoutInflater.from(context).inflate(R.layout.custome_time, null);
+			builder.setView(view);
+			
+			builder.setTitle("Set Time");
+			
+			final NumberPicker np1 = (NumberPicker)view.findViewById(R.id.numberPicker1);
+			final String[] nums1 = {"00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"};
+			np1.setMaxValue(23);
+			np1.setMinValue(0);
+			np1.setWrapSelectorWheel(false);
+			np1.setDisplayedValues(nums1);
+			
+			final NumberPicker np2 = (NumberPicker)view.findViewById(R.id.numberPicker2);
+			final String[] nums2 = {"00", "15", "30", "45"};
+			np2.setMaxValue(3);
+			np2.setMinValue(0);
+			np2.setWrapSelectorWheel(false);
+			np2.setDisplayedValues(nums2);
+			
+			builder.setPositiveButton("Set", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface arg0, int arg1) {
+					cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(nums1[np1.getValue()]));
+					cal.set(Calendar.MINUTE, Integer.parseInt(nums2[np2.getValue()]));
+					end = sdf.format(cal.getTime());
+					reloadView();
+				}
+			});
+			
+			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface arg0, int arg1) {
+				}
+			});
+			AlertDialog dialogTime = builder.create();
+//			TimePickerDialog dialogTime = new TimePickerDialog(context,
+//					new OnTimeSetListener() {
+//						@Override
+//						public void onTimeSet(TimePicker arg0, int arg1,
+//								int arg2) {
+//							cal.set(Calendar.HOUR_OF_DAY, arg1);
+//							cal.set(Calendar.MINUTE, arg2);
+//							end = sdf.format(cal.getTime());
+//							reloadView();
+//						}
+//					}, cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE),
+//					true);
 			dialogTime.show();
 		}
 	}
@@ -493,6 +570,25 @@ public class CreateAvailability extends SherlockFragmentActivity {
 			}
 		}.start();
 	}
+	
+	private String checkInput() {
+		if(start != null && end != null) {
+			return "";
+		} else {
+			String errors = "";
+			
+			if(start == null) {
+				errors += "* " + getString(R.string.start_time) + "\n";
+			}
+			
+			if(start == null) {
+				errors += "* " + getString(R.string.end_time) + "\n";
+			}
+			
+			return errors;
+			
+		}
+	}
 
 	protected void doAddAvailability() {
 		final String url = SERVERURL + API_CREATE_AND_AVAILABILITY;
@@ -513,15 +609,12 @@ public class CreateAvailability extends SherlockFragmentActivity {
 						Toast.makeText(context, getString(R.string.availability_adding_overlap),
 								Toast.LENGTH_SHORT).show();
 					} else {
-						Toast.makeText(
-								context,
-								getString(R.string.something_wrong),
-								Toast.LENGTH_LONG).show();
+						NetworkUtils.connectionHandler(context, jsonStr);
 					}
 				} else {
 					Toast.makeText(
 							context,
-							getString(R.string.something_wrong),
+							getString(R.string.server_error),
 							Toast.LENGTH_LONG).show();
 				}
 			}
@@ -580,7 +673,23 @@ public class CreateAvailability extends SherlockFragmentActivity {
 			if (update) {
 				doEditAvailability();
 			} else {
-				doAddAvailability();
+				String errors = checkInput();
+				if(errors.length() == 0) {
+					doAddAvailability();					
+				} else {
+					AlertDialog.Builder builder = new AlertDialog.Builder(context);
+					builder.setTitle(getString(R.string.menu_availability));
+					builder.setMessage("Please complete :\n" + errors);
+					builder.setPositiveButton(getString(R.string.ok),
+							new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int arg1) {
+									// Nothing 
+								}
+							});
+					AlertDialog dialog = builder.create();
+					dialog.show();	
+				}
 			}
 			break;
 		}

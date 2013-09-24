@@ -40,6 +40,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.matchimi.R;
 import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
+import com.matchimi.utils.NetworkUtils;
 
 
 public class AvailabilityPreview extends SherlockFragmentActivity {
@@ -229,12 +230,14 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 						Intent result = new Intent();
 						setResult(RESULT_OK, result);
 						finish();
-					} else {
+					} else if (response.equalsIgnoreCase("1")) {
 						Toast.makeText(
 								context,
 								getString(R.string.delete_availability_failed),
 								Toast.LENGTH_LONG).show();
 						Log.d(TAG, "Delete failed with result code " + response);
+					} else {
+						NetworkUtils.connectionHandler(context, response);						
 					}
 		        }
 		    }, 

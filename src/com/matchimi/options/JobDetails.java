@@ -8,6 +8,7 @@ import static com.matchimi.CommonUtilities.SETTING_THEME;
 import static com.matchimi.CommonUtilities.TAG;
 import static com.matchimi.CommonUtilities.THEME_LIGHT;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.AlertDialog;
@@ -41,6 +42,7 @@ import com.matchimi.R;
 import com.matchimi.ValidationUtilities;
 import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
+import com.matchimi.utils.NetworkUtils;
 
 public class JobDetails extends SherlockFragmentActivity {
 
@@ -204,7 +206,9 @@ public class JobDetails extends SherlockFragmentActivity {
 	
 
 	private void loadLocation() {
-		final String url = "http://matchimi.buuukapps.com/get_availability_by_avail_id?avail_id=";
+		final String url = CommonUtilities.SERVERURL + CommonUtilities.API_GET_AVAILABILITY_BY_AVAIL_ID 
+				+"?" + CommonUtilities.PARAM_AVAIL_ID + "=";
+
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
@@ -214,12 +218,17 @@ public class JobDetails extends SherlockFragmentActivity {
 						obj = obj.getJSONObject("availabilities");
 						String location = jsonParser.getString(obj, "location");
 						loadMap(location);
+					} catch (JSONException e1) {						
+						NetworkUtils.connectionHandler(JobDetails.this, jsonStr);
+						
+						Log.e(CommonUtilities.TAG, "Load location result" +
+								jsonStr + " >> " + e1.getMessage());
 					} catch (Exception e) {
-						Log.e("loadLocation", ">>> " + e.getMessage());
+						Log.e(CommonUtilities.TAG, ">>> " + e.getMessage());
 					}
 				} else {
-					Toast.makeText(context, "Failed to load location !",
-							Toast.LENGTH_SHORT).show();
+					Toast.makeText(JobDetails.this,
+							getString(R.string.server_error), Toast.LENGTH_SHORT).show();
 				}
 			}
 		};
@@ -262,15 +271,17 @@ public class JobDetails extends SherlockFragmentActivity {
 				if (jsonStr != null) {
 					Log.e("Result", ">>> " + jsonStr + ".");
 					if (jsonStr.trim().equalsIgnoreCase("0")) {
-						Toast.makeText(context, "Job canceled succesfully.",
+						Toast.makeText(context, getString(R.string.job_cancel_success),
 								Toast.LENGTH_SHORT).show();
 						setResult(RESULT_OK);
 						finish();
-					} else {
+					} else if(jsonStr.trim().equalsIgnoreCase("1")){
 						Toast.makeText(
 								context,
-								"Failed when rejecting offer, please try again.",
+								getString(R.string.job_cancel_failed),
 								Toast.LENGTH_LONG).show();
+					} else {
+						NetworkUtils.connectionHandler(context, jsonStr);
 					}
 				} else {
 					Toast.makeText(context, "jsonStr is Null",
@@ -279,8 +290,10 @@ public class JobDetails extends SherlockFragmentActivity {
 			}
 		};
 
-		progress = ProgressDialog.show(context, "Job", "Canceling job...",
+		progress = ProgressDialog.show(context, getString(R.string.job_menu), 
+				getString(R.string.job_cancel_progress),
 				true, false);
+		
 		new Thread() {
 			public void run() {
 				jsonParser = new JSONParser();
@@ -296,31 +309,37 @@ public class JobDetails extends SherlockFragmentActivity {
 		}.start();
 	}
 
+	/**
+	 * Reject offer action
+	 */
 	protected void doRejectOffer() {
-		final String url = "http://matchimi.buuukapps.com/reject_job_offer";
+		final String url = CommonUtilities.SERVERURL + CommonUtilities.API_REJECT_JOB_OFFER;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
 				if (jsonStr != null) {
 					if (jsonStr.trim().equalsIgnoreCase("0")) {
-						Toast.makeText(context, "Rejecting offer Done.",
+						Toast.makeText(context, getString(R.string.job_reject_offer_success),
 								Toast.LENGTH_SHORT).show();
 						setResult(RESULT_OK);
 						finish();
-					} else {
+					} else if(jsonStr.trim().equalsIgnoreCase("1")){
 						Toast.makeText(
 								context,
-								"Failed when rejecting offer, try again latter !",
+								getString(R.string.job_reject_offer_failed),
 								Toast.LENGTH_LONG).show();
+					} else {
+						NetworkUtils.connectionHandler(context, jsonStr);
 					}
 				} else {
-					Toast.makeText(context, "jsonStr is Null",
+					Toast.makeText(context, getString(R.string.server_error),
 							Toast.LENGTH_SHORT).show();
 				}
 			}
 		};
 
-		progress = ProgressDialog.show(context, "Job", "Rejecting job...",
+		progress = ProgressDialog.show(context, getString(R.string.job_menu), 
+				getString(R.string.job_reject_progress),
 				true, false);
 		new Thread() {
 			public void run() {
@@ -338,30 +357,33 @@ public class JobDetails extends SherlockFragmentActivity {
 	}
 
 	protected void doAcceptOffer() {
-		final String url = "http://matchimi.buuukapps.com/accept_job_offer";
+		final String url = CommonUtilities.SERVERURL + CommonUtilities.API_ACCEPT_JOB_OFFER;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
 				if (jsonStr != null) {
 					if (jsonStr.trim().equalsIgnoreCase("0")) {
-						Toast.makeText(context, "Accepting offer Done.",
+						Toast.makeText(context, getString(R.string.job_accept_offer_success),
 								Toast.LENGTH_SHORT).show();
 						setResult(RESULT_OK);
 						finish();
-					} else {
+					} else if(jsonStr.trim().equalsIgnoreCase("1")) {
 						Toast.makeText(
 								context,
-								"Failed when accepting offer, try again latter !",
+								getString(R.string.job_accept_offer_failed),
 								Toast.LENGTH_LONG).show();
+					} else {
+						NetworkUtils.connectionHandler(context, jsonStr);
 					}
 				} else {
-					Toast.makeText(context, "jsonStr is Null",
+					Toast.makeText(context, getString(R.string.server_error),
 							Toast.LENGTH_SHORT).show();
 				}
 			}
 		};
 
-		progress = ProgressDialog.show(context, "Job", "Accepting job...",
+		progress = ProgressDialog.show(context, getString(R.string.job_menu),
+				getString(R.string.job_accept_offer_progress),
 				true, false);
 		new Thread() {
 			public void run() {

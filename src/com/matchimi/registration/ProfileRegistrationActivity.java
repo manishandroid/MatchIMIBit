@@ -76,6 +76,7 @@ import com.matchimi.ValidationUtilities;
 import com.matchimi.options.JobDetails;
 import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
+import com.matchimi.utils.NetworkUtils;
 
 public class ProfileRegistrationActivity extends Activity {
 
@@ -753,11 +754,14 @@ public class ProfileRegistrationActivity extends Activity {
 						
 					} else if (jsonStr.trim().equalsIgnoreCase("2")) {
 						ValidationUtilities.resendLinkDialog(ProfileRegistrationActivity.this, pt_id);
-					} else {
+					} else if (jsonStr.trim().equalsIgnoreCase("1")) {
 						Toast.makeText(context,
 								getString(R.string.registration_profile_failed),
 								Toast.LENGTH_LONG).show();
+					} else {
+						NetworkUtils.connectionHandler(ProfileRegistrationActivity.this, jsonStr);
 					}
+					
 				} else {
 					Toast.makeText(context,
 							getString(R.string.registration_profile_failed),
@@ -893,14 +897,16 @@ public class ProfileRegistrationActivity extends Activity {
 					if (jsonStr.trim().equalsIgnoreCase("0")) {
 						Toast.makeText(context, getString(R.string.resend_email_validation_success),
 								Toast.LENGTH_SHORT).show();
-					} else {
+					} else if(jsonStr.trim().equalsIgnoreCase("1")) {
 						Toast.makeText(context,
 								getString(R.string.resend_email_validation_failed),
 								Toast.LENGTH_LONG).show();
+					} else {
+						NetworkUtils.connectionHandler(ProfileRegistrationActivity.this, jsonStr);
 					}
 				} else {
 					Toast.makeText(context,
-							getString(R.string.resend_email_validation_failed),
+							getString(R.string.server_error),
 							Toast.LENGTH_LONG).show();
 				}
 			}
