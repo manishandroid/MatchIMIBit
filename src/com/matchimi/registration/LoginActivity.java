@@ -1,7 +1,4 @@
 package com.matchimi.registration;
-
-import static com.matchimi.CommonUtilities.*;
-
 import java.util.Arrays;
 
 import org.json.JSONException;
@@ -101,13 +98,12 @@ public class LoginActivity extends Activity {
 					closeKeyboard();
 
 					extraBundle = new Bundle();
-					extraBundle.putString(USER_BIRTHDAY, "");
-					extraBundle.putString(USER_FIRSTNAME, "");
-					extraBundle.putString(USER_FACEBOOK_ID, "");
-					extraBundle.putString(USER_LASTNAME, "");
-					extraBundle.putString(USER_FIRSTNAME, "");
-					extraBundle.putString(USER_GENDER, "");
-					extraBundle.putString(USER_IS_VERIFIED, "false");
+					extraBundle.putString(CommonUtilities.USER_BIRTHDAY, "");
+					extraBundle.putString(CommonUtilities.USER_FIRSTNAME, "");
+					extraBundle.putString(CommonUtilities.USER_LASTNAME, "");					
+					extraBundle.putString(CommonUtilities.USER_FACEBOOK_ID, "");
+					extraBundle.putString(CommonUtilities.USER_GENDER, "");
+					extraBundle.putString(CommonUtilities.USER_IS_VERIFIED, "false");
 
 					loginPartTimer(emailText.getText().toString(), passwordText
 							.getText().toString());
@@ -145,15 +141,15 @@ public class LoginActivity extends Activity {
 
 	protected void showForgetDialog() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setTitle("Forgot password");
-		builder.setMessage("Enter your email address to reset password.");
+		builder.setTitle(getString(R.string.login_forgot_password_title));
+		builder.setMessage(getString(R.string.login_forgot_password_message));
 
 		final EditText input = new EditText(context);
 		input.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-		input.setHint("email address");
+		input.setHint(getString(R.string.hint_email_address));
 		builder.setView(input);
-		builder.setPositiveButton("Reset", null);
-		builder.setNegativeButton("Cancel",
+		builder.setPositiveButton(getString(R.string.reset), null);
+		builder.setNegativeButton(getString(R.string.cancel),
 				new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface arg0, int arg1) {
@@ -172,14 +168,14 @@ public class LoginActivity extends Activity {
 					sendForgetRequest(input.getText().toString().trim());
 					dialog.dismiss();
 				} else {
-					input.setError("Email address is not valid");
+					input.setError(getString(R.string.login_email_not_valid));
 				}
 			}
 		});
 	}
 
 	protected void sendForgetRequest(final String email) {
-		final String url = "http://matchimi.buuukapps.com/forget_part_timer_password";
+		final String url = CommonUtilities.SERVERURL + CommonUtilities.API_FORGET_PART_TIMER_PASSWORD;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
@@ -196,7 +192,7 @@ public class LoginActivity extends Activity {
 								getString(R.string.reset_password_success),
 								Toast.LENGTH_LONG).show();
 					} else if (jsonStr.trim().length() > 0 && !jsonStr.trim().equalsIgnoreCase("0")) {
-						NetworkUtils.connectionHandler(context, jsonStr);
+						NetworkUtils.connectionHandler(context, jsonStr, "");
 					}
 				} else {
 					Toast.makeText(context,
@@ -207,8 +203,8 @@ public class LoginActivity extends Activity {
 		};
 
 		progress = ProgressDialog.show(context,
-				getResources().getString(R.string.app_name),
-				"Reseting password...", true, false);
+				getString(R.string.app_name),
+				getString(R.string.reset_password_progress), true, false);
 		new Thread() {
 			public void run() {
 				jsonParser = new JSONParser();
@@ -218,7 +214,7 @@ public class LoginActivity extends Activity {
 					jsonStr = jsonParser.getHttpResultUrlPost(url, params,
 							values);
 
-					Log.e(TAG, "Reset password " + url + " >>> " + jsonStr);
+					Log.e(CommonUtilities.TAG, "Reset password " + url + " >>> " + jsonStr);
 				} catch (Exception e) {
 					jsonStr = null;
 				}
@@ -238,19 +234,24 @@ public class LoginActivity extends Activity {
 				@Override
 				public void onCompleted(GraphUser user, Response response) {
 					extraBundle = new Bundle();
-					extraBundle.putString(USER_BIRTHDAY, user.getBirthday());
-					extraBundle.putString(USER_FIRSTNAME, user.getFirstName());
-					extraBundle.putString(USER_FACEBOOK_ID, user.getId());
-					extraBundle.putString(USER_LASTNAME, user.getLastName());
-					extraBundle.putString(USER_FIRSTNAME, user.getName());
-					extraBundle.putString(USER_GENDER, user.getProperty("gender").toString());
+					extraBundle.putString(CommonUtilities.USER_BIRTHDAY, user.getBirthday());
+					extraBundle.putString(CommonUtilities.USER_FIRSTNAME, user.getFirstName());
+					extraBundle.putString(CommonUtilities.USER_LASTNAME, user.getLastName());					
+					extraBundle.putString(CommonUtilities.USER_FACEBOOK_ID, user.getId());
+					extraBundle.putString(CommonUtilities.USER_GENDER, user.getProperty("gender").toString());
 
+					SharedPreferences settings = getSharedPreferences(
+							CommonUtilities.PREFS_NAME, Context.MODE_PRIVATE);
+					SharedPreferences.Editor editor = settings.edit();
+					editor.putString(CommonUtilities.USER_FACEBOOK_ID, user.getId());
+					editor.commit();
+					
 					loginPartTimer(user.getProperty("email").toString(),
 							user.getId());
 				}
 			});
 		} else {
-			Log.e(TAG, "updateUI NULL");
+			Log.e(CommonUtilities.TAG, "updateUI NULL");
 		}
 	}
 
@@ -275,12 +276,12 @@ public class LoginActivity extends Activity {
 	}
 
 	protected void loginPartTimer(final String email, final String password) {
-		final String url = SERVERURL + API_LOGIN_PART_TIMER;
+		final String url = CommonUtilities.SERVERURL + CommonUtilities.API_LOGIN_PART_TIMER;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
 				if (jsonStr != null) {
-					Log.d(TAG, "Result from " + url + " >>>\n" + jsonStr.toString());
+					Log.d(CommonUtilities.TAG, "Result from " + url + " >>>\n" + jsonStr.toString());
 					
 					// FIXME: please check on server response
 					if (jsonStr.trim().equalsIgnoreCase("1")) {
@@ -295,7 +296,7 @@ public class LoginActivity extends Activity {
 								Toast.LENGTH_LONG).show();
 					} else if (jsonStr.trim().length() > 0){
 						SharedPreferences settings = getSharedPreferences(
-								PREFS_NAME, Context.MODE_PRIVATE);
+								CommonUtilities.PREFS_NAME, Context.MODE_PRIVATE);
 						SharedPreferences.Editor editor = settings.edit();
 
 						String ptid = "";
@@ -304,55 +305,62 @@ public class LoginActivity extends Activity {
 							JSONObject obj = new JSONObject(jsonStr);
 							JSONObject partTimer = obj
 									.getJSONObject("part_timers");
-							ptid = partTimer.getString(PARAM_PT_ID);
+							ptid = partTimer.getString(CommonUtilities.PARAM_PT_ID);
 							
-							userIsVerified = partTimer.getString(PARAM_PROFILE_IS_VERIFIED);
-							userDob = partTimer.getString(PARAM_PROFILE_DATE_OF_BIRTH);
-							userWorkExperience = partTimer.getString(PARAM_PROFILE_WORK_EXPERIENCE);
-							userPhoneNumber = partTimer.getString(PARAM_PROFILE_PHONE_NUMBER);
-							userGender = partTimer.getString(PARAM_PROFILE_GENDER);
-							userNRICType = partTimer.getString(PARAM_PROFILE_IC_TYPE);
-							userNRICTypeID = partTimer.getString(PARAM_PROFILE_IC_TYPE_ID);
+							userIsVerified = partTimer.getString(CommonUtilities.PARAM_PROFILE_IS_VERIFIED);
+							userDob = partTimer.getString(CommonUtilities.PARAM_PROFILE_DATE_OF_BIRTH);
+							userWorkExperience = partTimer.getString(CommonUtilities.PARAM_PROFILE_WORK_EXPERIENCE);
+							userPhoneNumber = partTimer.getString(CommonUtilities.PARAM_PROFILE_PHONE_NUMBER);
+							userGender = partTimer.getString(CommonUtilities.PARAM_PROFILE_GENDER);
+							userNRICType = partTimer.getString(CommonUtilities.PARAM_PROFILE_IC_TYPE);
+							userNRICTypeID = partTimer.getString(CommonUtilities.PARAM_PROFILE_IC_TYPE_ID);
 							
 							// Update settings
-							String nricNumber = partTimer.getString(PARAM_PROFILE_IC_NUMBER);
+							String nricNumber = partTimer.getString(CommonUtilities.PARAM_PROFILE_IC_NUMBER);
 							if(nricNumber == "null") {
 								nricNumber = "";
 							}
 							
-							editor.putString(USER_PTID, ptid);
-							editor.putString(USER_FIRSTNAME, partTimer.getString(PARAM_PROFILE_FIRSTNAME));
-							editor.putString(USER_LASTNAME, partTimer.getString(PARAM_PROFILE_LASTNAME));
-							editor.putString(USER_EMAIL, partTimer.getString(PARAM_PROFILE_EMAIL));
-							editor.putString(USER_NRIC_NUMBER, nricNumber);
-							editor.putString(USER_PROFILE_PICTURE, partTimer.getString(PARAM_PROFILE_PICTURE));
-							editor.putString(USER_NRIC_TYPE, userNRICType);
-							editor.putString(USER_NRIC_TYPE_ID, userNRICTypeID);
-							editor.putString(USER_IS_VERIFIED, userIsVerified);
-							editor.putInt(USER_RATING, (int) partTimer.getInt(PARAM_PROFILE_GRADE_ID));
-							editor.putBoolean(USER_PROFILE_COMPLETE, ValidationUtilities.checkProfileComplete(partTimer));							
+							editor.putString(CommonUtilities.USER_PTID, ptid);
+							editor.putString(CommonUtilities.USER_FIRSTNAME, 
+									partTimer.getString(CommonUtilities.PARAM_PROFILE_FIRSTNAME));
+							editor.putString(CommonUtilities.USER_LASTNAME, 
+									partTimer.getString(CommonUtilities.PARAM_PROFILE_LASTNAME));
+							editor.putString(CommonUtilities.USER_EMAIL, 
+									partTimer.getString(CommonUtilities.PARAM_PROFILE_EMAIL));
+							editor.putString(CommonUtilities.USER_NRIC_NUMBER, nricNumber);
+							editor.putString(CommonUtilities.USER_PROFILE_PICTURE, 
+									partTimer.getString(CommonUtilities.PARAM_PROFILE_PICTURE));
+							editor.putString(CommonUtilities.USER_NRIC_TYPE, userNRICType);
+							editor.putString(CommonUtilities.USER_NRIC_TYPE_ID, userNRICTypeID);
+							editor.putString(CommonUtilities.USER_IS_VERIFIED, userIsVerified);
+							editor.putInt(CommonUtilities.USER_RATING, 
+									(int) partTimer.getInt(CommonUtilities.PARAM_PROFILE_GRADE_ID));
 							
+							// Check all fields in user 
+							editor.putBoolean(CommonUtilities.USER_PROFILE_COMPLETE, 
+									ValidationUtilities.checkProfileComplete(partTimer));							
 
-							extraBundle.putString(USER_PTID, ptid);
-							extraBundle.putString(USER_EMAIL, email);
-							extraBundle.putString(USER_IS_VERIFIED, userIsVerified);
-							extraBundle.putString(USER_BIRTHDAY, userDob);
-							extraBundle.putString(USER_GENDER, userGender);
-							extraBundle.putString(USER_WORK_EXPERIENCE, userWorkExperience);
-							extraBundle.putString(USER_PHONE_NUMBER, userPhoneNumber);
-							extraBundle.putString(USER_NRIC_TYPE, userNRICType);
-							extraBundle.putString(USER_NRIC_TYPE_ID, userNRICTypeID);	
+							extraBundle.putString(CommonUtilities.USER_PTID, ptid);
+							extraBundle.putString(CommonUtilities.USER_EMAIL, email);
+							extraBundle.putString(CommonUtilities.USER_IS_VERIFIED, userIsVerified);
+							extraBundle.putString(CommonUtilities.USER_BIRTHDAY, userDob);
+							extraBundle.putString(CommonUtilities.USER_GENDER, userGender);
+							extraBundle.putString(CommonUtilities.USER_WORK_EXPERIENCE, userWorkExperience);
+							extraBundle.putString(CommonUtilities.USER_PHONE_NUMBER, userPhoneNumber);
+							extraBundle.putString(CommonUtilities.USER_NRIC_TYPE, userNRICType);
+							extraBundle.putString(CommonUtilities.USER_NRIC_TYPE_ID, userNRICTypeID);	
 							
 							// Check if basic profile user already completed
 							if(userGender != "null" && userDob != "null"
-									&& userPhoneNumber != "null"  &&
-									userWorkExperience != "null" &&
-									userNRICType != "null") {
+									&& userPhoneNumber != "null"
+//									&& userWorkExperience != "null"
+									&& userNRICType != "null") {
 								userBasicComplete = true;							
 							}
 							
-							if (settings.getBoolean(REGISTERED, false)) {
-								editor.putBoolean(LOGIN, true);
+							if (settings.getBoolean(CommonUtilities.REGISTERED, false)) {
+								editor.putBoolean(CommonUtilities.LOGIN, true);
 								editor.commit();
 								
 								// If user not verified, remind them
@@ -365,7 +373,7 @@ public class LoginActivity extends Activity {
 							} else {
 								// Check if user already completed basic profile
 								if(userBasicComplete) {
-									editor.putBoolean(LOGIN, true);
+									editor.putBoolean(CommonUtilities.LOGIN, true);
 									editor.commit();
 									
 									// If user not verified, remind them
@@ -384,11 +392,8 @@ public class LoginActivity extends Activity {
 								}
 							}
 							
-						} catch (JSONException e1) {						
-							NetworkUtils.connectionHandler(context, jsonStr);
-							
-							Log.e(CommonUtilities.TAG, "Load login result " +
-									jsonStr + " >> " + e1.getMessage());
+						} catch (JSONException e1) {			
+							NetworkUtils.connectionHandler(context, jsonStr, e1.getMessage());
 						}
 					}
 				} else {
@@ -399,7 +404,8 @@ public class LoginActivity extends Activity {
 			}
 		};
 
-		progress = ProgressDialog.show(context, getString(R.string.login), getString(R.string.please_wait), true,
+		progress = ProgressDialog.show(context, getString(R.string.login),
+				getString(R.string.please_wait), true,
 				false);
 		new Thread() {
 			public void run() {
@@ -408,18 +414,19 @@ public class LoginActivity extends Activity {
 				try {
 					JSONObject parentData = new JSONObject();
 					JSONObject childData = new JSONObject();
-					childData.put("email", email);
-					childData.put("password", password);
-					parentData.put("part_timer", childData);
+					childData.put(CommonUtilities.COMMON_EMAIL, email);
+					childData.put(CommonUtilities.COMMON_PASSWORD, password);
+					parentData.put(CommonUtilities.COMMON_PART_TIMER, childData);
 
-					String[] params = { "data" };
+					String[] params = { CommonUtilities.COMMON_DATA };
 					String[] values = { parentData.toString() };
 					jsonStr = jsonParser.getHttpResultUrlPost(url, params,
 							values);
 
-					Log.e(TAG, "HTTPPOST to " + url + " with data\n " + childData.toString());
+					Log.e(CommonUtilities.TAG, "HTTPPOST to " + url + " with data\n " + childData.toString());
+					
 				} catch (Exception e) {
-					Log.d(TAG, "Error HTTP POST " + e.toString());
+					Log.d(CommonUtilities.TAG, "Error HTTP POST " + e.toString());
 					jsonStr = null;
 				}
 
@@ -431,6 +438,13 @@ public class LoginActivity extends Activity {
 		}.start();
 	}
 	
+	/**
+	 * Showing email validation dialog if user not verify their account
+	 * 
+	 * @param extraBundle
+	 * @param editor
+	 * @param isCompleted
+	 */
 	private void notifyUserVerification(final Bundle extraBundle, 
 			final Editor editor, final boolean isCompleted) {
 		// Use the Builder class for convenient dialog construction

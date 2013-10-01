@@ -6,8 +6,11 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -100,7 +103,9 @@ public class ProfileRegistrationActivity extends Activity {
 	private TextView skillView;
 	private TextView nricTypeView;
 
-	private EditText fullName;
+	private EditText firstName;
+	private EditText lastName;
+	
 //	private EditText phoneNumber;
 	private EditText editExperience;
 
@@ -141,6 +146,10 @@ public class ProfileRegistrationActivity extends Activity {
 	private List<String> listWorkExperience;
 	private List<String> listWorkExpID;
 	private int selectedWorkIdx = -1;
+	private Bitmap facebookAvatar = null;
+	private boolean isFacebookAvatar = false;
+	private String facebookID;
+	private String profilePicture = "";
 	
 	public AlbumStorageDirFactory mAlbumStorageDirFactory = null;
 	private SharedPreferences settings;
@@ -153,7 +162,9 @@ public class ProfileRegistrationActivity extends Activity {
 
 		context = this;
 
-		fullName = (EditText) findViewById(R.id.regprofile_fullname);
+		firstName = (EditText) findViewById(R.id.regprofile_family_name);
+		lastName = (EditText) findViewById(R.id.regprofile_given_name);
+		
 //		phoneNumber = (EditText) findViewById(R.id.editPhoneNumber);
 		genderView = (RadioGroup) findViewById(R.id.gender_group);
 
@@ -171,6 +182,7 @@ public class ProfileRegistrationActivity extends Activity {
 
 		// Set experience textview and listener
 //		editExperience = (EditText) findViewById(R.id.editExperience);
+		
 		workExperienceView = (TextView) findViewById(R.id.regprofile_work_experience);
 		preparingWorkExperience();
 		workExperienceView.setOnClickListener(workExperienceListener);
@@ -210,7 +222,11 @@ public class ProfileRegistrationActivity extends Activity {
 
 			// Set default value for user fullname
 			if (userFirstName != null) {
-				fullName.setText(userFirstName + " " + userLastName);
+				firstName.setText(userFirstName);
+			}
+			
+			if(userLastName != null) {
+				lastName.setText(userLastName);
 			}
 
 			String bday = bundleExtras.getString(CommonUtilities.USER_BIRTHDAY);
@@ -234,6 +250,12 @@ public class ProfileRegistrationActivity extends Activity {
 					e.printStackTrace();
 				}			
 			}
+			
+			facebookID = bundleExtras.getString(CommonUtilities.USER_FACEBOOK_ID);
+			if(facebookID.length() > 0) {
+				isFacebookAvatar = true;
+			}
+			
 		}
 		
 		school = (TextView) findViewById(R.id.registrationTextSchool);
@@ -269,12 +291,12 @@ public class ProfileRegistrationActivity extends Activity {
 
 						createGenderView();
 						loadNRICType();
-					} catch (JSONException e) {
-						Log.e(TAG, "Error get genders >>> " + e.getMessage());
+					}  catch (JSONException e) {
+						NetworkUtils.connectionHandler(ProfileRegistrationActivity.this, jsonStr, e.getMessage());
 					}
 				} else {
 					Toast.makeText(context,
-							getString(R.string.failed_load_data),
+							getString(R.string.server_error),
 							Toast.LENGTH_SHORT).show();
 				}
 			}
@@ -343,11 +365,11 @@ public class ProfileRegistrationActivity extends Activity {
 //						loadSkill();
 
 					} catch (JSONException e) {
-						Log.e(TAG, "Error get ic types >>> " + e.getMessage());
+							NetworkUtils.connectionHandler(ProfileRegistrationActivity.this, jsonStr, e.getMessage());
 					}
 				} else {
 					Toast.makeText(context,
-							getString(R.string.failed_load_data),
+							getString(R.string.server_error),
 							Toast.LENGTH_SHORT).show();
 				}
 			}
@@ -386,12 +408,17 @@ public class ProfileRegistrationActivity extends Activity {
 							listSchool.add(obj.getString("school_name"));
 							listSchoolId.add(obj.getString("school_id"));
 						}
-					} catch (Exception e) {
-						Log.e(TAG, "Error schools >>> " + e.getMessage());
+					} catch (JSONException e) {
+						NetworkUtils.connectionHandler(ProfileRegistrationActivity.this, jsonStr, e.getMessage());
 					}
+					
+					if(isFacebookAvatar) {
+						loadFacebookAvatar(facebookID);
+					}
+					
 				} else {
 					Toast.makeText(context,
-							getString(R.string.failed_load_data),
+							getString(R.string.server_error),
 							Toast.LENGTH_SHORT).show();
 				}
 			}
@@ -432,11 +459,11 @@ public class ProfileRegistrationActivity extends Activity {
 							listSkill.add(obj.getString("skill_name"));
 						}
 					} catch (JSONException e) {
-						Log.e(TAG, "Error skills >>> " + e.getMessage());
+						NetworkUtils.connectionHandler(ProfileRegistrationActivity.this, jsonStr, e.getMessage());
 					}
 				} else {
 					Toast.makeText(context,
-							getString(R.string.failed_load_data),
+							getString(R.string.server_error),
 							Toast.LENGTH_SHORT).show();
 				}
 			}
@@ -450,6 +477,41 @@ public class ProfileRegistrationActivity extends Activity {
 				jsonParser = new JSONParser();
 				jsonStr = jsonParser.getHttpResultUrlGet(url);
 
+				if (progress != null && progress.isShowing()) {
+					progress.dismiss();
+					mHandlerFeed.post(mUpdateResultsFeed);
+				}
+			}
+		}.start();
+	}	
+	
+	protected void loadFacebookAvatar(final String user_id) {
+		final Handler mHandlerFeed = new Handler();
+		final Runnable mUpdateResultsFeed = new Runnable() {
+			public void run() {
+				// Nothing needed
+			}
+		};
+
+		progress = ProgressDialog.show(context,
+				getResources().getString(R.string.app_name),
+				getString(R.string.download_avatar), true, false);
+		new Thread() {
+			public void run() {				
+				try {
+					URL fbAvatarUrl = new URL("http://graph.facebook.com/"
+							+ user_id + "/picture?type=large");
+					Log.d(TAG, "Image from " + fbAvatarUrl.toString());
+
+					facebookAvatar = BitmapFactory.decodeStream(fbAvatarUrl
+							.openConnection().getInputStream());
+					
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
 				if (progress != null && progress.isShowing()) {
 					progress.dismiss();
 					mHandlerFeed.post(mUpdateResultsFeed);
@@ -485,8 +547,7 @@ public class ProfileRegistrationActivity extends Activity {
 				} catch (ParseException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
-				
+				}				
 			}
 			
 			DatePickerDialog dateDlg = new DatePickerDialog(
@@ -638,8 +699,12 @@ public class ProfileRegistrationActivity extends Activity {
 			String userNRICFront = settings.getString(USER_NRIC_FRONT, "");
 			String errors = "";
 
-			if (fullName.getText().toString().trim().length() == 0) {
-				errors += "* " + getString(R.string.registration_profile_fullname) + "\n";
+			if (firstName.getText().toString().trim().length() == 0) {
+				errors += "* " + getString(R.string.registration_profile_family_name) + "\n";
+			}
+
+			if (lastName.getText().toString().trim().length() == 0) {
+				errors += "* " + getString(R.string.registration_profile_given_name) + "\n";
 			}
 
 			if (genderSelected == null) {
@@ -684,7 +749,11 @@ public class ProfileRegistrationActivity extends Activity {
 
 			// If all fields completed, then create profile
 			if (errors.length() == 0) {
-				doCreateProfile();
+				if(isFacebookAvatar) {
+					uploadFacebookAvatar(pt_id);
+				} else {
+					doCreateProfile();					
+				}
 				
 			} else {
 				// Showing errors if fields not completed
@@ -713,6 +782,105 @@ public class ProfileRegistrationActivity extends Activity {
 			}
 		}
 	};
+	
+	/**
+	 * Upload facebook avatar
+	 * 
+	 * @param pt_id
+	 */
+	protected void uploadFacebookAvatar(final String pt_id) {
+		final Handler mHandlerFeed = new Handler();
+		final Runnable mUpdateResultsFeed = new Runnable() {
+			public void run() {
+				doCreateProfile();
+			}
+		};
+
+		progress = ProgressDialog.show(context,
+				getResources().getString(R.string.app_name),
+				"Uploading avatar...", true, false);
+		new Thread() {
+			public void run() {
+				String result = "";
+				Bitmap bm = facebookAvatar;
+				
+				boolean isRenamed = false;
+				
+				try {
+					String url = CommonUtilities.SERVERURL + CommonUtilities.API_UPLOAD_PROFILE_PICTURE;
+					String selectedFileName = CommonUtilities.FILE_IMAGE_PROFILE + ".jpg";
+					String filePath = CommonUtilities.IMAGE_ROOT + selectedFileName;
+					
+					File file = new File(filePath);
+					String filename = file.getName();
+					
+					ByteArrayOutputStream bos = new ByteArrayOutputStream();
+					bm.compress(CompressFormat.JPEG, 75, bos);
+					
+					byte[] data = bos.toByteArray();
+					
+					// Replacing image in local storage
+					FileOutputStream fos = new FileOutputStream(file);
+					fos.write(data);
+					
+					HttpClient httpClient = new DefaultHttpClient();
+					HttpPost postRequest = new HttpPost(url);
+
+					ByteArrayBody bab = new ByteArrayBody(data, filename);
+					MultipartEntity reqEntity = new MultipartEntity(
+							HttpMultipartMode.BROWSER_COMPATIBLE);
+					reqEntity.addPart("file", bab);
+					reqEntity.addPart("filename", new StringBody(filename));
+					postRequest.setEntity(reqEntity);
+					HttpResponse response = httpClient.execute(postRequest);
+					BufferedReader reader = new BufferedReader(
+							new InputStreamReader(
+									response.getEntity().getContent(), "UTF-8"));
+					String sResponse;
+					StringBuilder s = new StringBuilder();
+
+					while ((sResponse = reader.readLine()) != null) {
+						s = s.append(sResponse);
+					}
+					
+					String imagePath = s.toString();
+					Log.d(TAG, "Upload result: " + imagePath);
+					
+					String newFilename = new File(imagePath).getName();
+					String newPath = CommonUtilities.IMAGE_ROOT + newFilename;
+					
+					File f = null;
+				    File f2 = null;
+					
+					try {
+						f = new File(filePath);						
+						f2 = new File(newPath);					
+						isRenamed = f.renameTo(f2);
+					} catch(Exception e){
+				         // if any error occurs
+				         e.printStackTrace();
+				    }
+					
+					if(isRenamed) {
+						profilePicture = imagePath;
+					}
+					
+					String profileFilename = CommonUtilities.FILE_IMAGE_PROFILE + pt_id + ".jpg";
+					String oldPicPath = CommonUtilities.IMAGE_ROOT + profileFilename;
+					ApplicationUtils.copyFile(newPath, oldPicPath);	
+
+				} catch(Exception e){
+			         // if any error occurs
+			         e.printStackTrace();
+			    }
+
+				if (progress != null && progress.isShowing()) {
+					progress.dismiss();
+					mHandlerFeed.post(mUpdateResultsFeed);
+				}
+			}
+		}.start();
+	}
 
 	protected void doCreateProfile() {
 		Log.d(TAG, "Create profile executed ");
@@ -727,39 +895,40 @@ public class ProfileRegistrationActivity extends Activity {
 					Log.d(TAG, "Result from " + url + " " + jsonStr.toString());
 					
 					// FIXME: please check on server response
-					if (jsonStr.trim().equalsIgnoreCase("0")) {
+					if (jsonStr.trim().equalsIgnoreCase("0") || 
+						jsonStr.trim().equalsIgnoreCase("2")) {
 						SharedPreferences.Editor editor = settings.edit();
 						editor.putBoolean(CommonUtilities.LOGIN, true);
 						editor.putBoolean(CommonUtilities.REGISTERED, true);
 						
-						String name = fullName.getText().toString().trim();
-						String fname = "";
-						String lname = "";
-						if (name.contains(" ")) {
-							fname = name.substring(0, name.lastIndexOf(" "));
-							lname = name.substring(name.lastIndexOf(" ") + 1);
-						} else {
-							fname = name;
-						}
+//						String name = fullName.getText().toString().trim();
+//						String fname = "";
+//						String lname = "";
+//						if (name.contains(" ")) {
+//							fname = name.substring(0, name.lastIndexOf(" "));
+//							lname = name.substring(name.lastIndexOf(" ") + 1);
+//						} else {
+//							fname = name;
+//						}
 						
-						editor.putString(USER_FIRSTNAME, fname);
-						editor.putString(USER_LASTNAME, lname);
+						editor.putString(USER_FIRSTNAME, firstName.getText().toString().trim());
+						editor.putString(USER_LASTNAME, lastName.getText().toString().trim());
 						editor.putString(USER_NRIC_TYPE, listNRICType.get(nricSelected));
 						editor.putString(USER_NRIC_TYPE_ID, listNRICTypeId.get(nricSelected));						
 						editor.commit();
-
+						
 						Intent intent = new Intent(context, HomeActivity.class);
 						startActivity(intent);
 						finish();
 						
-					} else if (jsonStr.trim().equalsIgnoreCase("2")) {
-						ValidationUtilities.resendLinkDialog(ProfileRegistrationActivity.this, pt_id);
+//					} else if (jsonStr.trim().equalsIgnoreCase("2")) {
+//						ValidationUtilities.resendLinkDialog(ProfileRegistrationActivity.this, pt_id);
 					} else if (jsonStr.trim().equalsIgnoreCase("1")) {
 						Toast.makeText(context,
 								getString(R.string.registration_profile_failed),
 								Toast.LENGTH_LONG).show();
 					} else {
-						NetworkUtils.connectionHandler(ProfileRegistrationActivity.this, jsonStr);
+						NetworkUtils.connectionHandler(ProfileRegistrationActivity.this, jsonStr, "");
 					}
 					
 				} else {
@@ -782,21 +951,23 @@ public class ProfileRegistrationActivity extends Activity {
 					JSONObject childData = new JSONObject();
 					childData.put("pt_id", pt_id);
 					
-					String name = fullName.getText().toString().trim();
-					String fname = "";
-					String lname = "";
-					if (name.contains(" ")) {
-						fname = name.substring(0, name.lastIndexOf(" "));
-						lname = name.substring(name.lastIndexOf(" ") + 1);
-					} else {
-						fname = name;
-					}
-					childData.put("first_name", fname);
-					childData.put("last_name", lname);
+//					String name = fullName.getText().toString().trim();
+//					String fname = "";
+//					String lname = "";
+//					if (name.contains(" ")) {
+//						fname = name.substring(0, name.lastIndexOf(" "));
+//						lname = name.substring(name.lastIndexOf(" ") + 1);
+//					} else {
+//						fname = name;
+//					}
+					
+					childData.put("first_name", firstName.getText().toString().trim());
+					childData.put("last_name", lastName.getText().toString().trim());
+					
 					childData.put("gender",
 							genderSelected.toLowerCase(Locale.getDefault()));
 					childData.put("dob", birthView.getText().toString().trim());
-					childData.put("profile_picture", "");
+					childData.put("profile_picture", profilePicture);
 					
 //					childData.put("phone_no", phoneNumber.getText().toString()
 //							.trim());
@@ -821,7 +992,6 @@ public class ProfileRegistrationActivity extends Activity {
 					
 					int tmp = listWorkExperience.indexOf(workExperienceView.getText().toString().trim());
 					childData.put("work_experience", listWorkExpID.get(tmp));
-
 					childData.put("profile_source", "");
 					childData.put("matric_card_picture", "");
 					childData.put("matric_card_no", "");
@@ -847,7 +1017,7 @@ public class ProfileRegistrationActivity extends Activity {
 					
 				} catch (Exception e) {
 					jsonStr = null;
-					Log.d(TAG, "Jsone null ... ");
+					Log.d(TAG, "Issue in generating Json profile");
 				}
 
 				if (progress != null && progress.isShowing()) {
@@ -856,86 +1026,7 @@ public class ProfileRegistrationActivity extends Activity {
 				}
 			}
 		}.start();
-	}
-	
-	
-	public void resendLinkDialog(Context context) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setTitle(context.getString(R.string.app_name));
-		builder.setMessage(getString(R.string.notify_user_verification))
-				.setCancelable(false)
-				.setPositiveButton(R.string.resend_link,
-						new DialogInterface.OnClickListener() {
-							public void onClick(
-									DialogInterface dialog,
-									int id) {
-								// resend link
-								resendLink();
-							}
-						})
-				.setNegativeButton(R.string.ok,
-						new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(
-									DialogInterface arg0,
-									int arg1) {
-							}
-						});
-
-		// Create the AlertDialog object and return it
-		AlertDialog alert = builder.create();
-		alert.show();
-	}
-
-
-	private void resendLink() {
-		final String url = SERVERURL + API_RESEND_VERIFICATION_EMAIL;
-		final Handler mHandlerFeed = new Handler();
-		final Runnable mUpdateResultsFeed = new Runnable() {
-			public void run() {
-				if (jsonStr != null) {
-					if (jsonStr.trim().equalsIgnoreCase("0")) {
-						Toast.makeText(context, getString(R.string.resend_email_validation_success),
-								Toast.LENGTH_SHORT).show();
-					} else if(jsonStr.trim().equalsIgnoreCase("1")) {
-						Toast.makeText(context,
-								getString(R.string.resend_email_validation_failed),
-								Toast.LENGTH_LONG).show();
-					} else {
-						NetworkUtils.connectionHandler(ProfileRegistrationActivity.this, jsonStr);
-					}
-				} else {
-					Toast.makeText(context,
-							getString(R.string.server_error),
-							Toast.LENGTH_LONG).show();
-				}
-			}
-		};
-
-		progress = ProgressDialog.show(context,
-				context.getString(R.string.app_name), getString(R.string.please_wait),
-				true, false);
-		new Thread() {
-			public void run() {
-				jsonParser = new JSONParser();
-				try {
-					String[] params = { "pt_id" };
-					String[] values = { pt_id };
-					jsonStr = jsonParser.getHttpResultUrlPost(url, params,
-							values);
-
-					Log.e(TAG, "Resend email link Result >>> " + jsonStr);
-				} catch (Exception e) {
-					jsonStr = null;
-				}
-
-				if (progress != null && progress.isShowing()) {
-					progress.dismiss();
-					mHandlerFeed.post(mUpdateResultsFeed);
-				}
-			}
-		}.start();
-	}
+	}	
 
 	/**
 	 * Skills selection list-checkbox listener
@@ -1187,6 +1278,7 @@ public class ProfileRegistrationActivity extends Activity {
 				PackageManager.MATCH_DEFAULT_ONLY);
 		return list.size() > 0;
 	}
+	
 
 	/**
 	 * Upload image to server and retrieve the path

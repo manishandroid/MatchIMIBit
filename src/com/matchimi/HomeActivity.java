@@ -1,10 +1,5 @@
 package com.matchimi;
 
-import static com.matchimi.CommonUtilities.HOMEPAGE_OPTION;
-import static com.matchimi.CommonUtilities.PAGEPROFILE;
-import static com.matchimi.CommonUtilities.PREFS_NAME;
-import static com.matchimi.CommonUtilities.TAG;
-import static com.matchimi.CommonUtilities.USER_FIRSTNAME;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -22,8 +17,9 @@ public class HomeActivity extends TabSwipeActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		// Check if user not logged
-		SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+		// Check whether user not logged or logged
+		SharedPreferences settings = getSharedPreferences(CommonUtilities.PREFS_NAME, 
+				Context.MODE_PRIVATE);
 
 		// If user not logged, redirect to Login/Register page
 		// FIXME: change default value of login to false to go to login page
@@ -45,19 +41,16 @@ public class HomeActivity extends TabSwipeActivity {
 				ProfileFragment.class,
 				ProfileFragment.createBundle("Fragment 3"));
 
+		// Move to first tab by default
 		moveTab(0);
 
 		Intent intent = getIntent();
 		Bundle extras = intent.getExtras();
 		if (extras != null) {
-			Log.d(TAG, "Incoming intent");
-
-			String page = extras.getString(HOMEPAGE_OPTION);
-			if (page == PAGEPROFILE) {
-				Log.d(TAG, "USER FIRSTNAME " + extras.getString(USER_FIRSTNAME));
+			String page = extras.getString(CommonUtilities.HOMEPAGE_OPTION);
+			if (page == CommonUtilities.PAGEPROFILE) {
 				moveTab(2);
 			}
 		}
 	}
-
 }

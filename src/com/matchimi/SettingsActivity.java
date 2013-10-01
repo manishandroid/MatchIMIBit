@@ -97,30 +97,6 @@ public class SettingsActivity extends Activity {
 
 	}
 	
-	
-	
-	private void toogleFreezeAvailability() { 
-		RequestQueue queue = Volley.newRequestQueue(this);
-		String url = "";
-
-		JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-
-			@Override
-			public void onResponse(JSONObject response) {
-
-			}
-		}, new Response.ErrorListener() {
-
-			@Override
-			public void onErrorResponse(VolleyError error) {
-				// TODO Auto-generated method stub
-
-			}
-		});
-
-		queue.add(jsObjRequest);
-	}
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.

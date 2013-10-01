@@ -98,7 +98,6 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 		 * anything else
 		 */
 		mViewPager.setId(0x7F04FFF0);
-
 		super.onCreate(savedInstanceState);
 
 		/*
@@ -265,12 +264,10 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 		MenuItem reload = menu.findItem(R.id.menu_reload);
 		if (settings.getInt(CommonUtilities.SETTING_THEME,
 				CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
-			actionNav
-					.setIcon(R.drawable.abs__ic_menu_moreoverflow_normal_holo_light);
+			actionNav.setIcon(R.drawable.abs__ic_menu_moreoverflow_normal_holo_light);
 			reload.setIcon(R.drawable.navigation_refresh);
 		} else {
-			actionNav
-					.setIcon(R.drawable.abs__ic_menu_moreoverflow_normal_holo_dark);
+			actionNav.setIcon(R.drawable.abs__ic_menu_moreoverflow_normal_holo_dark);
 			reload.setIcon(R.drawable.navigation_refresh_dark);
 		}
 		

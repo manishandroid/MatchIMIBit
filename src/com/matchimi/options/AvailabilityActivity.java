@@ -1,7 +1,5 @@
 package com.matchimi.options;
 
-import static com.matchimi.CommonUtilities.*;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -65,9 +63,9 @@ public class AvailabilityActivity extends SherlockFragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 
+		SharedPreferences settings = getSharedPreferences(CommonUtilities.PREFS_NAME, 
 				Context.MODE_PRIVATE);
-		if (settings.getInt(SETTING_THEME, THEME_LIGHT) == THEME_LIGHT) {
+		if (settings.getInt(CommonUtilities.SETTING_THEME, CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
 			setTheme(ApplicationUtils.getTheme(true));
 		} else {
 			setTheme(ApplicationUtils.getTheme(false));
@@ -79,9 +77,10 @@ public class AvailabilityActivity extends SherlockFragmentActivity {
 		ActionBar ab = getSupportActionBar();
 		ab.setDisplayHomeAsUpEnabled(true);
 
-		pt_id = settings.getString(USER_PTID, null);
-
+		pt_id = settings.getString(CommonUtilities.USER_PTID, null);
 		adapter = new AvailabilityAdapter(context);
+		
+		// Build list of availibilities
 		listview = (ListView) findViewById(R.id.listview);
 		listview.setAdapter(adapter);
 
@@ -108,9 +107,12 @@ public class AvailabilityActivity extends SherlockFragmentActivity {
 		loadDate();
 	}
 
+	/**
+	 * Loading all unmatched availabilities
+	 */
 	private void loadDate() {
-		final String url = SERVERURL + API_GET_AVAILABILITIES_BY_PT_ID + "?" +
-						PARAM_PT_ID + "=" + pt_id;
+		final String url = CommonUtilities.SERVERURL + CommonUtilities.API_GET_AVAILABILITIES_BY_PT_ID + "?" +
+				CommonUtilities.PARAM_PT_ID + "=" + pt_id;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
@@ -127,10 +129,6 @@ public class AvailabilityActivity extends SherlockFragmentActivity {
 					try {
 						JSONArray items = new JSONArray(jsonStr);
 						if (items != null && items.length() > 0) {
-							SimpleDateFormat formatterDate = new SimpleDateFormat(
-									"EE d, MMM", Locale.getDefault());
-							SimpleDateFormat formatterTime = new SimpleDateFormat(
-									"hh a", Locale.getDefault());
 							for (int i = 0; i < items.length(); i++) {
 								/* get all json items, and put it on list */
 								try {
@@ -144,8 +142,16 @@ public class AvailabilityActivity extends SherlockFragmentActivity {
 														"start_date_time");
 										String endDate = jsonParser.getString(
 												objs, "end_date_time");
-										listStartTime.add(startDate);
-										listEndTime.add(endDate);
+										
+										Calendar calStart = generateCalendar(startDate);
+										Calendar calEnd = generateCalendar(endDate);
+
+										String convertStartDate = CommonUtilities.AVAILABILTY_DATETIME.format(calStart.getTime());
+										String convertEndDate = CommonUtilities.AVAILABILTY_DATETIME.format(calEnd.getTime());
+										
+										listStartTime.add(convertStartDate);
+										listEndTime.add(convertEndDate);
+										
 										listRepeat.add(jsonParser.getInt(objs,
 												"repeat"));
 										listLocation.add(jsonParser.getString(
@@ -155,18 +161,16 @@ public class AvailabilityActivity extends SherlockFragmentActivity {
 										listFreeze.add(jsonParser.getBoolean(
 												objs, "is_frozen"));
 
-										Calendar calStart = generateCalendar(startDate);
-										Calendar calEnd = generateCalendar(endDate);
-										listDate.add(formatterDate
+										listDate.add(CommonUtilities.AVAILABILITY_DATE
 												.format(calStart.getTime())
 												+ "\n"
-												+ formatterTime
+												+ CommonUtilities.AVAILABILITY_TIME
 														.format(calStart
 																.getTime())
 														.toLowerCase(
 																Locale.getDefault())
 												+ " - "
-												+ formatterTime
+												+ CommonUtilities.AVAILABILITY_TIME
 														.format(calEnd
 																.getTime())
 														.toLowerCase(
@@ -174,16 +178,15 @@ public class AvailabilityActivity extends SherlockFragmentActivity {
 									}
 								} catch (JSONException e) {
 									Log.e(CommonUtilities.TAG,
-											"Error array >> " + e.getMessage());
+										"Error Array >> " + e.getMessage());
 								}
-								Log.d(TAG, "Availability results >>>\n " + jsonStr.toString());
+								Log.d(CommonUtilities.TAG, "Availability Results >>>\n " + jsonStr.toString());
 							}
 						} else {
-							Log.e("Parse Json Object", ">> Array is null");
+							Log.e(CommonUtilities.TAG, "Array is null");
 						}
 					} catch (JSONException e1) {
-						NetworkUtils.connectionHandler(context, jsonStr);
-						Log.e(TAG, " Error results >> " + e1.getMessage());
+						NetworkUtils.connectionHandler(context, jsonStr, e1.getMessage());
 					}
 				} else {
 					Toast.makeText(context, getString(R.string.server_error),
@@ -203,11 +206,17 @@ public class AvailabilityActivity extends SherlockFragmentActivity {
 			public void run() {
 				jsonParser = new JSONParser();
 				jsonStr = jsonParser.getHttpResultUrlGet(url);
+				Log.d(CommonUtilities.TAG, "Result from " + url + " >>>\n" + jsonStr);
 				mHandlerFeed.post(mUpdateResultsFeed);
 			}
 		}.start();
 	}
 
+	/**
+	 * Convert start / end datetime String into calendar object
+	 * @param str
+	 * @return
+	 */
 	private Calendar generateCalendar(String str) {
 		Calendar calRes = new GregorianCalendar(Integer.parseInt(str.substring(
 				0, 4)), Integer.parseInt(str.substring(5, 7)) - 1,
@@ -224,9 +233,9 @@ public class AvailabilityActivity extends SherlockFragmentActivity {
 
 		MenuItem reload = menu.findItem(R.id.menu_reload);
 		MenuItem add = menu.findItem(R.id.menu_add_availability);
-		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 
+		SharedPreferences settings = getSharedPreferences(CommonUtilities.PREFS_NAME, 
 				Context.MODE_PRIVATE);
-		if (settings.getInt(SETTING_THEME, THEME_LIGHT) == THEME_LIGHT) {
+		if (settings.getInt(CommonUtilities.SETTING_THEME, CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
 			reload.setIcon(R.drawable.navigation_refresh);
 			add.setIcon(R.drawable.add);
 		} else {

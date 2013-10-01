@@ -181,6 +181,9 @@ public class ProfileModel {
 		return work_exp;
 	}
 	public void setWork_exp(String work_exp) {
+		if(work_exp == "null") {
+			work_exp = null;
+		}
 		this.work_exp = work_exp;
 	}
 	public String getSchool() {
@@ -272,7 +275,7 @@ public class ProfileModel {
 	
 	public boolean checkComplete() {	
 		if(this.first_name == null ||
-			this.profile_pic == null ||
+//			this.profile_pic == null ||
 			this.gender == null ||
 			this.dob == null ||
 			this.phone_num == null ||
@@ -285,13 +288,14 @@ public class ProfileModel {
 			this.work_exp == null ||
 			this.ec_name == null ||
 			this.ec_phone == null ||
-			this.ec_relationship == null ||
-			this.bank_name == null ||
-			this.bank_acc_branch == null ||
-			this.bank_acc_number == null) {
+			this.ec_relationship == null			
+//			|| this.bank_name == null ||
+//			this.bank_acc_branch == null ||
+//			this.bank_acc_number == null
+			) {
 			return false;
 		} else if(this.first_name.length() == 0||
-				this.profile_pic.length() == 0||
+//				this.profile_pic.length() == 0||
 				this.gender.length() == 0||
 				this.dob.length() == 0||
 				this.phone_num.length() == 0||
@@ -303,10 +307,11 @@ public class ProfileModel {
 				this.work_exp.length() == 0||
 				this.ec_name.length() == 0||
 				this.ec_phone.length() == 0||
-				this.ec_relationship.length() == 0||
-				this.bank_name.length() == 0||
-				this.bank_acc_branch.length() == 0||
-				this.bank_acc_number.length() == 0) {
+				this.ec_relationship.length() == 0
+//				||this.bank_name.length() == 0||
+//				this.bank_acc_branch.length() == 0||
+//				this.bank_acc_number.length() == 0
+				) {
 				return false;
 		} else {
 			return true;

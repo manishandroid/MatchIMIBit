@@ -172,6 +172,11 @@ public class RegistrationActivity extends Activity {
 						Toast.makeText(context,
 								getString(R.string.registration_failed),
 								Toast.LENGTH_LONG).show();
+					} else if (jsonStr.trim().equalsIgnoreCase("2")) {
+						closeSession();
+						Toast.makeText(context,
+								getString(R.string.registration_already_exist),
+								Toast.LENGTH_LONG).show();
 					} else if (jsonStr.trim().length() > 0) {
 						String ptid = "";
 
@@ -198,10 +203,7 @@ public class RegistrationActivity extends Activity {
 							finish();
 
 						} catch (JSONException e1) {						
-							NetworkUtils.connectionHandler(context, jsonStr);
-							
-							Log.e(CommonUtilities.TAG, "Load register result " +
-									jsonStr + " >> " + e1.getMessage());
+							NetworkUtils.connectionHandler(context, jsonStr, e1.getMessage());
 						}
 					} else {
 						closeSession();
@@ -216,7 +218,8 @@ public class RegistrationActivity extends Activity {
 			}
 		};
 
-		progress = ProgressDialog.show(context, "Register", "Registering...",
+		progress = ProgressDialog.show(context, getString(R.string.register),
+				getString(R.string.register_progress),
 				true, false);
 		new Thread() {
 			public void run() {

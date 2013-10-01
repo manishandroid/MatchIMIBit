@@ -37,6 +37,7 @@ import com.matchimi.CommonUtilities;
 import com.matchimi.R;
 import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
+import com.matchimi.utils.NetworkUtils;
 
 public class HistoryDetail extends SherlockActivity {
 
@@ -116,8 +117,10 @@ public class HistoryDetail extends SherlockActivity {
 	}
 
 	private void loadData() {
-		final String url = "http://matchimi.buuukapps.com/get_past_accepted_job_offers?pt_id="
-				+ pt_id;
+		final String url = CommonUtilities.SERVERURL +
+				CommonUtilities.API_GET_PAST_ACCEPTED_JOB_OFFERS + "?" + 
+				CommonUtilities.PARAM_PT_ID + "=" + pt_id;
+		
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
@@ -204,10 +207,10 @@ public class HistoryDetail extends SherlockActivity {
 							Log.e("Parse Json Object", ">> Array is null");
 						}
 					} catch (JSONException e1) {
-						Log.e("updateUIFromJSON", ">> " + e1.getMessage());
+						NetworkUtils.connectionHandler(context, jsonStr, e1.getMessage());
 					}
 				} else {
-					Toast.makeText(context, "jsonObj is Null",
+					Toast.makeText(context, getString(R.string.server_error),
 							Toast.LENGTH_SHORT).show();
 				}
 
@@ -219,8 +222,8 @@ public class HistoryDetail extends SherlockActivity {
 
 		totalEarning = 0;
 		totalHours = 0;
-		progress = ProgressDialog.show(context, "History",
-				"Loading job history...", true, false);
+		progress = ProgressDialog.show(context, getString(R.string.menu_history),
+				getString(R.string.history_loading), true, false);
 		new Thread() {
 			public void run() {
 				jsonParser = new JSONParser();

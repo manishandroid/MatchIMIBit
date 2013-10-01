@@ -22,6 +22,13 @@ public final class ValidationUtilities {
 	public static JSONParser jsonParser = null;
 	public static String jsonStr = null;
 	
+	/**
+	 * Showing Dialog for resending email with link validation
+	 * In case user not receive email or asking for new email validation
+	 * 
+	 * @param context
+	 * @param pt_id
+	 */
 	public static final void resendLinkDialog(final Context context, final String pt_id) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setTitle(context.getResources().getString(R.string.app_name));
@@ -98,110 +105,133 @@ public final class ValidationUtilities {
 	}
 	
 	public static final boolean checkProfileComplete(JSONObject obj) throws JSONException {		
-		if(obj.getString("dob").length() == 0 || obj.getString("dob") == "null") {
+		if(obj.getString(CommonUtilities.PARAM_PROFILE_DATE_OF_BIRTH).length() == 0 || 
+				obj.getString(CommonUtilities.PARAM_PROFILE_DATE_OF_BIRTH) == "null") {
 			return false;
 		}
 		
-		if(obj.getString("email").length() == 0 || obj.getString("email") == "null") {
+		if(obj.getString(CommonUtilities.PARAM_PROFILE_EMAIL).length() == 0 ||
+				obj.getString(CommonUtilities.PARAM_PROFILE_EMAIL) == "null") {
 			return false;
 		}
 		
-		if(obj.getString("work_experience").length() == 0 || obj.getString("work_experience") == "null") {
+		if(obj.getString(CommonUtilities.PARAM_PROFILE_WORK_EXPERIENCE).length() == 0 ||
+				obj.getString(CommonUtilities.PARAM_PROFILE_WORK_EXPERIENCE) == "null") {
 			return false;
 		}
 		
-		if(obj.getString("first_name").length() == 0 || obj.getString("first_name") == "null") {
+		if(obj.getString(CommonUtilities.PARAM_PROFILE_FIRSTNAME).length() == 0 ||
+				obj.getString(CommonUtilities.PARAM_PROFILE_FIRSTNAME) == "null") {
 			return false;
 		}
 		
-		if(obj.getString("last_name").length() == 0 || obj.getString("last_name") == "null") {
+		if(obj.getString(CommonUtilities.PARAM_PROFILE_LASTNAME).length() == 0 || 
+				obj.getString(CommonUtilities.PARAM_PROFILE_LASTNAME) == "null") {
 			return false;
 		}
 		
-		if(obj.getString("phone_no").length() == 0 || obj.getString("phone_no") == "null") {
+		if(obj.getString(CommonUtilities.PARAM_PROFILE_PHONE_NUMBER).length() == 0 ||
+				obj.getString(CommonUtilities.PARAM_PROFILE_PHONE_NUMBER) == "null") {
 			return false;
 		}
 		
-		if(obj.getString("gender").length() == 0 || obj.getString("gender") == "null") {
+		if(obj.getString(CommonUtilities.PARAM_PROFILE_GENDER).length() == 0 ||
+				obj.getString(CommonUtilities.PARAM_PROFILE_GENDER) == "null") {
 			return false;
 		}
 		
-		if(obj.getString("profile_picture").length() == 0 || obj.getString("profile_picture") == "null") {
+//		if(obj.getString(CommonUtilities.PARAM_PROFILE_PICTURE).length() == 0 ||
+//					obj.getString(CommonUtilities.PARAM_PROFILE_PICTURE) == "null") {
+//			return false;
+//		}
+		
+		if(obj.getString(CommonUtilities.PARAM_PROFILE_IC_BACK_PICTURE).length() == 0 ||
+				obj.getString(CommonUtilities.PARAM_PROFILE_IC_BACK_PICTURE) == "null") {
 			return false;
 		}
 		
-		if(obj.getString("ic_back_picture").length() == 0 || obj.getString("ic_back_picture") == "null") {
+		if(obj.getString(CommonUtilities.PARAM_PROFILE_IC_FRONT_PICTURE).length() == 0 ||
+				obj.getString(CommonUtilities.PARAM_PROFILE_IC_FRONT_PICTURE) == "null") {
 			return false;
 		}
 		
-		if(obj.getString("ic_front_picture").length() == 0 || obj.getString("ic_front_picture") == "null") {
+		if(obj.getString(CommonUtilities.PARAM_PROFILE_IC_NUMBER).length() == 0 || 
+				obj.getString(CommonUtilities.PARAM_PROFILE_IC_NUMBER) == "null") {
 			return false;
 		}
 		
-		if(obj.getString("ic_no").length() == 0 || obj.getString("ic_no") == "null") {
+		if(obj.getString(CommonUtilities.PARAM_PROFILE_IC_TYPE).length() == 0 || 
+				obj.getString(CommonUtilities.PARAM_PROFILE_IC_TYPE) == "null") {
 			return false;
 		}
 		
-		if(obj.getString("ic_type").length() == 0 || obj.getString("ic_type") == "null") {
+		if(obj.getString(CommonUtilities.PARAM_PROFILE_IC_TYPE_ID).length() == 0 ||
+				obj.getString(CommonUtilities.PARAM_PROFILE_IC_TYPE_ID) == "null") {
 			return false;
 		}
 		
-		if(obj.getString("ic_type_id").length() == 0 || obj.getString("ic_type_id") == "null") {
-			return false;
-		}
-		
-		String studentSchoolname = obj.optString("school_name");
+		String studentSchoolname = obj.optString(CommonUtilities.PARAM_PROFILE_SCHOOL_NAME);
 		if(studentSchoolname != "") {
-			if(obj.getString("school_name").length() == 0 || obj.getString("school_name") == "null") {
+			if(obj.getString(CommonUtilities.PARAM_PROFILE_SCHOOL_NAME).length() == 0 ||
+					obj.getString(CommonUtilities.PARAM_PROFILE_SCHOOL_NAME) == "null") {
 				return false;
 			}			
 		}
 		
 		// Matric card only for ic student
-		String studentMatricCard = obj.optString("matric_card_no");
+		String studentMatricCard = obj.optString(CommonUtilities.PARAM_PROFILE_MATRIC_CARD_NO);
 		if(studentMatricCard != "") {
-			if(obj.getString("matric_card_no").length() == 0 || obj.getString("matric_card_no") == "null") {
+			if(obj.getString(CommonUtilities.PARAM_PROFILE_MATRIC_CARD_NO).length() == 0 || 
+					obj.getString(CommonUtilities.PARAM_PROFILE_MATRIC_CARD_NO) == "null") {
 				return false;
 			}					
 		}		
 
 		// Student ic expired
-		String studentIcExpired = obj.optString("ic_expiry_date");
+		String studentIcExpired = obj.optString(CommonUtilities.PARAM_PROFILE_STUDENT_IC_EXPIRY_DATE);
 		if(studentIcExpired != "") {
-			if(obj.getString("ic_expiry_date").length() == 0 || obj.getString("ic_expiry_date") == "null") {
+			if(obj.getString(CommonUtilities.PARAM_PROFILE_STUDENT_IC_EXPIRY_DATE).length() == 0 ||
+					obj.getString(CommonUtilities.PARAM_PROFILE_STUDENT_IC_EXPIRY_DATE) == "null") {
 				return false;
 			}			
 		}
 		
-		if(obj.getString("skills").length() == 0 || obj.getString("skills") == "null") {
+		if(obj.getString(CommonUtilities.PARAM_PROFILE_SKILLS).length() == 0 || 
+				obj.getString(CommonUtilities.PARAM_PROFILE_SKILLS) == "null") {
 			return false;
 		}
 		
-		if(obj.getString("bank_name").length() == 0 || obj.getString("bank_name") == "null") {
-			return false;
-		}
-		
-
-		if(obj.getString("bank_account_no").length() == 0 || obj.getString("bank_account_no") == "null") {
-			return false;
-		}
+//		if(obj.getString(CommonUtilities.PARAM_PROFILE_BANK_NAME).length() == 0 ||
+//				obj.getString(CommonUtilities.PARAM_PROFILE_BANK_NAME) == "null") {
+//			return false;
+//		}
 		
 
-		if(obj.getString("bank_branch_name").length() == 0 || obj.getString("bank_branch_name") == "null") {
-			return false;
-		}
+//		if(obj.getString(CommonUtilities.PARAM_PROFILE_BANK_ACCOUNT_NO).length() == 0 
+//				|| obj.getString(CommonUtilities.PARAM_PROFILE_BANK_ACCOUNT_NO) == "null") {
+//			return false;
+//		}
 		
 
-		if(obj.getString("ec_first_name").length() == 0 || obj.getString("ec_first_name") == "null") {
+//		if(obj.getString(CommonUtilities.PARAM_PROFILE_BANK_BRANCH_NAME).length() == 0 ||
+//				obj.getString(CommonUtilities.PARAM_PROFILE_BANK_BRANCH_NAME) == "null") {
+//			return false;
+//		}
+		
+
+		if(obj.getString(CommonUtilities.PARAM_PROFILE_EC_FIRST_NAME).length() == 0 || 
+				obj.getString(CommonUtilities.PARAM_PROFILE_EC_FIRST_NAME) == "null") {
 			return false;
 		}		
 
-		if(obj.getString("ec_phone_no").length() == 0 || obj.getString("ec_phone_no") == "null") {
+		if(obj.getString(CommonUtilities.PARAM_PROFILE_EC_PHONE_NO).length() == 0 ||
+				obj.getString(CommonUtilities.PARAM_PROFILE_EC_PHONE_NO) == "null") {
 			return false;
 		}
 		
 
-		if(obj.getString("ec_relationship").length() == 0 || obj.getString("ec_relationship") == "null") {
+		if(obj.getString(CommonUtilities.PARAM_PROFILE_EC_RELATIONSHIP).length() == 0 || 
+				obj.getString(CommonUtilities.PARAM_PROFILE_EC_RELATIONSHIP) == "null") {
 			return false;
 		}
 		

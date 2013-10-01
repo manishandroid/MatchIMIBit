@@ -30,7 +30,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RatingBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,7 +54,9 @@ public class ProfileFragment extends Fragment {
 	private JSONParser jsonParser = null;
 	private String jsonStr = null;
 
-	private ProgressDialog progress;
+	private ScrollView scrollView;
+	private ProgressBar progressBar;
+//	private ProgressDialog progress;
 
 	private SharedPreferences settings;
 	private LinearLayout layFeedback;
@@ -75,6 +79,9 @@ public class ProfileFragment extends Fragment {
 
 		context = getActivity();
 
+		progressBar = (ProgressBar) view.findViewById(R.id.progress);
+		scrollView = (ScrollView)view.findViewById(R.id.scrollView);
+		
 		Button blockedCompanyButton = (Button) view
 				.findViewById(R.id.profile_blocked_companies_button);
 		blockedCompanyButton.setOnClickListener(blockedCompanyListener);
@@ -121,7 +128,7 @@ public class ProfileFragment extends Fragment {
 
 				if (jsonStr != null) {
 					try {
-						Log.e("Feedback", ">>> " + jsonStr);
+						Log.e(CommonUtilities.TAG, "Feedback result >>> " + jsonStr);
 						JSONArray items = new JSONArray(jsonStr);
 						if (items != null && items.length() > 0) {
 							for (int i = 0; i < items.length(); i++) {
@@ -141,7 +148,8 @@ public class ProfileFragment extends Fragment {
 							Log.e("Parse Json Object", ">> Array is null");
 						}
 					} catch (JSONException e1) {						
-						NetworkUtils.connectionHandler(getActivity(), jsonStr);
+						NetworkUtils.connectionHandler(getActivity(), jsonStr, 
+								e1.getMessage());
 						
 						Log.e(CommonUtilities.TAG, "Load feedback result " +
 								jsonStr + " >> " + e1.getMessage());
@@ -151,19 +159,24 @@ public class ProfileFragment extends Fragment {
 							getString(R.string.server_error), Toast.LENGTH_SHORT).show();
 				}
 				createLayout();
+				progressBar.setVisibility(View.GONE);
+				scrollView.setVisibility(View.VISIBLE);
 			}
 		};
 
-		progress = ProgressDialog.show(context, context.getString(R.string.app_name),
-				"Loading...", true, false);
+		progressBar.setVisibility(View.VISIBLE);
+		scrollView.setVisibility(View.GONE);
+//		progress = ProgressDialog.show(context, context.getString(R.string.app_name),
+//				"Loading...", true, false);
 		new Thread() {
 			public void run() {
 				jsonParser = new JSONParser();
 				jsonStr = jsonParser.getHttpResultUrlGet(url);
-				if (progress != null && progress.isShowing()) {
-					progress.dismiss();
-					mHandlerFeed.post(mUpdateResultsFeed);
-				}
+				mHandlerFeed.post(mUpdateResultsFeed);
+//				if (progress != null && progress.isShowing()) {
+//					progress.dismiss();
+//					mHandlerFeed.post(mUpdateResultsFeed);
+//				}
 			}
 		}.start();
 	}
@@ -221,7 +234,7 @@ public class ProfileFragment extends Fragment {
 		TextView usernameView = (TextView) view
 				.findViewById(R.id.profile_username);
 		String userName = settings.getString(CommonUtilities.USER_FIRSTNAME, "")
-				+ settings.getString(CommonUtilities.USER_LASTNAME, "");
+				+ " " + settings.getString(CommonUtilities.USER_LASTNAME, "");
 		usernameView.setText(userName);
 
 		// Set email name
@@ -246,13 +259,20 @@ public class ProfileFragment extends Fragment {
 		String profileFilename = CommonUtilities.FILE_IMAGE_PROFILE + pt_id + ".jpg";
 		File f = new File(CommonUtilities.IMAGE_ROOT, profileFilename);
 		
-		if (f.exists()) {
-			Bitmap b = BitmapFactory.decodeFile(f.getAbsolutePath());
-			avatarView.setImageBitmap(b);
+		String facebookID = settings.getString(CommonUtilities.USER_FACEBOOK_ID, "");
+		String profilePic = settings.getString(CommonUtilities.USER_PROFILE_PICTURE, "");
+		
+		if(profilePic.length() > 0) {
+			if (f.exists()) {
+				Bitmap b = BitmapFactory.decodeFile(f.getAbsolutePath());
+				avatarView.setImageBitmap(b);
+			}	
 		} else {
-			Utilities util = new Utilities();
-			util.downloadAvatar(settings.getString(CommonUtilities.USER_FACEBOOK_ID, ""),
-					avatarView);
+			if(facebookID.length() > 0) {
+				Utilities util = new Utilities();
+				util.downloadAvatar(settings.getString(CommonUtilities.USER_FACEBOOK_ID, ""),
+						avatarView);				
+			}
 		}
 
 		RatingBar ratingBar = (RatingBar) view.findViewById(R.id.ratingBar);

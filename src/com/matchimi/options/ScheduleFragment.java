@@ -55,7 +55,8 @@ public class ScheduleFragment extends Fragment {
 	private List<String> listDescription = null;
 	private List<String> listRequirement = null;
 	private List<String> listOptional = null;
-
+	private List<String> listLocation = null;
+	
 	private String pt_id = null;
 
 	public static final String EXTRA_TITLE = "title";
@@ -89,6 +90,7 @@ public class ScheduleFragment extends Fragment {
 				i.putExtra("description", listDescription.get(arg2));
 				i.putExtra("requirement", listRequirement.get(arg2));
 				i.putExtra("optional", listOptional.get(arg2));
+				i.putExtra("location", listLocation.get(arg2));				
 				i.putExtra("id", listAvailID.get(arg2));
 				i.putExtra("type", "accepted");
 				startActivityForResult(i, RC_SCHEDULE_DETAIL);
@@ -105,7 +107,7 @@ public class ScheduleFragment extends Fragment {
 	BroadcastReceiver scheduleReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context arg0, Intent arg1) {
-			// TODO Auto-generated method stub
+			Log.d(TAG, "Receive broadcast from jobs");
 			loadData();
 		}
 	};
@@ -142,10 +144,12 @@ public class ScheduleFragment extends Fragment {
 				listDescription = new ArrayList<String>();
 				listRequirement = new ArrayList<String>();
 				listOptional = new ArrayList<String>();
-
+				listLocation = new ArrayList<String>();
+				
 				if (jsonStr != null) {
 					try {
-						Log.d(TAG, "Schedule results from " + url + ">>>\n" + jsonStr.toString());
+						Log.d(TAG, "Schedule results from " + url +
+								">>>\n" + jsonStr.toString());
 						
 						JSONArray items = new JSONArray(jsonStr);
 						if (items != null && items.length() > 0) {
@@ -187,6 +191,9 @@ public class ScheduleFragment extends Fragment {
 														"description"));
 										listOptional.add(jsonParser.getString(
 												objs, "optional"));
+										listLocation.add(jsonParser.getString(
+												objs, "location"));
+										
 										String startDate = jsonParser
 												.getString(objs,
 														"start_date_time");
@@ -233,7 +240,7 @@ public class ScheduleFragment extends Fragment {
 							Log.e("Parse Json Object", ">> Array is null");
 						}
 					} catch (JSONException e1) {						
-						NetworkUtils.connectionHandler(getActivity(), jsonStr);
+						NetworkUtils.connectionHandler(getActivity(), jsonStr, e1.getMessage());
 						
 						Log.e(CommonUtilities.TAG, "Load schedule " +
 								jsonStr + " >> " + e1.getMessage());

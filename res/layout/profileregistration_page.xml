@@ -23,23 +23,49 @@
             android:paddingTop="5dp" >
 
             <TextView
-                android:id="@+id/profile_reg_fullname"
+                android:id="@+id/profile_reg_fistname"
                 android:layout_width="110dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:paddingLeft="10dp"
-                android:text="@string/registration_profile_fullname" />
+                android:text="@string/registration_profile_family_name" />
 
             <EditText
-                android:id="@+id/regprofile_fullname"
+                android:id="@+id/regprofile_family_name"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="10dp"
-                android:layout_toRightOf="@id/profile_reg_fullname"
+                android:layout_toRightOf="@id/profile_reg_fistname"
                 android:inputType="textPersonName" >
             </EditText>
         </RelativeLayout>
+        
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp" >
+
+            <TextView
+                android:id="@+id/profile_reg_lastname"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/registration_profile_given_name" />
+
+            <EditText
+                android:id="@+id/regprofile_given_name"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/profile_reg_lastname"
+                android:inputType="textPersonName">
+            </EditText>
+        </RelativeLayout>
+        
 
         <View
             android:layout_width="fill_parent"
@@ -264,6 +290,7 @@
          -->
         
         <RelativeLayout
+            android:id="@+id/profile_reg_workexperience_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" >
 

@@ -64,11 +64,14 @@ public class JobDetails extends SherlockFragmentActivity {
 	private String isVerified = "false";
 	private boolean isProfileComplete;
 	private String pt_id = "";
+	private SharedPreferences settings;
+	private String optional;
+	private String requirement;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		SharedPreferences settings = getSharedPreferences(
+		settings = getSharedPreferences(
 				PREFS_NAME, Context.MODE_PRIVATE);
 		if (settings.getInt(SETTING_THEME, THEME_LIGHT) == THEME_LIGHT) {
 			setTheme(ApplicationUtils.getTheme(true));
@@ -76,8 +79,9 @@ public class JobDetails extends SherlockFragmentActivity {
 			setTheme(ApplicationUtils.getTheme(false));
 		}
 		
-		isVerified = settings.getString(CommonUtilities.USER_IS_VERIFIED, "true");
+		isVerified = settings.getString(CommonUtilities.USER_IS_VERIFIED, "false");
 		isProfileComplete = settings.getBoolean(CommonUtilities.USER_PROFILE_COMPLETE, false);
+		
 		pt_id = settings.getString(CommonUtilities.USER_PTID, "");
 		setContentView(R.layout.job_detail);
 
@@ -94,6 +98,8 @@ public class JobDetails extends SherlockFragmentActivity {
 		String expire = b.getString("expire");
 		String description = b.getString("description");
 		String reqs = b.getString("requirement");
+		String location = b.getString("location");
+		
 		if (reqs.contains("|")) {
 			String[] tmp = reqs.split("\\|");
 			reqs = "";
@@ -105,8 +111,8 @@ public class JobDetails extends SherlockFragmentActivity {
 				}
 			}
 		}
-		final String requirement = reqs;
-		final String optional = b.getString("optional");
+		requirement = reqs;
+		optional = b.getString("optional");
 		String jobType = b.getString("type");
 
 		TextView textPrice = (TextView) findViewById(R.id.textPrice);
@@ -141,27 +147,9 @@ public class JobDetails extends SherlockFragmentActivity {
 				if(isVerified == "false") {
 					ValidationUtilities.resendLinkDialog(JobDetails.this, pt_id);
 				} else if (isProfileComplete == false) {						
-					// Use the Builder class for convenient dialog construction
-			        AlertDialog.Builder builder = new AlertDialog.Builder(JobDetails.this);
-			        builder.setTitle(R.string.profile_header);
-			        builder.setMessage(R.string.profile_complete_question)
-			               .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-			                   public void onClick(DialogInterface dialog, int id) {
-			                      // Nothing here
-			                   }
-			               });
-			        Dialog dialog = builder.create();
-					dialog.show();
-
+					profileNotCompleteDialog();
 				} else {
-					Intent i = new Intent(context, RequirementsDetail.class);
-					i.putExtra("optional", optional);
-					if (requirement != null
-							&& !requirement.equalsIgnoreCase("null")
-							&& requirement.trim().length() > 1) {
-						i.putExtra("requirement", requirement.split("\n"));
-					}
-					startActivityForResult(i, RC_ACCEPT);					
+					allowAcceptJob();				
 				}
 			}
 		});
@@ -201,9 +189,89 @@ public class JobDetails extends SherlockFragmentActivity {
 
 		map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
 				.getMap();
-		loadLocation();
+		loadMap(location);
 	}
 	
+	/**
+	 * Verify user 
+	 */
+	protected void verifyUser() {
+		final String url = CommonUtilities.SERVERURL +
+				CommonUtilities.API_CHECK_PARTIMER_VERIFIED + "?" +
+				CommonUtilities.PARAM_PT_ID + "=" + pt_id;
+		
+		final Handler mHandlerFeed = new Handler();
+		final Runnable mUpdateResultsFeed = new Runnable() {
+			public void run() {
+				if (jsonStr != null) {
+					Log.e(TAG, "Result >>> " + jsonStr + ".");
+					
+					if (jsonStr.trim().equalsIgnoreCase("true")) {
+						
+						// Update user is_verified status
+						SharedPreferences.Editor editor = settings.edit();
+						editor.putString(CommonUtilities.USER_IS_VERIFIED, jsonStr.trim());
+						editor.commit();
+						
+						if(isProfileComplete == false) {
+							profileNotCompleteDialog();							
+						} else {
+							allowAcceptJob();
+						}
+
+					} else if(jsonStr.trim().equalsIgnoreCase("false")){
+						ValidationUtilities.resendLinkDialog(JobDetails.this, pt_id);
+					} else if(jsonStr.trim().equalsIgnoreCase("1")){
+						Toast.makeText(context, getString(R.string.server_error),
+								Toast.LENGTH_SHORT).show();
+					} else {
+						NetworkUtils.connectionHandler(context, jsonStr, "");
+					}
+				} else {
+					Toast.makeText(context, getString(R.string.server_error),
+							Toast.LENGTH_SHORT).show();
+				}
+			}
+		};
+
+		progress = ProgressDialog.show(context, getString(R.string.job_menu), 
+				getString(R.string.verifying),
+				true, false);
+		
+		new Thread() {
+			public void run() {
+				jsonParser = new JSONParser();
+				jsonStr = jsonParser.getHttpResultUrlGet(url);
+				Log.d(CommonUtilities.TAG, "Result from " + url + " >>>\n" + jsonStr);
+				mHandlerFeed.post(mUpdateResultsFeed);
+			}
+		}.start();
+	}
+	
+	private void allowAcceptJob() {
+		Intent i = new Intent(context, RequirementsDetail.class);
+		i.putExtra("optional", optional);
+		if (requirement != null
+				&& !requirement.equalsIgnoreCase("null")
+				&& requirement.trim().length() > 1) {
+			i.putExtra("requirement", requirement.split("\n"));
+		}
+		startActivityForResult(i, RC_ACCEPT);
+	}
+	
+	private void profileNotCompleteDialog() {
+		// Use the Builder class for convenient dialog construction
+        AlertDialog.Builder builder = new AlertDialog.Builder(JobDetails.this);
+        builder.setTitle(R.string.profile_header);
+        builder.setMessage(R.string.profile_complete_question)
+               .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
+                      // Nothing here
+                   }
+               });
+        Dialog dialog = builder.create();
+		dialog.show();
+	}
 
 	private void loadLocation() {
 		final String url = CommonUtilities.SERVERURL + CommonUtilities.API_GET_AVAILABILITY_BY_AVAIL_ID 
@@ -217,12 +285,11 @@ public class JobDetails extends SherlockFragmentActivity {
 						JSONObject obj = new JSONObject(jsonStr);
 						obj = obj.getJSONObject("availabilities");
 						String location = jsonParser.getString(obj, "location");
+						Log.d(TAG, "Load location " + location);
+						
 						loadMap(location);
 					} catch (JSONException e1) {						
-						NetworkUtils.connectionHandler(JobDetails.this, jsonStr);
-						
-						Log.e(CommonUtilities.TAG, "Load location result" +
-								jsonStr + " >> " + e1.getMessage());
+						NetworkUtils.connectionHandler(JobDetails.this, jsonStr, e1.getMessage());
 					} catch (Exception e) {
 						Log.e(CommonUtilities.TAG, ">>> " + e.getMessage());
 					}
@@ -269,7 +336,8 @@ public class JobDetails extends SherlockFragmentActivity {
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
 				if (jsonStr != null) {
-					Log.e("Result", ">>> " + jsonStr + ".");
+					Log.e(TAG, "Result >>> " + jsonStr + ".");
+					
 					if (jsonStr.trim().equalsIgnoreCase("0")) {
 						Toast.makeText(context, getString(R.string.job_cancel_success),
 								Toast.LENGTH_SHORT).show();
@@ -281,10 +349,10 @@ public class JobDetails extends SherlockFragmentActivity {
 								getString(R.string.job_cancel_failed),
 								Toast.LENGTH_LONG).show();
 					} else {
-						NetworkUtils.connectionHandler(context, jsonStr);
+						NetworkUtils.connectionHandler(context, jsonStr, "");
 					}
 				} else {
-					Toast.makeText(context, "jsonStr is Null",
+					Toast.makeText(context, getString(R.string.server_error),
 							Toast.LENGTH_SHORT).show();
 				}
 			}
@@ -312,7 +380,7 @@ public class JobDetails extends SherlockFragmentActivity {
 	/**
 	 * Reject offer action
 	 */
-	protected void doRejectOffer() {
+	protected void doRejectOffer(final boolean isBlocked) {		
 		final String url = CommonUtilities.SERVERURL + CommonUtilities.API_REJECT_JOB_OFFER;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
@@ -329,7 +397,7 @@ public class JobDetails extends SherlockFragmentActivity {
 								getString(R.string.job_reject_offer_failed),
 								Toast.LENGTH_LONG).show();
 					} else {
-						NetworkUtils.connectionHandler(context, jsonStr);
+						NetworkUtils.connectionHandler(context, jsonStr, "");
 					}
 				} else {
 					Toast.makeText(context, getString(R.string.server_error),
@@ -344,9 +412,28 @@ public class JobDetails extends SherlockFragmentActivity {
 		new Thread() {
 			public void run() {
 				jsonParser = new JSONParser();
-				String[] params = { "avail_id" };
-				String[] values = { jobID };
-				jsonStr = jsonParser.getHttpResultUrlPut(url, params, values);
+				try {
+					JSONObject parentData = new JSONObject();
+					JSONObject childData = new JSONObject();				
+
+					childData.put("avail_id", jobID);
+					if(isBlocked) {
+						childData.put("blocked", 1);					
+					} else {
+						childData.put("blocked", 0);
+					}
+					parentData.put("job_offer", childData);
+					String[] params = { "data" };
+					String[] values = { parentData.toString() };
+					
+					jsonStr = jsonParser.getHttpResultUrlPut(url, params, values);
+					Log.d(TAG, "Put into " + url + " with data " + parentData.toString());
+					Log.d(TAG, "Result >>> " + jsonStr);
+					
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 
 				if (progress != null && progress.isShowing()) {
 					progress.dismiss();
@@ -363,6 +450,10 @@ public class JobDetails extends SherlockFragmentActivity {
 			public void run() {
 				if (jsonStr != null) {
 					if (jsonStr.trim().equalsIgnoreCase("0")) {
+						// Reload schedule
+						Intent i = new Intent("schedule.receiver");
+						sendBroadcast(i);
+						
 						Toast.makeText(context, getString(R.string.job_accept_offer_success),
 								Toast.LENGTH_SHORT).show();
 						setResult(RESULT_OK);
@@ -373,7 +464,7 @@ public class JobDetails extends SherlockFragmentActivity {
 								getString(R.string.job_accept_offer_failed),
 								Toast.LENGTH_LONG).show();
 					} else {
-						NetworkUtils.connectionHandler(context, jsonStr);
+						NetworkUtils.connectionHandler(context, jsonStr, "");
 					}
 				} else {
 					Toast.makeText(context, getString(R.string.server_error),
@@ -405,15 +496,15 @@ public class JobDetails extends SherlockFragmentActivity {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (resultCode == RESULT_OK) {
 			if (requestCode == RC_ACCEPT) {
-				Intent i = new Intent("schedule.receiver");
-				sendBroadcast(i);
 				doAcceptOffer();
 			}
 			if (requestCode == RC_CANCEL) {
 				doCancelOffer(data.getExtras().getString("reason"));
 			}
 			if (requestCode == RC_REJECT) {
-				doRejectOffer();
+				boolean isBlocked = data.getBooleanExtra(
+						CommonUtilities.INTENT_REJECT_IS_BLOCKED, false);
+				doRejectOffer(isBlocked);
 			}
 		}
 	}

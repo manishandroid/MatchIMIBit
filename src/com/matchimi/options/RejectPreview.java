@@ -20,7 +20,8 @@ import com.matchimi.R;
 import com.matchimi.utils.ApplicationUtils;
 
 public class RejectPreview extends SherlockActivity {
-
+	private boolean isBlocked = false;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -45,14 +46,15 @@ public class RejectPreview extends SherlockActivity {
 			@Override
 			public void onClick(View arg0) {
 				Intent result = new Intent();
+				result.putExtra(CommonUtilities.INTENT_REJECT_IS_BLOCKED, isBlocked);
 				setResult(RESULT_OK, result);
 				finish();
 			}
 		});
 
-		buttonConfirmSubmit.setEnabled(false);
-		buttonConfirmSubmit
-				.setBackgroundResource(R.drawable.button_reject_offer);
+		buttonConfirmSubmit.setEnabled(true);
+//		buttonConfirmSubmit
+//				.setBackgroundResource(R.drawable.button_reject_offer);
 
 		final CheckBox checkOffer = (CheckBox) findViewById(R.id.checkOffer);
 		checkOffer.setText(getResources().getString(R.string.dont_show_offer)
@@ -60,15 +62,21 @@ public class RejectPreview extends SherlockActivity {
 		checkOffer.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
-				if (checkOffer.isChecked()) {
-					buttonConfirmSubmit.setEnabled(true);
-					buttonConfirmSubmit
-							.setBackgroundResource(R.drawable.button_accept_offer);
+				if(checkOffer.isChecked()) {
+					isBlocked = true;
 				} else {
-					buttonConfirmSubmit.setEnabled(false);
-					buttonConfirmSubmit
-							.setBackgroundResource(R.drawable.button_reject_offer);
+					isBlocked = false;					
 				}
+				
+//				if (checkOffer.isChecked()) {
+//					buttonConfirmSubmit.setEnabled(true);
+//					buttonConfirmSubmit
+//							.setBackgroundResource(R.drawable.button_accept_offer);
+//				} else {
+//					buttonConfirmSubmit.setEnabled(false);
+//					buttonConfirmSubmit
+//							.setBackgroundResource(R.drawable.button_reject_offer);
+//				}
 			}
 		});
 

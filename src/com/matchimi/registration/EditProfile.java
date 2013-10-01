@@ -193,6 +193,8 @@ public class EditProfile extends SherlockActivity {
 		defaultExpire.add(Calendar.DAY_OF_MONTH, 1);
 		
 		fullnameView = (EditText) findViewById(R.id.regprofile_fullname);
+		fullnameView.setEnabled(false);
+
 		phoneView = (EditText) findViewById(R.id.editPhoneNumber);
 		cardNumberView = (EditText) findViewById(R.id.editCardNumber);
 		EcNameView = (EditText) findViewById(R.id.editEcName);
@@ -200,7 +202,11 @@ public class EditProfile extends SherlockActivity {
 		bankNameView = (EditText) findViewById(R.id.editBankName);
 		accNumberView = (EditText) findViewById(R.id.editAccNumber);
 		branchView = (EditText) findViewById(R.id.editBranch);				
+		
 		genderView = (RadioGroup) findViewById(R.id.gender_group);
+		for(int i=0; i< genderView.getChildCount(); i++) {
+			((RadioButton) genderView.getChildAt(i)).setEnabled(false);
+		}
 		
 //		EcEmailView = (EditText) findViewById(R.id.editEcEmail);
 //		addressView = (EditText) findViewById(R.id.editAddress);
@@ -209,6 +215,9 @@ public class EditProfile extends SherlockActivity {
 //		EcPostalCodeView = (EditText) findViewById(R.id.editEcPostCode);
 //		bankAccTypeView = (EditText) findViewById(R.id.editBankAccType);
 
+		RelativeLayout workExperienceLayout = (RelativeLayout) findViewById(R.id.profile_reg_workexperience_layout);
+		workExperienceLayout.setVisibility(View.GONE);
+		
 		workExperienceView = (TextView) findViewById(R.id.regprofile_work_experience);
 		workExperienceView.setOnClickListener(workExperienceListener);
 		
@@ -226,7 +235,8 @@ public class EditProfile extends SherlockActivity {
 		// Set date of birth fields and listener
 		dobView = (TextView) findViewById(R.id.regprofile_date_of_birth);
 		dobView.setOnClickListener(dobListener);
-
+		dobView.setEnabled(false);
+		
 		// Set date of expire fields and listener
 		expiryDateView = (TextView) findViewById(R.id.editExpireDate);
 		expiryDateView.setOnClickListener(expiredListener);
@@ -238,7 +248,8 @@ public class EditProfile extends SherlockActivity {
 		// Set NRIC type fields and listener
 		statusView = (TextView) findViewById(R.id.regprofile_nric_type);
 		statusView.setOnClickListener(statusListener);
-
+		statusView.setEnabled(false);
+		
 		// Set school fields and listener
 		schoolView = (TextView) findViewById(R.id.textSchool);
 		schoolView.setOnClickListener(schoolListener);
@@ -301,13 +312,13 @@ public class EditProfile extends SherlockActivity {
 		showStudentInfo(false);
 
 		if (savedInstanceState == null) {
-			loadGender(false);
+			loadProfileWithDefaultData(false);
 		} else {
 			uploadImage = savedInstanceState.getString("uploadImage");	
 			uploadURL = savedInstanceState.getString("uploadURL");
 			selectedPhotoId = savedInstanceState.getInt("selectedPhotoId");				
 			
-			loadGender(true);
+			loadProfileWithDefaultData(true);
 		}
 		
 	}
@@ -826,11 +837,6 @@ public class EditProfile extends SherlockActivity {
 				isUserCompleteInput = false;
 			}
 			
-//			tmp = bankAccTypeView.getText().toString().trim();
-//			if (tmp.length() > 0) {
-//				profileInfo.setBank_acc_type(tmp);
-//			}
-			
 			tmp = accNumberView.getText().toString().trim();
 			if (tmp.length() > 0) {
 				profileInfo.setBank_acc_number(tmp);
@@ -845,7 +851,13 @@ public class EditProfile extends SherlockActivity {
 			} else {
 				profileInfo.setBank_acc_branch("");
 				isUserCompleteInput = false;
-			}
+			}			
+			
+//			tmp = bankAccTypeView.getText().toString().trim();
+//			if (tmp.length() > 0) {
+//				profileInfo.setBank_acc_type(tmp);
+//			}
+			
 			
 			doCreateProfile();
 			
@@ -897,7 +909,7 @@ public class EditProfile extends SherlockActivity {
 						loadNRICType(isUpload);
 						
 					} catch (JSONException e) {
-						NetworkUtils.connectionHandler(EditProfile.this, jsonStr);
+						NetworkUtils.connectionHandler(EditProfile.this, jsonStr, e.getMessage());
 						Log.e(TAG, "Error get genders >>> " + e.getMessage());
 					}
 				} else {
@@ -943,7 +955,7 @@ public class EditProfile extends SherlockActivity {
 
 						loadSkill(isUpload);
 					} catch (JSONException e) {
-						NetworkUtils.connectionHandler(EditProfile.this, jsonStr);
+						NetworkUtils.connectionHandler(EditProfile.this, jsonStr, e.getMessage());
 						Log.e(TAG, "Error get ic types >>> " + e.getMessage());
 					}
 				} else {
@@ -990,8 +1002,9 @@ public class EditProfile extends SherlockActivity {
 						}
 
 						loadSchool(isUpload);
+						
 					} catch (JSONException e) {
-						NetworkUtils.connectionHandler(EditProfile.this, jsonStr);
+						NetworkUtils.connectionHandler(EditProfile.this, jsonStr, e.getMessage());
 						Log.e(TAG, "Error skills >>> " + e.getMessage());
 					}
 				} else {
@@ -1038,7 +1051,7 @@ public class EditProfile extends SherlockActivity {
 						loadProfile(isUpload);
 						
 					} catch (Exception e) {
-						NetworkUtils.connectionHandler(EditProfile.this, jsonStr);
+						NetworkUtils.connectionHandler(EditProfile.this, jsonStr, e.getMessage());
 						Log.e(TAG, "Error skills >>> " + e.getMessage());
 					}
 				} else {
@@ -1056,6 +1069,248 @@ public class EditProfile extends SherlockActivity {
 				jsonParser = new JSONParser();
 				jsonStr = jsonParser.getHttpResultUrlGet(url);
 
+				if (progress != null && progress.isShowing()) {
+					progress.dismiss();
+					mHandlerFeed.post(mUpdateResultsFeed);
+				}
+			}
+		}.start();
+	}
+	
+	private void loadGenderJson(String jsonStr) {
+		try {
+			JSONObject dataObj = new JSONObject(jsonStr);
+			JSONArray jsonArray = dataObj.getJSONArray(CommonUtilities.PARAM_PROFILE_DEFAUT_PART_TIMER_GENDER);
+			
+			listGender = new ArrayList<String>();
+			listGenderId = new ArrayList<String>();
+			
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONObject obj = jsonArray.getJSONObject(i);
+				
+				obj = obj.getJSONObject("genders");
+				listGender.add(obj.getString("gender"));
+				listGenderId.add(obj.getString("gender_id"));
+			}
+			
+			loadNRICTypeJSON(jsonStr);
+			
+		} catch (JSONException e) {
+			NetworkUtils.connectionHandler(EditProfile.this, jsonStr, e.getMessage());
+			Log.e(TAG, "Error while get genders >>> " + e.getMessage());
+		}
+	}
+
+	private void loadNRICTypeJSON(String jsonStr) {		
+		
+		try {
+			JSONObject dataObj = new JSONObject(jsonStr);
+			JSONArray jsonArray = dataObj.getJSONArray(CommonUtilities.PARAM_PROFILE_DEFAUT_PART_TIMER_IC_TYPE);
+			
+			listNRICType = new ArrayList<String>();
+			listNRICTypeId = new ArrayList<String>();
+
+
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONObject obj = jsonArray.getJSONObject(i);
+				obj = obj.getJSONObject("nric_types");
+				listNRICType.add(obj.getString("nric_type"));
+				listNRICTypeId.add(obj.getString("nric_type_id"));
+			}
+
+			loadSkillJson(jsonStr);
+		} catch (JSONException e) {
+			NetworkUtils.connectionHandler(EditProfile.this, jsonStr, e.getMessage());
+			Log.e(TAG, "Error get ic types >>> " + e.getMessage());
+		}
+	}
+	
+	private void loadSkillJson(String jsonStr) {
+		try {
+			JSONObject dataObj = new JSONObject(jsonStr);
+			JSONArray jsonArray = dataObj.getJSONArray(CommonUtilities.PARAM_PROFILE_DEFAUT_PART_TIMER_SKILL);
+			
+			listSkill = new ArrayList<String>();
+			listSkillId = new ArrayList<String>();
+			listSkillDesc = new ArrayList<String>();
+
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONObject obj = jsonArray.getJSONObject(i);
+				obj = obj.getJSONObject("skills");
+				listSkillDesc.add(obj.getString("skill_desc"));
+				listSkillId.add(obj.getString("skill_id"));
+				listSkill.add(obj.getString("skill_name"));
+			}
+
+			loadSchoolJson(jsonStr);
+			
+		} catch (JSONException e) {
+			NetworkUtils.connectionHandler(EditProfile.this, jsonStr, e.getMessage());
+			Log.e(TAG, "Error skills >>> " + e.getMessage());
+		}
+	}
+	
+	private void loadSchoolJson(String jsonStr) {
+		try {
+			listSchool = new ArrayList<String>();
+			listSchoolId = new ArrayList<String>();
+
+			JSONObject dataObj = new JSONObject(jsonStr);
+			JSONArray jsonArray = dataObj.getJSONArray(CommonUtilities.PARAM_PROFILE_DEFAUT_PART_TIMER_SCHOOL);
+			
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONObject obj = jsonArray.getJSONObject(i);
+				obj = obj.getJSONObject("schools");
+				listSchool.add(obj.getString("school_name"));
+				listSchoolId.add(obj.getString("school_id"));
+			}
+
+			loadProfileJson(jsonStr);
+			
+		} catch (Exception e) {
+			NetworkUtils.connectionHandler(EditProfile.this, jsonStr, e.getMessage());
+			Log.e(TAG, "Error skills >>> " + e.getMessage());
+		}
+	}
+	
+	private void loadProfileJson(String jsonStr) {
+		profileInfo = new ProfileModel();
+		
+		try {
+			JSONObject obj = new JSONObject(jsonStr);
+			JSONObject wrapperObj = obj.getJSONObject(CommonUtilities.PARAM_PROFILE_DEFAUT_PART_TIMER);
+			obj = wrapperObj.getJSONObject("part_timers");
+			
+			Log.d(TAG, "User profile data\n" + obj.toString());
+			
+			// Convert date birth format
+			Date dobDate = facebookDateFormat.parse(obj.getString("dob"));
+			String dobConvert = dobDateFormat.format(dobDate);
+			profileInfo.setDob(dobConvert);						
+			
+			profileInfo.setEmail(obj.getString("email"));
+			profileInfo.setWork_exp(obj
+					.getString("work_experience"));
+			profileInfo.setFirst_name(obj.getString("first_name"));
+			profileInfo.setLast_name(obj.getString("last_name"));
+			profileInfo.setPhone_num(obj.getString("phone_no"));
+			profileInfo.setGender(obj.getString("gender"));
+			profileInfo.setProfile_pic(obj
+					.getString("profile_picture"));
+			profileInfo.setIc_back_picture(obj
+					.getString("ic_back_picture"));
+			profileInfo.setIc_front_picture(obj
+					.getString("ic_front_picture"));
+			profileInfo.setIc_no(obj.getString("ic_no"));
+			profileInfo.setIc_type(obj.getString("ic_type"));
+			profileInfo.setIc_type_id(obj.getString("ic_type_id"));
+			
+			// School only for ic student
+			String studentSchoolname = obj.optString("school_name");
+			if(studentSchoolname != "") {
+				profileInfo.setSchool(obj.getString("school_name"));							
+			}
+
+			// Matric card only for ic student
+			String studentMatricCard = obj.optString("matric_card_no");
+			if(studentMatricCard != "") {
+				profileInfo.setCard_number(obj.getString("matric_card_no"));							
+			}						
+
+			String studentMatricCardPicture = obj.optString("matric_card_picture");
+			if(studentMatricCardPicture != "") {
+				profileInfo.setCard_picture(obj.getString("matric_card_picture"));							
+			}
+			
+			// Student ic expired
+			String studentIcExpired = obj.optString("ic_expiry_date");
+			if(studentIcExpired != "") {
+				String expiryDate = obj.getString("ic_expiry_date");
+				if(expiryDate != "null") {
+					// Convert date birth format
+					Date expireDate = facebookDateFormat.parse(obj.getString("ic_expiry_date"));
+					String expireConvert = dobDateFormat.format(expireDate);
+					profileInfo.setIc_expired(expireConvert);								
+				}
+				expiryDateLayout.setVisibility(View.VISIBLE);
+			} else {
+				expiryDateLayout.setVisibility(View.GONE);
+			}
+
+			String s = obj.getString("skills");
+			if (s != null && !s.equalsIgnoreCase("null") && s.length() > 2) {
+				s = s.substring(1, s.length() - 1);
+				String[] arr = s.split(",");
+				List<Integer> l = new ArrayList<Integer>();
+				for (String tmp : arr) {
+					l.add(Integer.parseInt(tmp.trim()));
+				}
+				profileInfo.setSkill(l);
+			}
+			
+			// Loading Bank data
+			profileInfo.setBank_name(obj.getString("bank_name"));
+			profileInfo.setBank_acc_number(obj
+					.getString("bank_account_no"));
+			profileInfo.setBank_acc_branch(obj
+					.getString("bank_branch_name"));
+			
+			// Loading EC data
+			profileInfo.setEc_name(obj.getString("ec_first_name")
+					+ " " + obj.getString("ec_last_name"));
+			profileInfo.setEc_phone(obj.getString("ec_phone_no"));
+			profileInfo.setEc_relationship(obj
+					.getString("ec_relationship"));
+			
+			// Update user is_verified status
+			SharedPreferences.Editor editor = settings.edit();
+			editor.putString(CommonUtilities.USER_IS_VERIFIED, 
+					obj.getString(CommonUtilities.PARAM_PROFILE_IS_VERIFIED));
+			editor.commit();
+			
+			updateLayout();			
+			
+		} catch (Exception e) {
+			NetworkUtils.connectionHandler(EditProfile.this, jsonStr, e.getMessage());
+
+			Log.e(TAG, "Get profile error >> " + e.getMessage());
+			Toast.makeText(context,
+					getString(R.string.edit_get_profile_error),
+					Toast.LENGTH_SHORT).show();
+		}
+	}
+	
+	
+	private void loadProfileWithDefaultData(final boolean isUpload) {
+		Log.d(TAG, "Load profile with default data");
+		
+		final String url = SERVERURL + CommonUtilities.API_GET_PART_TIMER_PROFILE_WITH_DEFAULT_DATA_BY_PT_ID +
+				"?" + CommonUtilities.PARAM_PT_ID + "=" + pt_id;
+		
+		final Handler mHandlerFeed = new Handler();
+		final Runnable mUpdateResultsFeed = new Runnable() {
+			public void run() {
+				if (jsonStr != null || jsonStr.length() > 0) {
+					loadGenderJson(jsonStr);
+					
+					if(isUpload) {
+						uploadImageToServer(uploadImage, uploadURL, selectedPhotoId);
+					}
+					
+				} else {
+					Toast.makeText(context,
+							getString(R.string.server_error),
+							Toast.LENGTH_SHORT).show();
+				}
+			}
+		};
+
+		progress = ProgressDialog.show(context, "Profile",
+				getString(R.string.loading_profile), true, false);
+		new Thread() {
+			public void run() {
+				jsonParser = new JSONParser();
+				jsonStr = jsonParser.getHttpResultUrlGet(url);
 				if (progress != null && progress.isShowing()) {
 					progress.dismiss();
 					mHandlerFeed.post(mUpdateResultsFeed);
@@ -1170,7 +1425,7 @@ public class EditProfile extends SherlockActivity {
 						
 //						loadBankInfo();
 					} catch (Exception e) {
-						NetworkUtils.connectionHandler(EditProfile.this, jsonStr);
+						NetworkUtils.connectionHandler(EditProfile.this, jsonStr, e.getMessage());
 
 						Log.e(TAG, "Get profile error >> " + e.getMessage());
 						Toast.makeText(context,
@@ -1235,14 +1490,18 @@ public class EditProfile extends SherlockActivity {
 			skillView.setText(skillString);
 		}
 
-		int selectedWorkID = Integer.parseInt(profileInfo.getWork_exp());
-		if(selectedWorkID > 3) {
-			selectedWorkID = 0;
-		} else {
-			selectedWorkID = listWorkExpID.indexOf(profileInfo.getWork_exp());						
-		}
+		String workExperienceText = "";
+		try {
+			int selectedWorkID = Integer.parseInt(profileInfo.getWork_exp());			
+			if(selectedWorkID > 3) {
+				selectedWorkID = 0;
+			} else {
+				selectedWorkID = listWorkExpID.indexOf(profileInfo.getWork_exp());						
+			}
+			workExperienceText = (String) listWorkExperience.get(selectedWorkID);
+		} catch(Exception e) {
 
-		String workExperienceText = (String) listWorkExperience.get(selectedWorkID);
+		}
 		workExperienceView.setText(workExperienceText);
 
 		statusView.setText(profileInfo.getIc_type());
@@ -1273,20 +1532,29 @@ public class EditProfile extends SherlockActivity {
 			showStudentInfo(false);
 		}
 		
-		insertImage(imageProfileView, profileImagePath);
-		insertImage(imageICBackView, icBackImagePath);
-		insertImage(imageICFrontView, icFrontImagePath);
-		insertImage(imageCardView, cardImagePath);
+		updateImageLayout();
 	}
 
 	/**
 	 * Refreshing image layout
 	 */
 	private void updateImageLayout() {
-		insertImage(imageProfileView, profileImagePath);
-		insertImage(imageICBackView, icBackImagePath);
-		insertImage(imageICFrontView, icFrontImagePath);
-		insertImage(imageCardView, cardImagePath);
+
+		if(profileInfo.getProfile_pic() != null && profileInfo.getProfile_pic().length() > 0) {
+			insertImage(imageProfileView, profileImagePath);			
+		}
+		
+		if(profileInfo.getIc_back_picture() != null && profileInfo.getIc_back_picture().length() > 0) {
+			insertImage(imageICBackView, icBackImagePath);			
+		}
+		
+		if(profileInfo.getIc_front_picture() != null && profileInfo.getIc_front_picture().length() > 0) {
+			insertImage(imageICFrontView, icFrontImagePath);			
+		}
+		
+		if(profileInfo.getCard_picture() != null && profileInfo.getCard_picture().length() > 0) {			
+			insertImage(imageCardView, cardImagePath);
+		}
 	}
 	
 	private void showStudentInfo(boolean show) {
@@ -1320,6 +1588,7 @@ public class EditProfile extends SherlockActivity {
 			for (int i = 0; i < listGender.size(); i++) {
 				final RadioButton rb = new RadioButton(context);
 				rb.setText(listGender.get(i));
+				rb.setEnabled(false);
 				rb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 					@Override
 					public void onCheckedChanged(CompoundButton arg0,
@@ -1344,8 +1613,6 @@ public class EditProfile extends SherlockActivity {
 			public void run() {
 				if (jsonStr != null) {
 					if (jsonStr.trim().equalsIgnoreCase("0")) {
-						SharedPreferences settings = getSharedPreferences(
-								PREFS_NAME, Context.MODE_PRIVATE);
 						SharedPreferences.Editor editor = settings.edit();
 						
 						// Update settings
@@ -1373,7 +1640,7 @@ public class EditProfile extends SherlockActivity {
 					} else if (jsonStr.trim().equalsIgnoreCase("2")) {
 						ValidationUtilities.resendLinkDialog(EditProfile.this, pt_id);
 					} else {
-						NetworkUtils.connectionHandler(EditProfile.this, jsonStr);
+						NetworkUtils.connectionHandler(EditProfile.this, jsonStr, "");
 					}
 				} else {
 					Toast.makeText(context,
@@ -1428,6 +1695,7 @@ public class EditProfile extends SherlockActivity {
 					childData.put("profile_source", "system");
 					childData.put("matric_card_picture",
 							profileInfo.getCard_picture());
+					
 					childData.put("matric_card_no",
 							profileInfo.getCard_number());
 					
@@ -1494,7 +1762,7 @@ public class EditProfile extends SherlockActivity {
 		
 		if(profileInfo.checkComplete() == true && isUserCompleteInput == true) {
 			editor.putBoolean(USER_PROFILE_COMPLETE, true);
-			Log.d(TAG, "User profile completed!");
+			Log.d(TAG, "User profile already completed!");
 		} else {
 			editor.putBoolean(USER_PROFILE_COMPLETE, false);
 			Log.d(TAG, "User profile incompleted! profileInfo : " + profileInfo.checkComplete() +
@@ -1720,7 +1988,7 @@ public class EditProfile extends SherlockActivity {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-					NetworkUtils.connectionHandler(context, jsonStr.toString());						
+					NetworkUtils.connectionHandler(context, jsonStr.toString(), e.getMessage());						
 					Log.e(CommonUtilities.TAG, "Error uploading image " + " >> " + e.getMessage());
 				}
 				
@@ -1759,6 +2027,12 @@ public class EditProfile extends SherlockActivity {
 					switch (outputPhotoId) {
 		    		case TAKE_IMG_PROFILE:
 		    			profileInfo.setProfile_pic(s.toString());
+		    			
+		    			// Update user profile picture
+		    			SharedPreferences.Editor editor = settings.edit();
+						editor.putString(CommonUtilities.USER_PROFILE_PICTURE, s.toString());
+						editor.commit();
+						
 		    			break;
 		    		case TAKE_IMG_CARD:
 		    			profileInfo.setCard_picture(s.toString());
@@ -1775,7 +2049,7 @@ public class EditProfile extends SherlockActivity {
 					JSONObject json = new JSONObject(); 
 					try {
 						json.put("status", CommonUtilities.NOINTERNET);
-						NetworkUtils.connectionHandler(context, jsonStr.toString());						
+						NetworkUtils.connectionHandler(context, jsonStr.toString(), e.getMessage());						
 					} catch (JSONException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();

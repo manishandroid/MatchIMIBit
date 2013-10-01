@@ -9,9 +9,13 @@ import static com.matchimi.CommonUtilities.TAG;
 import static com.matchimi.CommonUtilities.THEME_LIGHT;
 import static com.matchimi.CommonUtilities.USER_PTID;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Locale;
 
 import org.json.JSONObject;
@@ -19,6 +23,7 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -55,6 +60,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.matchimi.CommonUtilities;
 import com.matchimi.R;
 import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
@@ -123,7 +129,7 @@ public class CreateAvailability extends SherlockFragmentActivity {
 					showDateDialog(false);
 				} else {
 					Toast.makeText(context,
-							"You should choose start time first !",
+							getString(R.string.availability_select_date_validation),
 							Toast.LENGTH_SHORT).show();
 				}
 			}
@@ -149,7 +155,6 @@ public class CreateAvailability extends SherlockFragmentActivity {
 		});
 
 		TextView labelSalary = (TextView) findViewById(R.id.labelSalary);
-		
 		labelSalary.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
@@ -203,6 +208,7 @@ public class CreateAvailability extends SherlockFragmentActivity {
 
 		Bundle b = getIntent().getExtras();
 		update = b.getBoolean("update");
+		
 		if (update) {
 			ab.setTitle("Edit Availability");
 			start = b.getString("start");
@@ -247,34 +253,32 @@ public class CreateAvailability extends SherlockFragmentActivity {
 	}
 
 	private void reloadView() {
-		SimpleDateFormat formatterDate = new SimpleDateFormat("EE d MMM",
-				Locale.getDefault());
-		SimpleDateFormat formatterTime = new SimpleDateFormat("hh a",
-				Locale.getDefault());
-
 		TextView labelStart = (TextView) findViewById(R.id.labelStart);
 		TextView labelEnd = (TextView) findViewById(R.id.labelEnd);
 		TextView labelRepeat = (TextView) findViewById(R.id.labelRepeat);
 		TextView labelSalary = (TextView) findViewById(R.id.labelSalary);
-
+		
+		labelStart.setText("Start at :");
+		labelEnd.setText("End at :");
+		
 		if (start != null) {
 			Calendar calStart = generateCalendar(start);
 			labelStart.setText("Start at : "
-					+ formatterDate.format(calStart.getTime())
+					+ CommonUtilities.AVAILABILITY_DATE.format(calStart.getTime())
 					+ ", "
-					+ formatterTime.format(calStart.getTime()).toLowerCase(
+					+ CommonUtilities.AVAILABILITY_TIME.format(calStart.getTime()).toLowerCase(
 							Locale.getDefault()));
 		}
 
 		if (end != null) {
 			Calendar calEnd = generateCalendar(end);
 			labelEnd.setText("End at : "
-					+ formatterDate.format(calEnd.getTime())
+					+ CommonUtilities.AVAILABILITY_DATE.format(calEnd.getTime())
 					+ ", "
-					+ formatterTime.format(calEnd.getTime()).toLowerCase(
+					+ CommonUtilities.AVAILABILITY_TIME.format(calEnd.getTime()).toLowerCase(
 							Locale.getDefault()));
-		}
-
+		} 
+		
 		labelRepeat.setText("Repeat : " + repeatString[repeat]);
 
 		if (price != null) {
@@ -293,7 +297,7 @@ public class CreateAvailability extends SherlockFragmentActivity {
 		boolean isNetworkEnabled = locationManager
 				.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
-		// Check if enabled and if not send user to the GSP settings
+		// Check if enabled and if not send user to the GPS settings
 		// Better solution would be to display a dialog and suggesting to
 		// go to the settings
 		if (!isGPSEnabled && !isNetworkEnabled) {
@@ -349,8 +353,8 @@ public class CreateAvailability extends SherlockFragmentActivity {
 					Double.parseDouble(longtitude));
 
 			map.clear();
-			map.addMarker(new MarkerOptions().position(pos).title("Matchimi")
-					.snippet("Your job area availability")
+			map.addMarker(new MarkerOptions().position(pos).title(getString(R.string.app_name))
+					.snippet(getString(R.string.map_availability_area))
 					.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin)));
 			// Move the camera instantly to hamburg with a zoom of 15.
 			map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 12));
@@ -360,15 +364,16 @@ public class CreateAvailability extends SherlockFragmentActivity {
 	}
 
 	protected void showDateDialog(boolean withDate) {
-		final SimpleDateFormat sdf = new SimpleDateFormat(
-				"yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+		final SimpleDateFormat sdf = CommonUtilities.AVAILABILTY_DATETIME;
 		final Calendar cal;
+		
 		if (withDate) {
 			if (start != null) {
 				cal = generateCalendar(start);
 			} else {
 				cal = new GregorianCalendar(Locale.getDefault());
 			}
+			
 			DatePickerDialog dialogDate = new DatePickerDialog(
 					context,
 					new OnDateSetListener() {
@@ -380,39 +385,72 @@ public class CreateAvailability extends SherlockFragmentActivity {
 							cal.set(Calendar.DAY_OF_MONTH, arg3);
 							AlertDialog.Builder builder = new AlertDialog.Builder(context);
 							final View view = LayoutInflater.from(context).inflate(R.layout.custome_time, null);
-							builder.setView(view);
 							
-							builder.setTitle("Set Time");
+							builder.setView(view);							
+							builder.setTitle(getString(R.string.availability_set_time));
 							
 							final NumberPicker np1 = (NumberPicker)view.findViewById(R.id.numberPicker1);
-							final String[] nums1 = {"00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"};
+							final String[] nums1 = generateHour(0);
 							np1.setMaxValue(23);
 							np1.setMinValue(0);
-							np1.setWrapSelectorWheel(false);
+							np1.setWrapSelectorWheel(true);
 							np1.setDisplayedValues(nums1);
 							
 							final NumberPicker np2 = (NumberPicker)view.findViewById(R.id.numberPicker2);
 							final String[] nums2 = {"00", "15", "30", "45"};
 							np2.setMaxValue(3);
 							np2.setMinValue(0);
-							np2.setWrapSelectorWheel(false);
+							np2.setWrapSelectorWheel(true);
 							np2.setDisplayedValues(nums2);
 							
-							builder.setPositiveButton("Set", new DialogInterface.OnClickListener() {
+							builder.setPositiveButton(R.string.set, new DialogInterface.OnClickListener() {
 								@Override
 								public void onClick(DialogInterface arg0, int arg1) {
 									cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(nums1[np1.getValue()]));
 									cal.set(Calendar.MINUTE, Integer.parseInt(nums2[np2.getValue()]));
 									start = sdf.format(cal.getTime());
+
+									// Restrict start date not older than now
+									Date today = new Date();
+									if(today.after(cal.getTime())) {
+										// Use the Builder class for convenient dialog construction
+								        AlertDialog.Builder builder = new AlertDialog.Builder(CreateAvailability.this);
+								        builder.setMessage(R.string.availability_start_error)
+								               .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+								                   public void onClick(DialogInterface dialog, int id) {
+								                	   start = null;
+								                	   end = null;
+								                	   reloadView();
+								                   }
+								               });
+								        // Create the AlertDialog object and return it
+								        Dialog dialog = builder.create();
+								        dialog.show();
+								        
+									} else {
+										if(end != null) {
+											try {
+												Date endAvailability = sdf.parse(end);
+												if(endAvailability.getTime() <= cal.getTimeInMillis()) {
+													end = null;	
+												} 
+											} catch (ParseException e) {
+												// TODO Auto-generated catch block
+												e.printStackTrace();
+											}
+										}
+									}
+									
 									reloadView();
 								}
 							});
 							
-							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+							builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
 								@Override
 								public void onClick(DialogInterface arg0, int arg1) {
 								}
 							});
+							
 							AlertDialog dialogTime = builder.create();
 //							TimePickerDialog dialogTime = new TimePickerDialog(
 //									context, new OnTimeSetListener() {
@@ -431,16 +469,18 @@ public class CreateAvailability extends SherlockFragmentActivity {
 					}, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH),
 					cal.get(Calendar.DAY_OF_MONTH));
 			dialogDate.show();
+			
 		} else {
+			
 			cal = generateCalendar(start);
 			AlertDialog.Builder builder = new AlertDialog.Builder(context);
 			final View view = LayoutInflater.from(context).inflate(R.layout.custome_time, null);
 			builder.setView(view);
 			
-			builder.setTitle("Set Time");
+			builder.setTitle(getString(R.string.availability_set_time));
 			
 			final NumberPicker np1 = (NumberPicker)view.findViewById(R.id.numberPicker1);
-			final String[] nums1 = {"00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"};
+			final String[] nums1 = generateHour(0);
 			np1.setMaxValue(23);
 			np1.setMinValue(0);
 			np1.setWrapSelectorWheel(false);
@@ -453,17 +493,47 @@ public class CreateAvailability extends SherlockFragmentActivity {
 			np2.setWrapSelectorWheel(false);
 			np2.setDisplayedValues(nums2);
 			
-			builder.setPositiveButton("Set", new DialogInterface.OnClickListener() {
+			builder.setPositiveButton(R.string.set, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface arg0, int arg1) {
 					cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(nums1[np1.getValue()]));
 					cal.set(Calendar.MINUTE, Integer.parseInt(nums2[np2.getValue()]));
-					end = sdf.format(cal.getTime());
+					
+					try {
+						Date startAvailability = sdf.parse(start);					
+						Log.d(TAG, "Start comparing ..");
+						
+						if(startAvailability.getTime() >= cal.getTimeInMillis()) {
+							end = null;
+							AlertDialog.Builder builder = new AlertDialog.Builder(context);
+							String message = "";
+							if(startAvailability.getTime() == cal.getTimeInMillis()) {
+								message = getString(R.string.availability_end_equal);
+							} else {
+								message = getString(R.string.availability_end_overlap);
+							}
+					        builder.setMessage(message)
+					               .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+					                   public void onClick(DialogInterface dialog, int id) {
+					                	   
+					                   }
+					               });
+					        // Create the AlertDialog object and return it
+					        Dialog dialog = builder.create();
+					        dialog.show();
+						} else {
+							end = sdf.format(cal.getTime());
+						}
+					} catch (ParseException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
 					reloadView();
 				}
 			});
 			
-			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface arg0, int arg1) {
 				}
@@ -484,7 +554,27 @@ public class CreateAvailability extends SherlockFragmentActivity {
 			dialogTime.show();
 		}
 	}
-
+	
+	/**
+	 * Generate hour
+	 * @param startHour
+	 * @return
+	 */
+	private String[] generateHour(int startHour) {
+		List<String> hourResult = new ArrayList<String>();		
+		
+		int endHour = 24;
+		for(int i=startHour; i<endHour; i++) {
+			if(i<10) {
+				hourResult.add("0" + String.valueOf(i));
+			} else {
+				hourResult.add(String.valueOf(i));
+			}
+		}
+		
+		return hourResult.toArray(new String[hourResult.size()]);
+	}
+	
 	private Calendar generateCalendar(String str) {
 		Calendar calRes = new GregorianCalendar(Integer.parseInt(str.substring(
 				0, 4)), Integer.parseInt(str.substring(5, 7)) - 1,
@@ -517,11 +607,13 @@ public class CreateAvailability extends SherlockFragmentActivity {
 								context,
 								getString(R.string.availability_adding_overlap),
 								Toast.LENGTH_LONG).show();
+					} else {
+						NetworkUtils.connectionHandler(context, jsonStr, "");
 					}
 				} else {
 					Toast.makeText(
 							context,
-							getString(R.string.something_wrong),
+							getString(R.string.server_error),
 							Toast.LENGTH_LONG).show();
 				}
 			}
@@ -543,11 +635,10 @@ public class CreateAvailability extends SherlockFragmentActivity {
 					childData.put("end_date_time", end);
 					childData.put("repeat", repeat);
 					childData.put("avail_id", avail_id);
-					if(location != null && !location.equalsIgnoreCase("null")
-							&& location.length() > 1) {
+					if(location == null || location.equalsIgnoreCase("null")
+							|| location.length() == 0) {
 						location = "";
 					}
-
 					childData.put("location", location);
 					
 					parentData.put("availability", childData);
@@ -581,7 +672,7 @@ public class CreateAvailability extends SherlockFragmentActivity {
 				errors += "* " + getString(R.string.start_time) + "\n";
 			}
 			
-			if(start == null) {
+			if(end == null) {
 				errors += "* " + getString(R.string.end_time) + "\n";
 			}
 			
@@ -609,7 +700,7 @@ public class CreateAvailability extends SherlockFragmentActivity {
 						Toast.makeText(context, getString(R.string.availability_adding_overlap),
 								Toast.LENGTH_SHORT).show();
 					} else {
-						NetworkUtils.connectionHandler(context, jsonStr);
+						NetworkUtils.connectionHandler(context, jsonStr, "");
 					}
 				} else {
 					Toast.makeText(
@@ -635,6 +726,11 @@ public class CreateAvailability extends SherlockFragmentActivity {
 					childData.put("start_date_time", start);
 					childData.put("end_date_time", end);
 					childData.put("repeat", repeat);
+					if(location == null || location.equalsIgnoreCase("null")
+							|| location.length() == 0) {
+						location = "";
+					}
+					childData.put("location", location);				
 					parentData.put("availability", childData);
 
 					String[] params = { "data" };
@@ -670,27 +766,29 @@ public class CreateAvailability extends SherlockFragmentActivity {
 			finish();
 			break;
 		case R.id.menu_submit:
-			if (update) {
-				doEditAvailability();
+			String errors = checkInput();
+			
+			if(errors.length() > 0) {
+				AlertDialog.Builder builder = new AlertDialog.Builder(context);
+				builder.setTitle(getString(R.string.menu_availability));
+				builder.setMessage("Please complete :\n" + errors);
+				builder.setPositiveButton(getString(R.string.ok),
+						new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int arg1) {
+								// Nothing 
+							}
+						});
+				AlertDialog dialog = builder.create();
+				dialog.show();	
 			} else {
-				String errors = checkInput();
-				if(errors.length() == 0) {
-					doAddAvailability();					
+				if (update) {
+					doEditAvailability();			
 				} else {
-					AlertDialog.Builder builder = new AlertDialog.Builder(context);
-					builder.setTitle(getString(R.string.menu_availability));
-					builder.setMessage("Please complete :\n" + errors);
-					builder.setPositiveButton(getString(R.string.ok),
-							new DialogInterface.OnClickListener() {
-								@Override
-								public void onClick(DialogInterface dialog, int arg1) {
-									// Nothing 
-								}
-							});
-					AlertDialog dialog = builder.create();
-					dialog.show();	
+					doAddAvailability();					
 				}
 			}
+			
 			break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -702,6 +800,7 @@ public class CreateAvailability extends SherlockFragmentActivity {
 		if (resultCode == RESULT_OK) {
 			if (requestCode == RC_MAPS_ACTIVITY) {
 				location = data.getExtras().getString("location");
+				Log.d(TAG, "Receive location data from intent " + location);
 				loadMap(location);
 			}
 		}

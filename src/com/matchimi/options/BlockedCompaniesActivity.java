@@ -21,8 +21,15 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RatingBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
@@ -33,9 +40,12 @@ import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
+import com.matchimi.CommonUtilities;
 import com.matchimi.R;
 import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONHelper;
+import com.matchimi.utils.JSONParser;
+import com.matchimi.utils.NetworkUtils;
 
 public class BlockedCompaniesActivity extends SherlockActivity {
 	
@@ -44,7 +54,16 @@ public class BlockedCompaniesActivity extends SherlockActivity {
 	
 	private ProgressDialog progress;
 	
-	private static RequestQueue volleyQueue;
+	private List<String> listAddress;
+	private List<String> listGrade;
+	private List<String> listName;
+	private List<String> listPostalCode;
+	private LinearLayout blockedCompaniesLayout;
+	
+	
+	private JSONParser jsonParser = null;
+	private String jsonStr = null;
+
 	private List<Map> blockedCompanies = new ArrayList();
 	private JSONObject companyData;
 	private ListView listview;
@@ -64,72 +83,104 @@ public class BlockedCompaniesActivity extends SherlockActivity {
 		context = this;
 		ActionBar ab = getSupportActionBar();
 		ab.setDisplayHomeAsUpEnabled(true);
+		
+		blockedCompaniesLayout = (LinearLayout) findViewById(R.id.blockedCompaniesLayout);
 
 		pt_id = settings.getString(USER_PTID, null);
-
-		listview = (ListView) findViewById(R.id.blocked_companies_listview);
-
-		String[] values = new String[] { "Jumbo, Clark Quay",
-				"Jumbo, Clark Quay", "Iguana, Clark Quay" };
-
-		final ArrayList<String> list = new ArrayList<String>();
-		for (int i = 0; i < values.length; ++i) {
-			list.add(values[i]);
-		}
-
-		volleyQueue = Volley.newRequestQueue(this);
-
-		progress = ProgressDialog.show(context, "Profile",
-				"Getting blocked companies...", true, false);
+		loadBlockedCompanies();
 		
-		String URL = SERVERURL + API_GET_BLOCKED_COMPANIES_BY_PT_ID + "?"
+	}
+
+	private void loadBlockedCompanies() {
+		final String url = SERVERURL + API_GET_BLOCKED_COMPANIES_BY_PT_ID + "?"
 				+ PARAM_PT_ID + "=" + pt_id;
-
-		volleyQueue.add(new JsonArrayRequest(URL, new Listener<JSONArray>() {
-			@Override
-			public void onResponse(JSONArray response) {
-
-				for (int i = 0; i < response.length(); i++) {
-					try {
-						JSONObject json_data = response.getJSONObject(i);
-						companyData = (JSONObject) json_data.get("companies");
-					} catch (JSONException e) {
-						e.printStackTrace();
-					}
-
-					try {
-						Map<String, Object> dataCompany = JSONHelper
-								.toMap(companyData);
-						blockedCompanies.add(dataCompany);
-						Log.d(TAG, "MOKO " + blockedCompanies.toString());
-					} catch (JSONException e) {
-						e.printStackTrace();
-					}
-				}
+		final Handler mHandlerFeed = new Handler();
+		final Runnable mUpdateResultsFeed = new Runnable() {
+			public void run() {
+				listAddress = new ArrayList<String>();
+				listGrade = new ArrayList<String>();
+				listName= new ArrayList<String>();
+				listPostalCode = new ArrayList<String>();
 				
+				if (jsonStr != null) {
+					try {
+						Log.e(TAG, "Blocked companies result >>> " + jsonStr);
+						
+						JSONArray items = new JSONArray(jsonStr);
+						if (items != null && items.length() > 0) {
+							for (int i = 0; i < items.length(); i++) {
+								JSONObject objs = items.getJSONObject(i);
+								objs = objs.getJSONObject(CommonUtilities.PARAM_BLOCKED_COMPANIES);
+								listAddress.add(jsonParser.getString(objs,
+										CommonUtilities.PARAM_BLOCKED_COMPANIES_ADDRESS));
+								listGrade.add(jsonParser.getString(objs,
+										CommonUtilities.PARAM_BLOCKED_COMPANIES_GRADE_ID));
+								listName.add(jsonParser.getString(objs,
+										CommonUtilities.PARAM_BLOCKED_COMPANIES_NAME));
+								
+								String information = "";
+								String postal_code = jsonParser.getString(objs,
+										CommonUtilities.PARAM_BLOCKED_COMPANIES_POSTAL_CODE);
+								if(postal_code.length() > 0) {
+									information += "Postal code: " + postal_code + "\n";
+								}
+								listPostalCode.add(information);
+							}
+						} else {
+							Log.e(TAG, "Result array is null");
+						}
+					} catch (JSONException e1) {						
+						NetworkUtils.connectionHandler(BlockedCompaniesActivity.this, jsonStr,
+								e1.getMessage());						
+					}
+				} else {
+					Toast.makeText(context,
+							getString(R.string.server_error), Toast.LENGTH_SHORT).show();
+				}
+				createLayout();
+			}
+		};
+
+		progress = ProgressDialog.show(context, context.getString(R.string.app_name),
+				getString(R.string.blocked_companies_loading), true, false);
+		new Thread() {
+			public void run() {
+				jsonParser = new JSONParser();
+				jsonStr = jsonParser.getHttpResultUrlGet(url);
 				if (progress != null && progress.isShowing()) {
 					progress.dismiss();
-				}
-
-				addAdapter(blockedCompanies);
-
-				// SUCCESS
-			}
-		}, new ErrorListener() {
-			@Override
-			public void onErrorResponse(VolleyError error) {
-				if (progress != null && progress.isShowing()) {
-					progress.dismiss();
+					mHandlerFeed.post(mUpdateResultsFeed);
 				}
 			}
-		}));
+		}.start();
+	}
+	
+	protected void createLayout() {
+		if (listName != null && listName.size() > 0) {
+			for (int i = 0; i < listName.size(); i++) {
+				LayoutInflater li = LayoutInflater.from(context);
+				View v = li.inflate(R.layout.blocked_companies_list, null);
+				TextView nameView = (TextView) v
+						.findViewById(R.id.blockedcompanies_company_name);
+				nameView.setText(listName.get(i));
+				
+				RatingBar rateGrade = (RatingBar) v
+						.findViewById(R.id.blockedcompanies_ratingBar);
+				rateGrade.setRating(Float.parseFloat(listGrade.get(i)));
+
+				TextView addressView = (TextView) v
+						.findViewById(R.id.blockedcompanies_address);
+				addressView.setText(listAddress.get(i));
+				
+				TextView informationView = (TextView) v
+						.findViewById(R.id.blockedcompanies_information);
+				informationView.setText(listPostalCode.get(i));
+				
+				blockedCompaniesLayout.addView(v);
+			}
+		}
 	}
 
-	private void addAdapter(List<Map> blockedCompanies) {
-		final BlockedCompaniesAdapter adapter = new BlockedCompaniesAdapter(
-				this, blockedCompanies);
-		listview.setAdapter(adapter);
-	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {

@@ -24,11 +24,14 @@
     <string name="registration_forgot_password">Forgot Password</string>
     <string name="registration_submit">Submit</string>
     <string name="registration_profile_fullname">Full Name</string>
+    <string name="registration_profile_family_name">Family name</string>
+    <string name="registration_profile_given_name">Given name</string>
     <string name="registration_profile_date_of_birth">Date of Birth</string>
     <string name="registration_profile_gender">Gender</string>
     <string name="registration_profile_nrictype">Status</string>
     <string name="registration_profile_school">School</string>
     <string name="registration_profile_add_nric_photos">NRIC Type</string>
+    <string name="registration_profile_addprofilephoto">Profile picture</string>
     <string name="registration_profile_skills">Job Functions</string>
     <string name="registration_profile_work_experience">Work Experience</string>
     <string name="registration_profile_addnricphotos">Add NRIC Photos</string>
@@ -43,6 +46,7 @@
     <string name="registration_failed">Failed. Your email may already registered"</string>
     <string name="resend_email_validation_success">Email validation has been sent.\nPlease check your email inbox.</string>
     <string name="resend_email_validation_failed">Email validation failed. Please try again</string>
+    <string name="registration_already_exist">Your email already registered. Please use login</string>
     
     <string name="please_wait">Please wait ...</string>
     <string name="job_menu">Job</string>    
@@ -104,15 +108,19 @@
     <string name="repeat">Repeat</string>
     <string name="location">Location Preference</string>
     <string name="ask_salary">Ask Salary</string>
+    <string name="availability_set_time">Set Time</string>    
     <string name="availability_detail">Detail Availability</string>
     <string name="availability_adding_succesfully">Your availability has been added succesfully</string>
     <string name="availability_adding_failed">Failed to create availability. Please try again</string>
+    <string name="availability_end_overlap">The selected time overlap with start time</string>    
+    <string name="availability_end_equal">End time must be not same with start time</string>        
     <string name="availability_adding_overlap">Availability has been overlapped with existing</string>
+    <string name="availability_start_error">Selected time already passed.\nPlease choose a new date</string>
     <string name="edit_availability">Edit Availability</string>
     <string name="edit_availability_progress">Updating availability ...</string>
     <string name="edit_availability_failed">Failed to edit availability. Please try again</string>
     <string name="edit_availability_success">Availability updated succesfully</string>
-    
+    <string name="availability_select_date_validation">Please set your start date first</string>    
     <string name="delete_availability">Delete Availability</string>
     <string name="delete_availability_success">Availability has been deleted succesfully</string>
     <string name="delete_availability_failed">Failed to delete availability. Please try again</string>    
@@ -142,12 +150,14 @@
     <string name="login">Login</string>
     <string name="login_failed">Login failed. Please check your email &amp; password.</string>
     <string name="register">Register</string>
+    <string name="register_progress">Registering ... </string>    
     <string name="login_fb">Please login using your facebook account</string>
     <string name="register_fb">Create a new profile or use your facebook account</string>
     <string name="total_work">Total worked:</string>
     <string name="total_earning">Total Earnings:</string>
     <string name="cancel_offer_receive">Do you want to receive offer again from the same outlet &#63;</string>
     <string name="notify_user_verification">Please activate your account by click verification link in your email inbox</string>
+    <string name="verifying">Verifying ...</string>
     <string name="settings_freeze">Freeze job offer</string>
     <string name="settings_freeze_description">Disable all your availabilities</string>
     <string name="settings_theme">Theme</string>  
@@ -184,11 +194,27 @@
     <string name="edit_profile_success">Your profile has been updated successfully</string>    
     <string name="edit_get_profile_error">Failed to get profile. Please try again</string>  
     <string name="uploading">Uploading ... </string>  
+    <string name="blocked_companies_loading">Loading companies...</string>    
+    <string name="loading_profile">Loading profile...</string>
     <string name="updating_profile">Updating profile...</string>
     <string name="server_error">Problem with server data. Please try again</string>
+
+    <string name="history_loading">Loading job histories ...</string>
+        
     <string name="reset_password_success">Your password has been reset succesfully.\nPlease check your email.</string>
     <string name="reset_password_failed">Failed to reset password. Please try again.</string>
-        
+    <string name="reset_password_progress">Resetting your password ...</string>
+    
+    <string name="login_forgot_password_title">Forgot password</string>
+    <string name="login_forgot_password_message">Enter your email address to reset password</string>
+    <string name="hint_email_address">Email address</string>
+    <string name="reset">Reset</string>
+    <string name="delete">Delete</string>
+    <string name="login_email_not_valid">Email address is not valid</string>
+    <string name="no_network_error">no network provider signal</string>
+    <string name="map_availability_area">Your availability job area</string>
+    <string name="download_avatar">Downloading avatar...</string>
+
     <string-array name="repeat_value">
         <item>None</item>
         <item>Weekly</item>

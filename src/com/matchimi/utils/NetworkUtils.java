@@ -15,7 +15,7 @@ import com.matchimi.CommonUtilities;
 import com.matchimi.R;
 
 public final class NetworkUtils {
-	public static final void connectionHandler(Context context, String jsonStr) {
+	public static final void connectionHandler(Context context, String jsonStr, String error) {
 		try {
 			JSONObject items = new JSONObject(jsonStr);
 			String status = items.optString("status", "");
@@ -33,6 +33,9 @@ public final class NetworkUtils {
 				Log.e(CommonUtilities.TAG, "File has been corrupted");
 				
 			} else {
+				Toast.makeText(context,
+						error,
+						Toast.LENGTH_SHORT).show();
 				Log.e(CommonUtilities.TAG, "Invalid response value" + jsonStr);
 			}			
 		} catch (JSONException e) {

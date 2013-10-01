@@ -1,7 +1,5 @@
 package com.matchimi.options;
 
-import static com.matchimi.CommonUtilities.*;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -37,6 +35,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.matchimi.CommonUtilities;
 import com.matchimi.R;
 import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
@@ -60,8 +59,10 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-		if (settings.getInt(SETTING_THEME, THEME_LIGHT) == THEME_LIGHT) {
+		SharedPreferences settings = getSharedPreferences(CommonUtilities.PREFS_NAME,
+				Context.MODE_PRIVATE);
+		if (settings.getInt(CommonUtilities.SETTING_THEME, 
+				CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
 			setTheme(ApplicationUtils.getTheme(true));
 		} else {
 			setTheme(ApplicationUtils.getTheme(false));
@@ -83,21 +84,16 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 		final String price = b.getString("price");
 		is_frozen = b.getBoolean("is_frozen");
 
-		SimpleDateFormat formatterDate = new SimpleDateFormat("EE d, MMM",
-				Locale.getDefault());
-		SimpleDateFormat formatterTime = new SimpleDateFormat("hh a",
-				Locale.getDefault());
-
 		Calendar calStart = generateCalendar(start);
 		Calendar calEnd = generateCalendar(end);
 
 		TextView textStart = (TextView) findViewById(R.id.textStart);
-		textStart.setText(formatterDate.format(calStart.getTime())
+		textStart.setText(CommonUtilities.AVAILABILITY_DATE.format(calStart.getTime())
 				+ ", "
-				+ formatterTime.format(calStart.getTime()).toLowerCase(
+				+ CommonUtilities.AVAILABILITY_TIME.format(calStart.getTime()).toLowerCase(
 						Locale.getDefault()));
 		TextView textEnd = (TextView) findViewById(R.id.textEnd);
-		textEnd.setText(formatterTime.format(calEnd.getTime()).toLowerCase(
+		textEnd.setText(CommonUtilities.AVAILABILITY_TIME.format(calEnd.getTime()).toLowerCase(
 				Locale.getDefault()));
 
 		String[] repeatString = context.getResources().getStringArray(
@@ -127,10 +123,10 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 			@Override
 			public void onClick(View arg0) {
 				AlertDialog.Builder builder = new AlertDialog.Builder(context);
-				builder.setTitle(getString(R.string.menu_availability));
-				builder.setMessage(getString(R.string.delete_availability_question));
+				builder.setTitle(R.string.menu_availability);
+				builder.setMessage(R.string.delete_availability_question);
 
-				builder.setPositiveButton("Delete",
+				builder.setPositiveButton(R.string.delete,
 						new DialogInterface.OnClickListener() {
 							@Override
 							public void onClick(DialogInterface arg0, int arg1) {
@@ -138,7 +134,7 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 							}
 						});
 
-				builder.setNegativeButton("Cancel",
+				builder.setNegativeButton(R.string.cancel,
 						new DialogInterface.OnClickListener() {
 							@Override
 							public void onClick(DialogInterface arg0, int arg1) {
@@ -157,7 +153,6 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 			buttonFreeze.setText(getString(R.string.unfreeze_availability));
 		}		
 		buttonFreeze.setOnClickListener(freezeListener);
-		buttonFreeze.setVisibility(View.GONE);
 		
 		loadMap(location);
 	}
@@ -170,9 +165,9 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 				doUnfreezeAvailability(avail_id);	
 			} else {
 				AlertDialog.Builder builder = new AlertDialog.Builder(context);
-				builder.setTitle(getString(R.string.menu_availability));
-				builder.setMessage(getString(R.string.freeze_availability_question));
-				builder.setPositiveButton(getString(R.string.freeze_title),
+				builder.setTitle(R.string.menu_availability);
+				builder.setMessage(R.string.freeze_availability_question);
+				builder.setPositiveButton(R.string.freeze_title,
 						new DialogInterface.OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialog, int arg1) {
@@ -180,7 +175,7 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 							}
 						});
 
-				builder.setNegativeButton("Cancel",
+				builder.setNegativeButton(R.string.cancel,
 						new DialogInterface.OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialog, int arg1) {
@@ -205,7 +200,7 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 			GoogleMap map = ((SupportMapFragment) getSupportFragmentManager()
 					.findFragmentById(R.id.map)).getMap();
 			map.addMarker(new MarkerOptions().position(pos).title(getString(R.string.app_name))
-					.snippet("Your job area availability")
+					.snippet(getString(R.string.map_availability_area))
 					.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin)));
 			// Move the camera instantly to hamburg with a zoom of 15.
 			map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 12));
@@ -215,8 +210,8 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 	}
 
 	protected void doDeleteAvailability(final String avail_id) {
-		final String url = SERVERURL + API_DELETE_AVAILABILITY_BY_AVAIL_ID + "?" +
-							PARAM_AVAIL_ID + "=" + avail_id;
+		final String url = CommonUtilities.SERVERURL + CommonUtilities.API_DELETE_AVAILABILITY_BY_AVAIL_ID + "?" +
+						CommonUtilities.PARAM_AVAIL_ID + "=" + avail_id;
 		
 		RequestQueue queue = Volley.newRequestQueue(this); 
 		StringRequest dr = new StringRequest(Request.Method.DELETE, url, 
@@ -235,9 +230,9 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 								context,
 								getString(R.string.delete_availability_failed),
 								Toast.LENGTH_LONG).show();
-						Log.d(TAG, "Delete failed with result code " + response);
+						Log.d(CommonUtilities.TAG, "Delete failed with result code " + response);
 					} else {
-						NetworkUtils.connectionHandler(context, response);						
+						NetworkUtils.connectionHandler(context, response, "");						
 					}
 		        }
 		    }, 
@@ -245,7 +240,7 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 		    {
 				@Override
 				public void onErrorResponse(VolleyError error) {
-					Log.d(TAG, "error " + error.toString());
+					Log.d(CommonUtilities.TAG, "Error " + error.toString());
 					// TODO Auto-generated method stub
 		        	 Toast.makeText(
 								context,
@@ -309,7 +304,7 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 	 * @param avail_id
 	 */
 	protected void doFreezeAvailability(final String avail_id) {
-		final String url = SERVERURL + API_FREEZE_AVAILABILITY_BY_AVAIL_ID;
+		final String url = CommonUtilities.SERVERURL + CommonUtilities.API_FREEZE_AVAILABILITY_BY_AVAIL_ID;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
@@ -320,11 +315,13 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 						Intent result = new Intent();
 						setResult(RESULT_OK, result);
 						finish();
-					} else {
+					} else if (jsonStr.trim().equalsIgnoreCase("1")) {
 						Toast.makeText(
 								context,
 								getString(R.string.freeze_availability_failed),
 								Toast.LENGTH_LONG).show();
+					} else {
+						NetworkUtils.connectionHandler(context, jsonStr, "");
 					}
 				} else {
 					Toast.makeText(
@@ -357,7 +354,7 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 	 * @param avail_id
 	 */
 	protected void doUnfreezeAvailability(final String avail_id) {
-		final String url = SERVERURL + API_UNFREEZE_AVAILABILITY_BY_AVAIL_ID;
+		final String url = CommonUtilities.SERVERURL + CommonUtilities.API_UNFREEZE_AVAILABILITY_BY_AVAIL_ID;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
@@ -368,11 +365,13 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 						Intent result = new Intent();
 						setResult(RESULT_OK, result);
 						finish();
-					} else {
+					} else if (jsonStr.trim().equalsIgnoreCase("0")) {
 						Toast.makeText(
 								context,
 								getString(R.string.unfreeze_availability_failed),
 								Toast.LENGTH_LONG).show();
+					} else {
+						NetworkUtils.connectionHandler(context, jsonStr, "");
 					}
 				} else {
 					Toast.makeText(

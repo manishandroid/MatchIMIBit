@@ -56,7 +56,7 @@ public class MapsActivity extends SherlockFragmentActivity {
 		// Better solution would be to display a dialog and suggesting to
 		// go to the settings
 		if (!isGPSEnabled && !isNetworkEnabled) {
-			Log.e("Main", "NO NETWORK PROVIDER IS ENABLED !");
+			Log.e("Main", getString(R.string.no_network_error));
 			Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 			startActivity(intent);
 		} else {
@@ -78,6 +78,7 @@ public class MapsActivity extends SherlockFragmentActivity {
 			@Override
 			public void onClick(View arg0) {
 				Intent i = new Intent();
+				Log.d(TAG, "Location is " + location);
 				i.putExtra("location", location);
 				setResult(RESULT_OK, i);
 				finish();
@@ -96,6 +97,7 @@ public class MapsActivity extends SherlockFragmentActivity {
 		map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
 				.getMap();
 		location = getIntent().getExtras().getString("location");
+		
 		if (location != null && !location.equalsIgnoreCase("null")
 				&& location.length() > 1) {
 			loadMap(location);
@@ -112,8 +114,8 @@ public class MapsActivity extends SherlockFragmentActivity {
 				map.clear();
 				map.addMarker(new MarkerOptions()
 						.position(point)
-						.title("Matchimi")
-						.snippet("Your job area availability")
+						.title(getString(R.string.app_name))
+						.snippet(getString(R.string.map_availability_area))
 						.icon(BitmapDescriptorFactory
 								.fromResource(R.drawable.pin)));
 			}
@@ -133,7 +135,7 @@ public class MapsActivity extends SherlockFragmentActivity {
 		// Better solution would be to display a dialog and suggesting to
 		// go to the settings
 		if (!isGPSEnabled && !isNetworkEnabled) {
-			Log.e("Main", "NO NETWORK PROVIDER IS ENABLED !");
+			Log.e(TAG, getString(R.string.no_network_error));
 			Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 			startActivity(intent);
 		} else {
@@ -160,8 +162,8 @@ public class MapsActivity extends SherlockFragmentActivity {
 					Double.parseDouble(longtitude));
 
 			map.clear();
-			map.addMarker(new MarkerOptions().position(pos).title("Matchimi")
-					.snippet("Your job area availability")
+			map.addMarker(new MarkerOptions().position(pos).title(getString(R.string.app_name))
+					.snippet(getString(R.string.map_availability_area))
 					.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin)));
 			// Move the camera instantly to hamburg with a zoom of 15.
 			map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 12));
@@ -173,24 +175,26 @@ public class MapsActivity extends SherlockFragmentActivity {
 	LocationListener locationListener = new LocationListener() {
 		@Override
 		public void onStatusChanged(String provider, int status, Bundle extras) {
-			Log.e("LocationListener", "onStatusChanged()");
+			Log.e(TAG, "LocationListener onStatusChanged()");
 		}
 
 		@Override
 		public void onProviderEnabled(String provider) {
-			Log.e("LocationListener", "onProviderEnabled()");
+			Log.e(TAG, "LocationListener onProviderEnabled()");
 		}
 
 		@Override
 		public void onProviderDisabled(String provider) {
-			Log.e("LocationListener", "onProviderDisabled()");
+			Log.e(TAG, "LocationListener onProviderDisabled()");
 		}
 
 		@Override
-		public void onLocationChanged(Location location) {
-			Log.e("LocationListener", "onLocationChanged()");
+		public void onLocationChanged(Location mapLocation) {			
+			Log.e(TAG, "LocationListener onLocationChanged()");
+			location = mapLocation.getLatitude() + "," + mapLocation.getLongitude();
+			
 			if (!locationLoaded) {
-				loadMap(location.getLatitude() + "," + location.getLongitude());
+				loadMap(mapLocation.getLatitude() + "," + mapLocation.getLongitude());
 			}
 		}
 	};
