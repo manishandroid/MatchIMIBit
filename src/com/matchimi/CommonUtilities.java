@@ -69,9 +69,15 @@ public final class CommonUtilities {
 	public static final String API_GET_AVAILABILITY_BY_AVAIL_ID = "get_availability_by_avail_id";
 	public static final String API_GET_PART_TIMER_BY_PT_ID = "get_part_timer_by_pt_id";
 	public static final String API_GET_BLOCKED_COMPANIES_BY_PT_ID = "get_blocked_companies_by_pt_id";
-	public static final String API_GET_CURRENT_JOB_OFFERS = "get_current_job_offers";
-	public static final String API_GET_CURRENT_ACCEPTED_JOB_OFFERS = "get_current_accepted_job_offers";
+	
+//	public static final String API_GET_CURRENT_JOB_OFFERS = "get_current_job_offers";
+	public static final String API_GET_CURRENT_JOB_OFFERS = "get_current_job_offers_new";	
+
+	//	public static final String API_GET_CURRENT_ACCEPTED_JOB_OFFERS = "get_current_accepted_job_offers";
+	public static final String API_GET_CURRENT_ACCEPTED_JOB_OFFERS = "get_current_accepted_job_offers_new";
+	
 	public static final String API_GET_PART_TIMER_PROFILE_WITH_DEFAULT_DATA_BY_PT_ID = "get_part_timer_profile_with_default_data_by_pt_id";
+	public static final String API_GET_PROFILE_DEFAULT_DATA = "get_profile_default_data";
 	public static final String API_GET_SCHOOLS = "get_schools";
 	public static final String API_GET_IC_TYPES = "get_ic_types";
 	public static final String API_GET_SKILLS = "get_skills";
@@ -79,7 +85,10 @@ public final class CommonUtilities {
 	public static final String API_GET_FEEDBACKS_BY_PT_ID = "get_feedbacks_by_pt_id";
 	public static final String API_GET_FREEZE_AVAILABILITY = "get_freeze_availabilities";	
 	public static final String API_GET_PROFILE = "get_mobile_part_timer_profile_by_pt_id";
-	public static final String API_GET_PAST_ACCEPTED_JOB_OFFERS = "get_past_accepted_job_offers";
+	
+//	public static final String API_GET_PAST_ACCEPTED_JOB_OFFERS = "get_past_accepted_job_offers";
+	public static final String API_GET_PAST_ACCEPTED_JOB_OFFERS = "get_past_accepted_job_offers_new";
+	
 	public static final String API_GET_BANK_INFO = "get_bank_account_by_pt_id";
 	public static final String API_GET_EC_INFO = "get_emergency_contact_by_pt_id";	
 	public static final String API_GET_PART_TIMER_BY_AVAILABLE_ID = "get_part_timer_by_avail_id";
@@ -89,6 +98,20 @@ public final class CommonUtilities {
 	public static final String API_REJECT_JOB_OFFER = "reject_job_offer";
 	public static final String API_UNFREEZE_AVAILABILITY_BY_AVAIL_ID  = "unfreeze_availability";	
 	public static final String API_WITHDRAW_AVAILABILITY = "withdraw_availability";
+	public static final String API_GET_PROFILE_PIC = "get_profile_pic_by_pt_id";
+	public static final String API_GET_IC_BACK_PIC_BY_PT_ID = "get_ic_back_pic_by_pt_id";
+	public static final String API_GET_IC_FRONT_PIC_BY_PT_ID = "get_ic_front_pic_by_pt_id";
+	public static final String API_GET_MATRIC_CARD_PIC_BY_PT_ID = "get_matric_card_pic_by_pt_id";
+	public static final String API_GET_BANK_STATEMENT_PIC_BY_PT_ID = "get_bank_statement_pic_by_pt_id";
+	public static final String API_GET_VISUME_BY_PT_ID = "get_visume_video_by_pt_id";
+
+	public static final String API_SET_MESSAGE_READ = "set_message_read";
+	public static final String API_GET_MESSAGE = "get_message_by_pt_id";
+	public static final String API_SET_RATING = "set_rating";
+	public static final String API_GET_RATING = "get_rating";
+	public static final String API_GET_FRIEND_BY_PT_ID = "get_friend_by_pt_id";
+	public static final String API_GET_ALL_FRIEND = "get_all_friends";
+	public static final String API_REQUEST_FRIENDSHIP = "request_friendship";
 	
 	public static final String COMMON_EMAIL = "email";
 	public static final String COMMON_PART_TIMER = "part_timer";
@@ -100,7 +123,6 @@ public final class CommonUtilities {
 	public static final String COMMON_LOCATION = "location";
 	public static final String COMMON_PRICE = "price";	
 	public static final String COMMON_UPDATE = "update";	
-
 	
 	// public static final String API_UPLOAD_FRONT_NRIC_PHOTOS =
 	// "posts/upload/";
@@ -194,10 +216,10 @@ public final class CommonUtilities {
 	
 	public static final String INTENT_REJECT_IS_BLOCKED = "reject_is_blocked";
 	
-	public static final String FILE_IMAGE_PROFILE = "profile_";
+	public static final String FILE_IMAGE_PROFILE = "profile";
 	public static final String FILE_IC_FRONT = "ic_front";
 	public static final String FILE_IC_BACK = "ic_back";
-	public static final String FILE_CARD = "card_";
+	public static final String FILE_CARD = "card";
 	public static final String IMAGE_ROOT = ApplicationUtils.getAppRootDir() + "/";
 	
 	public static final String SETTING_THEME = "setting.theme";

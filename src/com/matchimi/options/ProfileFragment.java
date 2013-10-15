@@ -1,9 +1,35 @@
 package com.matchimi.options;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import static com.matchimi.CommonUtilities.PARAM_PT_ID;
+import static com.matchimi.CommonUtilities.SERVERURL;
+import static com.matchimi.CommonUtilities.TAG;
+import static com.matchimi.CommonUtilities.USER_FIRSTNAME;
+import static com.matchimi.CommonUtilities.USER_LASTNAME;
+import static com.matchimi.CommonUtilities.USER_NRIC_NUMBER;
+import static com.matchimi.CommonUtilities.USER_NRIC_TYPE;
+import static com.matchimi.CommonUtilities.USER_NRIC_TYPE_ID;
+import static com.matchimi.CommonUtilities.USER_PROFILE_PICTURE;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.regex.Matcher;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,6 +44,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -37,6 +64,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.matchimi.CommonUtilities;
+import com.matchimi.ProfileModel;
 import com.matchimi.R;
 import com.matchimi.registration.EditProfile;
 import com.matchimi.registration.Utilities;
@@ -56,7 +84,6 @@ public class ProfileFragment extends Fragment {
 
 	private ScrollView scrollView;
 	private ProgressBar progressBar;
-//	private ProgressDialog progress;
 
 	private SharedPreferences settings;
 	private LinearLayout layFeedback;
@@ -73,7 +100,6 @@ public class ProfileFragment extends Fragment {
 		view = inflater.inflate(R.layout.user_profile, container, false);
 
 		// Check if user not logged
-
 		settings = getActivity().getSharedPreferences(CommonUtilities.PREFS_NAME, Context.MODE_PRIVATE);
 		pt_id = settings.getString(CommonUtilities.USER_PTID, null);
 
@@ -100,18 +126,139 @@ public class ProfileFragment extends Fragment {
 		getActivity().registerReceiver(profileReceiver, new IntentFilter("profile.receiver"));
 
 		return view;
-
 	}
 
 	private void loadProfile() {
-		loadData();
-		loadFeedback();
+		final String url = SERVERURL + CommonUtilities.API_GET_PROFILE + "?"
+				+ PARAM_PT_ID + "=" + pt_id;
+		final Handler mHandlerFeed = new Handler();
+		final Runnable mUpdateResultsFeed = new Runnable() {
+			public void run() {
+				if (jsonStr != null || jsonStr.length() > 0) {
+					try {
+						JSONObject obj = new JSONObject(jsonStr);
+						obj = obj.getJSONObject("part_timers");
+
+						SharedPreferences.Editor editor = settings.edit();
+						
+						// Update settings
+						editor.putString(USER_FIRSTNAME, obj.getString("first_name"));
+						editor.putString(USER_LASTNAME, obj.getString("last_name"));
+						editor.putString(USER_PROFILE_PICTURE, obj.getString("profile_picture"));
+						String studentMatricCard = obj.optString("matric_card_no");
+						if (studentMatricCard != null) {
+							editor.putString(USER_NRIC_NUMBER, studentMatricCard);
+						}
+						editor.putString(CommonUtilities.USER_EMAIL, obj.getString("email"));
+						editor.putInt(CommonUtilities.USER_RATING, obj.getInt("pt_grade_id"));
+						editor.commit();
+						
+					} catch (Exception e) {
+						Log.e(TAG, "Get profile error >> " + e.getMessage());
+						Toast.makeText(context,
+								getString(R.string.edit_get_profile_error),
+								Toast.LENGTH_SHORT).show();
+					}
+				} else {
+					Toast.makeText(context,
+							getString(R.string.server_error),
+							Toast.LENGTH_SHORT).show();
+				}
+				
+				String picName = settings.getString(USER_PROFILE_PICTURE, null);
+				Log.d(TAG, "picture: " + picName);
+				
+				if(picName != null) {
+					String url = SERVERURL + CommonUtilities.API_GET_PROFILE_PIC + "?"
+							+ PARAM_PT_ID + "=" + pt_id;
+					checkAndDownloadPic(picName, url);
+				}
+				loadData();
+			}
+		};
+
+		progressBar.setVisibility(View.VISIBLE);
+		scrollView.setVisibility(View.GONE);
+		new Thread() {
+			public void run() {
+				jsonParser = new JSONParser();
+				jsonStr = jsonParser.getHttpResultUrlGet(url);
+				mHandlerFeed.post(mUpdateResultsFeed);
+			}
+		}.start();
+	}
+	
+	private String checkAndDownloadPic(String imageStoragePath,
+			String apiURL) {
+		File f = new File(imageStoragePath);
+		String filename = f.getName();
+		
+		File imageFile = new File(CommonUtilities.IMAGE_ROOT, filename);
+		if (!imageFile.exists()) {
+			String[] params = {apiURL, filename};
+			new downloadWebPage().execute(params);
+		} else {
+			Log.d(TAG, "Image exists");
+		}
+		
+		return CommonUtilities.IMAGE_ROOT + filename;
+	}
+
+	private class downloadWebPage extends AsyncTask<String, Void, Void> {
+
+	    @Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			Log.d(TAG, "downloading profile picture");
+			loadData();
+		}
+
+		@Override
+	    protected Void doInBackground(String... params) {
+	        try {
+	            HttpClient httpClient = new DefaultHttpClient();
+	            HttpGet httpGet = new HttpGet(params[0]);
+	            HttpResponse response;
+	            response = httpClient.execute(httpGet);
+	            HttpEntity entity = response.getEntity();
+	            InputStream is = entity.getContent();
+	            
+				String picName = settings.getString(USER_PROFILE_PICTURE, null);
+				int idx = picName.lastIndexOf("/");
+				picName = picName.substring(idx + 1);
+				File f = new File(CommonUtilities.IMAGE_ROOT, picName);
+
+				FileOutputStream output = new FileOutputStream(f);
+
+	            byte data[] = new byte[1024];
+	            int count;
+	            while ((count = is.read(data)) > 0) {
+	                output.write(data, 0, count);
+	            }
+	            
+	            output.flush();
+	            output.close();
+	            is.close();
+	        } catch (Exception e) {
+	            // TODO Auto-generated catch block
+				Log.e(TAG, ">>> " + e.getMessage());
+	            e.printStackTrace();
+	        }
+	        return null;
+	    }
+
+	}
+		
+	protected void loadPicture() {
+		final String link = SERVERURL + CommonUtilities.API_GET_PROFILE_PIC + "?"
+				+ PARAM_PT_ID + "=" + pt_id;
+		downloadWebPage download = new downloadWebPage();
+		download.execute(link);
 	}
 
 	BroadcastReceiver profileReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context arg0, Intent arg1) {
-			// TODO Auto-generated method stub
 			loadProfile();
 		}
 	};
@@ -145,7 +292,7 @@ public class ProfileFragment extends Fragment {
 										objs, "grade"));
 							}
 						} else {
-							Log.e("Parse Json Object", ">> Array is null");
+							Log.e(TAG, ">> Array is null");
 						}
 					} catch (JSONException e1) {						
 						NetworkUtils.connectionHandler(getActivity(), jsonStr, 
@@ -164,8 +311,6 @@ public class ProfileFragment extends Fragment {
 			}
 		};
 
-		progressBar.setVisibility(View.VISIBLE);
-		scrollView.setVisibility(View.GONE);
 //		progress = ProgressDialog.show(context, context.getString(R.string.app_name),
 //				"Loading...", true, false);
 		new Thread() {
@@ -229,7 +374,6 @@ public class ProfileFragment extends Fragment {
 	}
 
 	private void loadData() {
-		// TODO Auto-generated method stub
 		// Set user name
 		TextView usernameView = (TextView) view
 				.findViewById(R.id.profile_username);
@@ -256,8 +400,10 @@ public class ProfileFragment extends Fragment {
 		ImageView avatarView = (ImageView) view
 				.findViewById(R.id.profile_avatar);
 
-		String profileFilename = CommonUtilities.FILE_IMAGE_PROFILE + pt_id + ".jpg";
-		File f = new File(CommonUtilities.IMAGE_ROOT, profileFilename);
+		String picName = settings.getString(USER_PROFILE_PICTURE, null);
+		int idx = picName.lastIndexOf("/");
+		picName = picName.substring(idx + 1);
+		File f = new File(CommonUtilities.IMAGE_ROOT, picName);
 		
 		String facebookID = settings.getString(CommonUtilities.USER_FACEBOOK_ID, "");
 		String profilePic = settings.getString(CommonUtilities.USER_PROFILE_PICTURE, "");
@@ -277,6 +423,14 @@ public class ProfileFragment extends Fragment {
 
 		RatingBar ratingBar = (RatingBar) view.findViewById(R.id.ratingBar);
 		ratingBar.setRating(settings.getInt(CommonUtilities.USER_RATING, 0));
+		
+		loadFeedback();
 	}
 	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		getActivity().unregisterReceiver(profileReceiver);
+	}
+
 }

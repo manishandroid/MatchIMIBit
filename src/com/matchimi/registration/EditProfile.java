@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,9 +18,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import khandroid.ext.apache.http.HttpEntity;
 import khandroid.ext.apache.http.HttpResponse;
 import khandroid.ext.apache.http.client.HttpClient;
+import khandroid.ext.apache.http.client.methods.HttpGet;
 import khandroid.ext.apache.http.client.methods.HttpPost;
+import khandroid.ext.apache.http.client.methods.HttpUriRequest;
 import khandroid.ext.apache.http.entity.mime.HttpMultipartMode;
 import khandroid.ext.apache.http.entity.mime.MultipartEntity;
 import khandroid.ext.apache.http.entity.mime.content.ByteArrayBody;
@@ -48,7 +52,9 @@ import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.text.format.DateFormat;
@@ -68,10 +74,12 @@ import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.MenuItem;
+import com.matchimi.Api;
 import com.matchimi.CommonUtilities;
 import com.matchimi.ProfileModel;
 import com.matchimi.R;
@@ -88,7 +96,12 @@ public class EditProfile extends SherlockActivity {
 	private final int TAKE_IMG_IC_FRONT = 3;
 	private final int TAKE_PHOTO_CODE = 4;
 	private final int SELECT_PHOTO = 5;
-
+	private final int TAKE_IMG_BANK_STATEMENT = 6;
+	private final int TAKE_VIDEO = 7;
+	private final int SELECT_VIDEO = 8;
+	
+	public AlbumStorageDirFactory mAlbumStorageDirFactory = null;
+	
 	private Context context;
 
 	private ProfileModel profileInfo;
@@ -149,6 +162,8 @@ public class EditProfile extends SherlockActivity {
 	private ImageView imageICBackView;
 	private ImageView imageICFrontView;
 	private ImageView imageCardView;
+	private ImageView imageBankStatementView;	
+	private ImageView visumeImageView;
 	
 	private Calendar defaultBirthday = Calendar.getInstance();
 	private Calendar defaultExpire = Calendar.getInstance();
@@ -163,9 +178,13 @@ public class EditProfile extends SherlockActivity {
 	private String cardImagePath;
 	private String icFrontImagePath;
 	private String icBackImagePath;
+	private String bankStatementPath;	
+	private String visumePath;	
 	
 	private String uploadImage = null;
 	private String uploadURL = null;
+	private Uri mVideoUri = null;
+	private VideoView mVideoView;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -295,6 +314,23 @@ public class EditProfile extends SherlockActivity {
 			}
 		});
 
+		imageBankStatementView = (ImageView) findViewById(R.id.buttonBankStatement);
+		imageBankStatementView.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				askImageFrom(TAKE_IMG_BANK_STATEMENT);
+			}
+		});
+		
+		visumeImageView = (ImageView) findViewById(R.id.buttonVisume);
+		visumeImageView.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				askVideoFrom(SELECT_VIDEO);
+			}
+		});
+		
 		Button submit = (Button) findViewById(R.id.regprofile_submit_button);
 		submit.setOnClickListener(new OnClickListener() {
 			@Override
@@ -302,12 +338,6 @@ public class EditProfile extends SherlockActivity {
 				checkInput();
 			}
 		});
-		
-		// Defining image path
-		profileImagePath = CommonUtilities.FILE_IMAGE_PROFILE + pt_id + ".jpg";
-		icBackImagePath = CommonUtilities.FILE_IC_BACK + pt_id + ".jpg";
-		icFrontImagePath = CommonUtilities.FILE_IC_FRONT + pt_id + ".jpg";
-		cardImagePath = CommonUtilities.FILE_CARD + pt_id + ".jpg";	
 		
 		showStudentInfo(false);
 
@@ -1534,26 +1564,185 @@ public class EditProfile extends SherlockActivity {
 		
 		updateImageLayout();
 	}
+	
+	private class downloadWebPage extends AsyncTask<String, Void, String> {
+
+	    @Override
+		protected void onPostExecute(String imagePath) {
+	    	if(imagePath.length() > 0) {
+	    		if(imagePath.contains(CommonUtilities.FILE_IMAGE_PROFILE)) {
+	    			updateImageProfile(imagePath);
+	    		} else if(imagePath.contains(CommonUtilities.FILE_IC_BACK)) {
+	    			updateImageICBack(imagePath);
+	    		} else if(imagePath.contains(CommonUtilities.FILE_IC_FRONT)) {
+	    			updateImageICFront(imagePath);
+	    		} else if(imagePath.contains(CommonUtilities.FILE_CARD)) {
+	    			updateImageICBack(imagePath);
+	    		}
+	    	}
+		}
+
+		@Override
+	    protected String doInBackground(String... params) {
+			String picPath = "";
+			
+	        try {
+	            HttpClient httpClient = new DefaultHttpClient();
+	            HttpGet httpGet = new HttpGet(params[0]);
+				
+	            HttpResponse response;
+	            response = httpClient.execute(httpGet);
+	            HttpEntity entity = response.getEntity();
+	            InputStream is = entity.getContent();
+	            
+				picPath = CommonUtilities.IMAGE_ROOT + params[1];
+				File f = new File(picPath);
+				FileOutputStream output = new FileOutputStream(f);
+
+	            byte data[] = new byte[1024];
+	            int count;
+	            while ((count = is.read(data)) > 0) {
+	                output.write(data, 0, count);
+	            }
+	            
+	            output.flush();
+	            output.close();
+	            is.close();
+	            
+	        } catch (Exception e) {
+	            // TODO Auto-generated catch block
+				Log.e(TAG, "Error download >>> " + picPath  + " " + e.getMessage());
+	            e.printStackTrace();
+	        }
+	        
+	        return picPath;
+	    }
+	}
+	
+	/**
+	 * Set the albumName for storing photos
+	 * 
+	 * @return String
+	 */
+	private String getAlbumName() {
+		return getString(R.string.album_name);
+	}
+	
+	/**
+	 * Create and get the album storage directory
+	 * 
+	 * @return File
+	 */
+	private File getAlbumDir() {
+		File storageDir = null;
+		
+		// Load Album Storage Factory based on Android Version
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+			mAlbumStorageDirFactory = new FroyoAlbumDirFactory();
+		} else {
+			mAlbumStorageDirFactory = new BaseAlbumDirFactory();
+		}
+
+		if (Environment.MEDIA_MOUNTED.equals(Environment
+				.getExternalStorageState())) {
+			storageDir = mAlbumStorageDirFactory
+					.getAlbumStorageDir(getAlbumName());
+
+			if (storageDir != null) {
+				if (!storageDir.mkdirs()) {
+					if (!storageDir.exists()) {
+						Log.d(TAG, "Can't create camera directory");
+						return null;
+					}
+				}
+			}
+		} else {
+			Log.v(TAG, "External storage is not mounted READ/WRITE");
+		}
+
+		return storageDir;
+	}
+	
+	
+	private String checkAndDownloadPic(String imageStoragePath,
+			String apiURL) {
+		File f = new File(imageStoragePath);
+		String filename = f.getName();
+		
+		File imageFile = new File(CommonUtilities.IMAGE_ROOT, filename);
+		if (!imageFile.exists()) {
+			String[] params = {apiURL, filename};
+			new downloadWebPage().execute(params);
+		} else {
+			Log.d(TAG, "Image exists");
+		}
+		
+		return CommonUtilities.IMAGE_ROOT + filename;
+	}
+	
+	private void updateImageProfile(String imagePath) {
+		insertImage(imageProfileView, imagePath);
+	}
+	
+	private void updateImageICBack(String imagePath) {
+		insertImage(imageICBackView, imagePath);
+	}
+	
+	private void updateImageICFront(String imagePath) {
+		insertImage(imageICFrontView, imagePath);
+	}
+	
+	private void updateImageCardPicture(String imagePath) {
+		insertImage(imageCardView, imagePath);
+	}
+	
 
 	/**
 	 * Refreshing image layout
 	 */
 	private void updateImageLayout() {
-
+		Log.d(TAG, "Update image profile " + profileInfo.getProfile_pic());
+		
 		if(profileInfo.getProfile_pic() != null && profileInfo.getProfile_pic().length() > 0) {
-			insertImage(imageProfileView, profileImagePath);			
+			String url = SERVERURL + CommonUtilities.API_GET_PROFILE_PIC + "?"
+					+ PARAM_PT_ID + "=" + pt_id;
+			profileImagePath = checkAndDownloadPic(profileInfo.getProfile_pic(), url);
+			updateImageProfile(profileImagePath);		
 		}
 		
 		if(profileInfo.getIc_back_picture() != null && profileInfo.getIc_back_picture().length() > 0) {
-			insertImage(imageICBackView, icBackImagePath);			
+			String url = SERVERURL + CommonUtilities.API_GET_IC_BACK_PIC_BY_PT_ID + "?"
+					+ PARAM_PT_ID + "=" + pt_id;
+			icBackImagePath = checkAndDownloadPic(profileInfo.getIc_back_picture(), url);
+			updateImageICBack(icBackImagePath);
 		}
 		
 		if(profileInfo.getIc_front_picture() != null && profileInfo.getIc_front_picture().length() > 0) {
-			insertImage(imageICFrontView, icFrontImagePath);			
+			String url = SERVERURL + CommonUtilities.API_GET_IC_FRONT_PIC_BY_PT_ID + "?"
+					+ PARAM_PT_ID + "=" + pt_id;
+			icFrontImagePath = checkAndDownloadPic(profileInfo.getIc_front_picture(), url);
+			updateImageICFront(icFrontImagePath);		
 		}
 		
 		if(profileInfo.getCard_picture() != null && profileInfo.getCard_picture().length() > 0) {			
-			insertImage(imageCardView, cardImagePath);
+			String url = SERVERURL + CommonUtilities.API_GET_MATRIC_CARD_PIC_BY_PT_ID + "?"
+					+ PARAM_PT_ID + "=" + pt_id;
+			cardImagePath = checkAndDownloadPic(profileInfo.getCard_picture(), url);
+			updateImageCardPicture(cardImagePath);	
+		}
+		
+		if(profileInfo.getBank_statement() != null && profileInfo.getBank_statement().length() > 0) {			
+			String url = SERVERURL + CommonUtilities.API_GET_BANK_STATEMENT_PIC_BY_PT_ID + "?"
+					+ PARAM_PT_ID + "=" + pt_id;
+			bankStatementPath = checkAndDownloadPic(profileInfo.getBank_statement(), url);
+			insertImage(imageBankStatementView, bankStatementPath);
+		}
+		
+		if(profileInfo.getVisume() != null && profileInfo.getVisume().length() > 0) {			
+			String url = SERVERURL + CommonUtilities.API_GET_VISUME_BY_PT_ID + "?"
+					+ PARAM_PT_ID + "=" + pt_id;
+			visumePath = checkAndDownloadPic(profileInfo.getVisume(), url);
+			insertVideo(visumeImageView, visumePath);
 		}
 	}
 	
@@ -1571,7 +1760,7 @@ public class EditProfile extends SherlockActivity {
 	}
 
 	private void insertImage(ImageView button, String imageFilePath) {
-		File f = new File(CommonUtilities.IMAGE_ROOT, imageFilePath);
+		File f = new File(imageFilePath);
 		
 		if (f.exists()) {
 			BitmapFactory.Options options = new BitmapFactory.Options();
@@ -1579,6 +1768,15 @@ public class EditProfile extends SherlockActivity {
 			options.inScaled = false;
 			Bitmap bitmap = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
 			button.setImageBitmap(bitmap);
+		}
+	}
+	
+	//FIXME insert video still empty
+	private void insertVideo(ImageView button, String videoFilePath) {
+		File f = new File(CommonUtilities.IMAGE_ROOT, videoFilePath);
+		
+		if (f.exists()) {
+			// Nothing to do
 		}
 	}
 
@@ -1779,7 +1977,7 @@ public class EditProfile extends SherlockActivity {
 	protected void askImageFrom(final int idx) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		CharSequence[] choice = { "Gallery", "Camera" };
-		builder.setTitle("Select image from");
+		builder.setTitle(R.string.select_image_from);
 		builder.setItems(choice, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
@@ -1805,27 +2003,33 @@ public class EditProfile extends SherlockActivity {
 		switch (idx) {
 		
 		case TAKE_IMG_PROFILE:
-			selectedFileName = CommonUtilities.FILE_IMAGE_PROFILE + pt_id + ".jpg";
+			selectedFileName = CommonUtilities.FILE_IMAGE_PROFILE + ".jpg";
 			uploadImage = CommonUtilities.IMAGE_ROOT + selectedFileName;
 			uploadURL += CommonUtilities.API_UPLOAD_PROFILE_PICTURE;
 			break;
 			
 		case TAKE_IMG_CARD:
-			selectedFileName = CommonUtilities.FILE_CARD + pt_id + ".jpg";
+			selectedFileName = CommonUtilities.FILE_CARD + ".jpg";
 			uploadImage = CommonUtilities.IMAGE_ROOT + selectedFileName;
 			uploadURL += CommonUtilities.API_UPLOAD_MATRIC_PHOTOS;
 			break;
 			
 		case TAKE_IMG_IC_BACK:
-			selectedFileName =  CommonUtilities.FILE_IC_BACK + pt_id + ".jpg";
+			selectedFileName =  CommonUtilities.FILE_IC_BACK + ".jpg";
 			uploadImage = CommonUtilities.IMAGE_ROOT + selectedFileName;
 			uploadURL += CommonUtilities.API_UPLOAD_BACK_NRIC_PHOTOS;
 			break;
 			
 		case TAKE_IMG_IC_FRONT:
-			selectedFileName =  CommonUtilities.FILE_IC_FRONT + pt_id + ".jpg";
+			selectedFileName =  CommonUtilities.FILE_IC_FRONT + ".jpg";
 			uploadImage = CommonUtilities.IMAGE_ROOT + selectedFileName;
 			uploadURL += CommonUtilities.API_UPLOAD_FRONT_NRIC_PHOTOS;
+			break;
+			
+		case TAKE_IMG_BANK_STATEMENT:
+			selectedFileName =  Api.FILE_BANK_STATEMENT + ".jpg";
+			uploadImage = Api.IMAGE_ROOT + selectedFileName;
+			uploadURL += Api.PARAM_BANK_STATEMENT_UPLOAD;
 			break;
 		}
 		
@@ -1853,27 +2057,32 @@ public class EditProfile extends SherlockActivity {
 		switch (selectedPhotoId) {
 		
 		case TAKE_IMG_PROFILE:
-			selectedFileName = CommonUtilities.FILE_IMAGE_PROFILE + pt_id + ".jpg";
+			selectedFileName = CommonUtilities.FILE_IMAGE_PROFILE + ".jpg";
 			uploadImage = CommonUtilities.IMAGE_ROOT + selectedFileName;
 			uploadURL += CommonUtilities.API_UPLOAD_PROFILE_PICTURE;
 			break;
 			
 		case TAKE_IMG_CARD:
-			selectedFileName = CommonUtilities.FILE_CARD + pt_id + ".jpg";
+			selectedFileName = CommonUtilities.FILE_CARD + ".jpg";
 			uploadImage = CommonUtilities.IMAGE_ROOT + selectedFileName;
 			uploadURL += CommonUtilities.API_UPLOAD_MATRIC_PHOTOS;
 			break;
 			
 		case TAKE_IMG_IC_BACK:
-			selectedFileName =  CommonUtilities.FILE_IC_BACK + pt_id + ".jpg";
+			selectedFileName =  CommonUtilities.FILE_IC_BACK + ".jpg";
 			uploadImage = CommonUtilities.IMAGE_ROOT + selectedFileName;
 			uploadURL += CommonUtilities.API_UPLOAD_BACK_NRIC_PHOTOS;
 			break;
 			
 		case TAKE_IMG_IC_FRONT:
-			selectedFileName =  CommonUtilities.FILE_IC_FRONT + pt_id + ".jpg";
+			selectedFileName =  CommonUtilities.FILE_IC_FRONT + ".jpg";
 			uploadImage = CommonUtilities.IMAGE_ROOT + selectedFileName;
 			uploadURL += CommonUtilities.API_UPLOAD_FRONT_NRIC_PHOTOS;
+			break;
+		case TAKE_IMG_BANK_STATEMENT:
+			selectedFileName =  Api.FILE_BANK_STATEMENT + ".jpg";
+			uploadImage = Api.IMAGE_ROOT + selectedFileName;
+			uploadURL += Api.PARAM_BANK_STATEMENT_UPLOAD;
 			break;
 		}
 		
@@ -1896,29 +2105,99 @@ public class EditProfile extends SherlockActivity {
 		}
 	}
 	
+	/**
+	 * Listener for visume
+	 * @param idx
+	 */
+	protected void askVideoFrom(final int idx) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setTitle(R.string.select_image_from);
+		builder.setItems(R.array.mediaupload_array, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+				if (arg1 == 0) {
+					takeVideoFromGallery(idx);
+				} else {
+					dispatchVideoIntent();
+				}
+			}
+		});
+
+		Dialog dialog = builder.create();
+		dialog.show();
+	}
+
+	protected void takeVideoFromGallery(int idx) {
+		// TODO Auto-generated method stub
+		selectedPhotoId = idx;
+		uploadImage = "";
+		selectedPhotoId = idx;
+		uploadURL = CommonUtilities.SERVERURL;
+		String selectedFileName = "";
+		
+		selectedFileName =  Api.FILE_VISUME + ".mp4";
+		uploadImage = Api.IMAGE_ROOT + selectedFileName;
+		uploadURL += Api.PARAM_VISUME_UPLOAD;
+		
+		Intent intent = new Intent();
+        intent.setType("video/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent,"Select Video"), SELECT_VIDEO);
+	}
+	
+	
+	private void dispatchVideoIntent() {
+		Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+		takeVideoIntent.putExtra("android.intent.extra.durationLimit", Api.VIDEO_LIMIT);
+		startActivityForResult(takeVideoIntent, TAKE_VIDEO);
+	}
+	
+	private void handleCameraVideo(Intent intent) {
+		mVideoUri = intent.getData();
+	}
+	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);		
 		switch (requestCode) {
-		case TAKE_PHOTO_CODE: {
-			if (resultCode == RESULT_OK) {
-				uploadAction(uploadImage, uploadURL, selectedPhotoId);
-			}
-			break;
-		} // ACTION_TAKE_PHOTO_B
-
-		case SELECT_PHOTO: {
-			if (resultCode == RESULT_OK) {
-				
-				Uri selectedImageUri = data.getData();
-	            String selectedImagePath = getPath(selectedImageUri);
-	            ApplicationUtils.copyFile(selectedImagePath, uploadImage);	            
-
-				uploadAction(uploadImage, uploadURL, selectedPhotoId);
-			}
-			break;
-		} // ACTION_TAKE_PHOTO_S
-		} // switch		
+			case TAKE_PHOTO_CODE: {
+				if (resultCode == RESULT_OK) {
+					uploadAction(uploadImage, uploadURL, selectedPhotoId);
+				}
+				break;
+			} // ACTION_TAKE_PHOTO_B
+	
+			case SELECT_PHOTO: {
+				if (resultCode == RESULT_OK) {
+					Uri selectedImageUri = data.getData();
+		            String selectedImagePath = getPath(selectedImageUri);
+		            ApplicationUtils.copyFile(selectedImagePath, uploadImage);	            
+	
+					uploadAction(uploadImage, uploadURL, selectedPhotoId);
+				}
+				break;
+			} // ACTION_TAKE_PHOTO_S
+			
+			case TAKE_VIDEO: {
+				if(resultCode == RESULT_OK) {
+					handleCameraVideo(data);
+				}
+				break;
+			} // ACTION_TAKE_VIDEO
+			
+			case SELECT_VIDEO: {
+				if (resultCode == RESULT_OK) {
+					Uri selectedImageUri = data.getData();
+		            String selectedImagePath = getPath(selectedImageUri);
+		            ApplicationUtils.copyFile(selectedImagePath, uploadImage);	            
+		
+					uploadAction(uploadImage, uploadURL, selectedPhotoId);
+				}
+				break;
+			} // ACTION_SELECT_VIDEO
+		
+		}
+		// switch		
 	}
 
 	public String getPath(Uri uri) {
@@ -1937,6 +2216,24 @@ public class EditProfile extends SherlockActivity {
 	    mtx.postRotate(degree);
 
 	    return Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, true);
+	}
+	
+	private void renameFile(String oldPath, String imagePath) {
+		String newFilename = new File(imagePath).getName();
+		String newPath = CommonUtilities.IMAGE_ROOT + newFilename;
+		boolean isRenamed = false;
+		
+		File f = null;
+	    File f2 = null;
+		
+		try {
+			f = new File(oldPath);						
+			f2 = new File(newPath);					
+			isRenamed = f.renameTo(f2);
+		} catch(Exception e){
+	         // if any error occurs
+	         e.printStackTrace();
+	    }		
 	}
 	
 	private void uploadImageToServer(final String filePath, final String url, final int outputPhotoId) {
@@ -2023,6 +2320,7 @@ public class EditProfile extends SherlockActivity {
 					}
 					
 					Log.d(TAG, "Upload result: " + s.toString());
+					renameFile(filePath, s.toString());
 					
 					switch (outputPhotoId) {
 		    		case TAKE_IMG_PROFILE:

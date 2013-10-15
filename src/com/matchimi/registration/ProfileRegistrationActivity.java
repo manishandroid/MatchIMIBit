@@ -14,6 +14,7 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -143,7 +144,7 @@ public class ProfileRegistrationActivity extends Activity {
 	private boolean isSchoolRequired = false;
 
 	private TextView workExperienceView;
-	private List<String> listWorkExperience;
+	private List<CharSequence> listWorkExperience;
 	private List<String> listWorkExpID;
 	private int selectedWorkIdx = -1;
 	private Bitmap facebookAvatar = null;
@@ -184,9 +185,14 @@ public class ProfileRegistrationActivity extends Activity {
 //		editExperience = (EditText) findViewById(R.id.editExperience);
 		
 		workExperienceView = (TextView) findViewById(R.id.regprofile_work_experience);
-		preparingWorkExperience();
 		workExperienceView.setOnClickListener(workExperienceListener);
+
+		CharSequence[] workExpArray = getResources().getStringArray(R.array.workexperience_array);
+		listWorkExperience = Arrays.asList(workExpArray);
 		
+		String[] workExpIDArray = getResources().getStringArray(R.array.workexperience_id_array);
+		listWorkExpID = Arrays.asList(workExpIDArray);
+
 		// Set take front NRIC button
 //		photoFrontNRIC = (Button) findViewById(R.id.profile_reg_addfront_button);
 //		photoFrontNRIC.setOnClickListener(frontNRICListener);
@@ -268,32 +274,23 @@ public class ProfileRegistrationActivity extends Activity {
 			mAlbumStorageDirFactory = new BaseAlbumDirFactory();
 		}
 
-		loadGender();
+		loadDefaultProfileData();
 	}
-
-	private void loadGender() {
-		final String url = SERVERURL + API_GET_GENDERS;
+	
+	protected void loadDefaultProfileData() {
+		final String url = CommonUtilities.SERVERURL + 
+				CommonUtilities.API_GET_PROFILE_DEFAULT_DATA;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
 				if (jsonStr != null) {
-					try {
-						listGender = new ArrayList<String>();
-						listGenderId = new ArrayList<String>();
-
-						JSONArray jsonArray = new JSONArray(jsonStr);
-						for (int i = 0; i < jsonArray.length(); i++) {
-							JSONObject obj = jsonArray.getJSONObject(i);
-							obj = obj.getJSONObject("genders");
-							listGender.add(obj.getString("gender"));
-							listGenderId.add(obj.getString("gender_id"));
-						}
-
-						createGenderView();
-						loadNRICType();
-					}  catch (JSONException e) {
-						NetworkUtils.connectionHandler(ProfileRegistrationActivity.this, jsonStr, e.getMessage());
+					loadGenderJson(jsonStr);
+					
+					// If user register using Facebook, download the avatar
+					if(isFacebookAvatar) {
+						loadFacebookAvatar(facebookID);
 					}
+
 				} else {
 					Toast.makeText(context,
 							getString(R.string.server_error),
@@ -304,7 +301,7 @@ public class ProfileRegistrationActivity extends Activity {
 
 		progress = ProgressDialog.show(context,
 				getResources().getString(R.string.registration_profile_title),
-				"Loading gender...", true, false);
+				getString(R.string.loading_data), true, false);
 		new Thread() {
 			public void run() {
 				jsonParser = new JSONParser();
@@ -317,7 +314,92 @@ public class ProfileRegistrationActivity extends Activity {
 			}
 		}.start();
 	}
+	
+	/**
+	 * Loading gender default data from JSON
+	 * 
+	 * @param jsonStr
+	 */
+	private void loadGenderJson(String jsonStr) {
+		try {
+			JSONObject dataObj = new JSONObject(jsonStr);
+			JSONArray jsonArray = dataObj.getJSONArray(CommonUtilities.PARAM_PROFILE_DEFAUT_PART_TIMER_GENDER);
+			
+			listGender = new ArrayList<String>();
+			listGenderId = new ArrayList<String>();
+			
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONObject obj = jsonArray.getJSONObject(i);
+				
+				obj = obj.getJSONObject("genders");
+				listGender.add(obj.getString("gender"));
+				listGenderId.add(obj.getString("gender_id"));
+			}
+			
+			createGenderView();
+			loadNRICTypeJSON(jsonStr);
+			
+		} catch (JSONException e) {
+			NetworkUtils.connectionHandler(ProfileRegistrationActivity.this, jsonStr, e.getMessage());
+			Log.e(TAG, "Error while get genders >>> " + e.getMessage());
+		}
+	}
 
+	/**
+	 * Loading NRICType from JSON
+	 * 
+	 * @param jsonStr
+	 */
+	private void loadNRICTypeJSON(String jsonStr) {		
+		
+		try {
+			JSONObject dataObj = new JSONObject(jsonStr);
+			JSONArray jsonArray = dataObj.getJSONArray(CommonUtilities.PARAM_PROFILE_DEFAUT_PART_TIMER_IC_TYPE);
+			
+			listNRICType = new ArrayList<String>();
+			listNRICTypeId = new ArrayList<String>();
+
+
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONObject obj = jsonArray.getJSONObject(i);
+				obj = obj.getJSONObject("nric_types");
+				listNRICType.add(obj.getString("nric_type"));
+				listNRICTypeId.add(obj.getString("nric_type_id"));
+			}
+
+			loadSchoolJson(jsonStr);
+		} catch (JSONException e) {
+			NetworkUtils.connectionHandler(ProfileRegistrationActivity.this, jsonStr, e.getMessage());
+			Log.e(TAG, "Error get ic types >>> " + e.getMessage());
+		}
+	}
+	
+	/**
+	 * Loading schools default data from JSON
+	 * 
+	 * @param jsonStr
+	 */
+	private void loadSchoolJson(String jsonStr) {
+		try {
+			listSchool = new ArrayList<String>();
+			listSchoolId = new ArrayList<String>();
+
+			JSONObject dataObj = new JSONObject(jsonStr);
+			JSONArray jsonArray = dataObj.getJSONArray(CommonUtilities.PARAM_PROFILE_DEFAUT_PART_TIMER_SCHOOL);
+			
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONObject obj = jsonArray.getJSONObject(i);
+				obj = obj.getJSONObject("schools");
+				listSchool.add(obj.getString("school_name"));
+				listSchoolId.add(obj.getString("school_id"));
+			}
+			
+		} catch (Exception e) {
+			NetworkUtils.connectionHandler(ProfileRegistrationActivity.this, jsonStr, e.getMessage());
+			Log.e(TAG, "Error skills >>> " + e.getMessage());
+		}
+	}
+	
 	protected void createGenderView() {
 		if (listGender.size() > 0) {
 			for (int i = 0; i < listGender.size(); i++) {
@@ -344,147 +426,6 @@ public class ProfileRegistrationActivity extends Activity {
 		}
 	}
 
-	protected void loadNRICType() {
-		final String url = SERVERURL + API_GET_IC_TYPES;
-		final Handler mHandlerFeed = new Handler();
-		final Runnable mUpdateResultsFeed = new Runnable() {
-			public void run() {
-				if (jsonStr != null) {
-					try {
-						listNRICType = new ArrayList<String>();
-						listNRICTypeId = new ArrayList<String>();
-
-						JSONArray jsonArray = new JSONArray(jsonStr);
-						for (int i = 0; i < jsonArray.length(); i++) {
-							JSONObject obj = jsonArray.getJSONObject(i);
-							obj = obj.getJSONObject("nric_types");
-							listNRICType.add(obj.getString("nric_type"));
-							listNRICTypeId.add(obj.getString("nric_type_id"));
-						}
-						loadSchool();
-//						loadSkill();
-
-					} catch (JSONException e) {
-							NetworkUtils.connectionHandler(ProfileRegistrationActivity.this, jsonStr, e.getMessage());
-					}
-				} else {
-					Toast.makeText(context,
-							getString(R.string.server_error),
-							Toast.LENGTH_SHORT).show();
-				}
-			}
-		};
-
-		progress = ProgressDialog.show(context,
-				getResources().getString(R.string.registration_profile_title),
-				"Loading NRIC type...", true, false);
-		new Thread() {
-			public void run() {
-				jsonParser = new JSONParser();
-				jsonStr = jsonParser.getHttpResultUrlGet(url);
-
-				if (progress != null && progress.isShowing()) {
-					progress.dismiss();
-					mHandlerFeed.post(mUpdateResultsFeed);
-				}
-			}
-		}.start();
-	}
-
-	protected void loadSchool() {
-		final String url = SERVERURL + API_GET_SCHOOLS;
-		final Handler mHandlerFeed = new Handler();
-		final Runnable mUpdateResultsFeed = new Runnable() {
-			public void run() {
-				if (jsonStr != null) {
-					try {
-						listSchool = new ArrayList<String>();
-						listSchoolId = new ArrayList<String>();
-
-						JSONArray jsonArray = new JSONArray(jsonStr);
-						for (int i = 0; i < jsonArray.length(); i++) {
-							JSONObject obj = jsonArray.getJSONObject(i);
-							obj = obj.getJSONObject("schools");
-							listSchool.add(obj.getString("school_name"));
-							listSchoolId.add(obj.getString("school_id"));
-						}
-					} catch (JSONException e) {
-						NetworkUtils.connectionHandler(ProfileRegistrationActivity.this, jsonStr, e.getMessage());
-					}
-					
-					if(isFacebookAvatar) {
-						loadFacebookAvatar(facebookID);
-					}
-					
-				} else {
-					Toast.makeText(context,
-							getString(R.string.server_error),
-							Toast.LENGTH_SHORT).show();
-				}
-			}
-		};
-
-		progress = ProgressDialog.show(context, "Registration", "Loading school...",
-				true, false);
-		new Thread() {
-			public void run() {
-				jsonParser = new JSONParser();
-				jsonStr = jsonParser.getHttpResultUrlGet(url);
-
-				if (progress != null && progress.isShowing()) {
-					progress.dismiss();
-					mHandlerFeed.post(mUpdateResultsFeed);
-				}
-			}
-		}.start();
-	}
-	
-	protected void loadSkill() {
-		final String url = SERVERURL + API_GET_SKILLS;
-		final Handler mHandlerFeed = new Handler();
-		final Runnable mUpdateResultsFeed = new Runnable() {
-			public void run() {
-				if (jsonStr != null) {
-					try {
-						listSkill = new ArrayList<String>();
-						listSkillId = new ArrayList<String>();
-						listSkillDesc = new ArrayList<String>();
-
-						JSONArray jsonArray = new JSONArray(jsonStr);
-						for (int i = 0; i < jsonArray.length(); i++) {
-							JSONObject obj = jsonArray.getJSONObject(i);
-							obj = obj.getJSONObject("skills");
-							listSkillDesc.add(obj.getString("skill_desc"));
-							listSkillId.add(obj.getString("skill_id"));
-							listSkill.add(obj.getString("skill_name"));
-						}
-					} catch (JSONException e) {
-						NetworkUtils.connectionHandler(ProfileRegistrationActivity.this, jsonStr, e.getMessage());
-					}
-				} else {
-					Toast.makeText(context,
-							getString(R.string.server_error),
-							Toast.LENGTH_SHORT).show();
-				}
-			}
-		};
-
-		progress = ProgressDialog.show(context,
-				getResources().getString(R.string.app_name),
-				"Loading skill...", true, false);
-		new Thread() {
-			public void run() {
-				jsonParser = new JSONParser();
-				jsonStr = jsonParser.getHttpResultUrlGet(url);
-
-				if (progress != null && progress.isShowing()) {
-					progress.dismiss();
-					mHandlerFeed.post(mUpdateResultsFeed);
-				}
-			}
-		}.start();
-	}	
-	
 	protected void loadFacebookAvatar(final String user_id) {
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
@@ -520,18 +461,6 @@ public class ProfileRegistrationActivity extends Activity {
 		}.start();
 	}
 
-	private void preparingWorkExperience() {
-		listWorkExperience = new ArrayList<String>();
-		listWorkExperience.add("Less than 3 months");
-		listWorkExperience.add("Between 3 and 12 months");
-		listWorkExperience.add("More than 12 months");
-		
-		listWorkExpID = new ArrayList<String>();
-		for (int i = 1; i < 4; i++) {
-			listWorkExpID.add(String.valueOf(i));
-		}		
-	}
-	
 	/**
 	 * Date birth selection dialog listener
 	 */
@@ -863,11 +792,7 @@ public class ProfileRegistrationActivity extends Activity {
 					
 					if(isRenamed) {
 						profilePicture = imagePath;
-					}
-					
-					String profileFilename = CommonUtilities.FILE_IMAGE_PROFILE + pt_id + ".jpg";
-					String oldPicPath = CommonUtilities.IMAGE_ROOT + profileFilename;
-					ApplicationUtils.copyFile(newPath, oldPicPath);	
+					}					
 
 				} catch(Exception e){
 			         // if any error occurs
@@ -1382,4 +1307,194 @@ public class ProfileRegistrationActivity extends Activity {
 		}
 	}
 
+
+	@Deprecated
+	private void loadGender() {
+		final String url = SERVERURL + API_GET_GENDERS;
+		final Handler mHandlerFeed = new Handler();
+		final Runnable mUpdateResultsFeed = new Runnable() {
+			public void run() {
+				if (jsonStr != null) {
+					try {
+						listGender = new ArrayList<String>();
+						listGenderId = new ArrayList<String>();
+
+						JSONArray jsonArray = new JSONArray(jsonStr);
+						for (int i = 0; i < jsonArray.length(); i++) {
+							JSONObject obj = jsonArray.getJSONObject(i);
+							obj = obj.getJSONObject("genders");
+							listGender.add(obj.getString("gender"));
+							listGenderId.add(obj.getString("gender_id"));
+						}
+
+						createGenderView();
+						loadNRICType();
+					}  catch (JSONException e) {
+						NetworkUtils.connectionHandler(ProfileRegistrationActivity.this, jsonStr, e.getMessage());
+					}
+				} else {
+					Toast.makeText(context,
+							getString(R.string.server_error),
+							Toast.LENGTH_SHORT).show();
+				}
+			}
+		};
+
+		progress = ProgressDialog.show(context,
+				getResources().getString(R.string.registration_profile_title),
+				"Loading gender...", true, false);
+		new Thread() {
+			public void run() {
+				jsonParser = new JSONParser();
+				jsonStr = jsonParser.getHttpResultUrlGet(url);
+
+				if (progress != null && progress.isShowing()) {
+					progress.dismiss();
+					mHandlerFeed.post(mUpdateResultsFeed);
+				}
+			}
+		}.start();
+	}
+
+	
+	@Deprecated
+	protected void loadSkill() {
+		final String url = SERVERURL + API_GET_SKILLS;
+		final Handler mHandlerFeed = new Handler();
+		final Runnable mUpdateResultsFeed = new Runnable() {
+			public void run() {
+				if (jsonStr != null) {
+					try {
+						listSkill = new ArrayList<String>();
+						listSkillId = new ArrayList<String>();
+						listSkillDesc = new ArrayList<String>();
+
+						JSONArray jsonArray = new JSONArray(jsonStr);
+						for (int i = 0; i < jsonArray.length(); i++) {
+							JSONObject obj = jsonArray.getJSONObject(i);
+							obj = obj.getJSONObject("skills");
+							listSkillDesc.add(obj.getString("skill_desc"));
+							listSkillId.add(obj.getString("skill_id"));
+							listSkill.add(obj.getString("skill_name"));
+						}
+					} catch (JSONException e) {
+						NetworkUtils.connectionHandler(ProfileRegistrationActivity.this, jsonStr, e.getMessage());
+					}
+				} else {
+					Toast.makeText(context,
+							getString(R.string.server_error),
+							Toast.LENGTH_SHORT).show();
+				}
+			}
+		};
+
+		progress = ProgressDialog.show(context,
+				getResources().getString(R.string.app_name),
+				"Loading skill...", true, false);
+		new Thread() {
+			public void run() {
+				jsonParser = new JSONParser();
+				jsonStr = jsonParser.getHttpResultUrlGet(url);
+
+				if (progress != null && progress.isShowing()) {
+					progress.dismiss();
+					mHandlerFeed.post(mUpdateResultsFeed);
+				}
+			}
+		}.start();
+	}	
+	
+	@Deprecated
+	protected void loadNRICType() {
+		final String url = SERVERURL + API_GET_IC_TYPES;
+		final Handler mHandlerFeed = new Handler();
+		final Runnable mUpdateResultsFeed = new Runnable() {
+			public void run() {
+				if (jsonStr != null) {
+					try {
+						listNRICType = new ArrayList<String>();
+						listNRICTypeId = new ArrayList<String>();
+
+						JSONArray jsonArray = new JSONArray(jsonStr);
+						for (int i = 0; i < jsonArray.length(); i++) {
+							JSONObject obj = jsonArray.getJSONObject(i);
+							obj = obj.getJSONObject("nric_types");
+							listNRICType.add(obj.getString("nric_type"));
+							listNRICTypeId.add(obj.getString("nric_type_id"));
+						}
+						loadSchool();
+
+					} catch (JSONException e) {
+							NetworkUtils.connectionHandler(ProfileRegistrationActivity.this, jsonStr, e.getMessage());
+					}
+				} else {
+					Toast.makeText(context,
+							getString(R.string.server_error),
+							Toast.LENGTH_SHORT).show();
+				}
+			}
+		};
+
+		progress = ProgressDialog.show(context,
+				getResources().getString(R.string.registration_profile_title),
+				"Loading NRIC type...", true, false);
+		new Thread() {
+			public void run() {
+				jsonParser = new JSONParser();
+				jsonStr = jsonParser.getHttpResultUrlGet(url);
+
+				if (progress != null && progress.isShowing()) {
+					progress.dismiss();
+					mHandlerFeed.post(mUpdateResultsFeed);
+				}
+			}
+		}.start();
+	}
+
+	@Deprecated
+	protected void loadSchool() {
+		final String url = SERVERURL + API_GET_SCHOOLS;
+		final Handler mHandlerFeed = new Handler();
+		final Runnable mUpdateResultsFeed = new Runnable() {
+			public void run() {
+				if (jsonStr != null) {
+					try {
+						listSchool = new ArrayList<String>();
+						listSchoolId = new ArrayList<String>();
+
+						JSONArray jsonArray = new JSONArray(jsonStr);
+						for (int i = 0; i < jsonArray.length(); i++) {
+							JSONObject obj = jsonArray.getJSONObject(i);
+							obj = obj.getJSONObject("schools");
+							listSchool.add(obj.getString("school_name"));
+							listSchoolId.add(obj.getString("school_id"));
+						}
+					} catch (JSONException e) {
+						NetworkUtils.connectionHandler(ProfileRegistrationActivity.this, jsonStr, e.getMessage());
+					}
+					
+					
+					
+				} else {
+					Toast.makeText(context,
+							getString(R.string.server_error),
+							Toast.LENGTH_SHORT).show();
+				}
+			}
+		};
+
+		progress = ProgressDialog.show(context, "Registration", "Loading school...",
+				true, false);
+		new Thread() {
+			public void run() {
+				jsonParser = new JSONParser();
+				jsonStr = jsonParser.getHttpResultUrlGet(url);
+
+				if (progress != null && progress.isShowing()) {
+					progress.dismiss();
+					mHandlerFeed.post(mUpdateResultsFeed);
+				}
+			}
+		}.start();
+	}
 }

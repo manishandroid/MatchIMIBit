@@ -220,7 +220,7 @@ public class CreateAvailability extends SherlockFragmentActivity {
 
 			reloadView();
 		} else {
-			ab.setTitle("Create Availability");
+			ab.setTitle(getString(R.string.create_availability));
 		}
 		
 		map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
@@ -393,14 +393,14 @@ public class CreateAvailability extends SherlockFragmentActivity {
 							final String[] nums1 = generateHour(0);
 							np1.setMaxValue(23);
 							np1.setMinValue(0);
-							np1.setWrapSelectorWheel(true);
+							np1.setWrapSelectorWheel(false);
 							np1.setDisplayedValues(nums1);
 							
 							final NumberPicker np2 = (NumberPicker)view.findViewById(R.id.numberPicker2);
 							final String[] nums2 = {"00", "15", "30", "45"};
 							np2.setMaxValue(3);
 							np2.setMinValue(0);
-							np2.setWrapSelectorWheel(true);
+							np2.setWrapSelectorWheel(false);
 							np2.setDisplayedValues(nums2);
 							
 							builder.setPositiveButton(R.string.set, new DialogInterface.OnClickListener() {
@@ -492,6 +492,24 @@ public class CreateAvailability extends SherlockFragmentActivity {
 			np2.setMinValue(0);
 			np2.setWrapSelectorWheel(false);
 			np2.setDisplayedValues(nums2);
+			
+			try {
+				Date getStart = sdf.parse(start);
+				Calendar currentStart = Calendar.getInstance();
+				currentStart.setTime(getStart);
+				int currentHour = currentStart.get(Calendar.HOUR_OF_DAY);
+				int currentMinute = currentStart.get(Calendar.MINUTE);
+				if(currentMinute > 30) {
+					np1.setValue(currentHour+1);
+				} else {
+					np1.setValue(currentHour);
+					int increment = currentMinute/15;
+					np2.setValue(increment+1);
+				}
+			} catch (ParseException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			
 			builder.setPositiveButton(R.string.set, new DialogInterface.OnClickListener() {
 				@Override

@@ -2,8 +2,7 @@
 <resources>
 
     <string name="app_name">Matchimi</string>
-    <string name="app_id">509335329136524</string>
-    <string name="facebook_app_id">437544919692116</string>
+    <string name="facebook_app_id">1417927991768409</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="price_hour">$13/hr</string>
@@ -92,6 +91,8 @@
     <string name="cancel_note">Please note that canceling your availability for an accepted offer, is not taken well by employers.\n\nThis will demote your ranking for some time in the Matchimi system and others will be given preference over you when matching job offers.</string>
     <string name="cancel_reason">Reason for cancellation</string>
     <string name="cancel_my_availabliity">Cancel my job</string>
+    <string name="create_availability">Create Availability</string>
+    
     <string name="ill_keep_appoinment">I will keep this appointment</string>
     <string name="pas_job_info">Past job info</string>
     <string name="menu_history">Job History</string>
@@ -169,8 +170,12 @@
     <string name="something_wrong">Something wrong. Please try again</string>
     <string name="edit_profile">Edit Profile</string>       
     <string name="edit_profile_nric_number">IC Number</string>
+    <string name="edit_profile_visume">Video Resume</string>
+    <string name="edit_profile_bank_statement">Bank Statement</string>     
     <string name="address">Address</string>
-    <string name="profile_picture">Profile Picture</string>        
+    <string name="profile_picture">Profile Picture</string>    
+    <string name="profile_visume">Profile Video Resume</string>     
+    <string name="profile_bank_statement">Profile Bank Statement</string> 
     <string name="postal_code">Postal Code</string>        
     <string name="expire_date">Expire Date</string>        
     <string name="school">School</string>
@@ -193,13 +198,14 @@
     <string name="edit_profile_error">Failed to update profile. Please try again</string> 
     <string name="edit_profile_success">Your profile has been updated successfully</string>    
     <string name="edit_get_profile_error">Failed to get profile. Please try again</string>  
-    <string name="uploading">Uploading ... </string>  
+    <string name="uploading">Uploading ... </string>
     <string name="blocked_companies_loading">Loading companies...</string>    
     <string name="loading_profile">Loading profile...</string>
     <string name="updating_profile">Updating profile...</string>
     <string name="server_error">Problem with server data. Please try again</string>
-
+    <string name="loading_data">Loading data ...</string>
     <string name="history_loading">Loading job histories ...</string>
+    <string name="select_image_from">Select image from</string>
         
     <string name="reset_password_success">Your password has been reset succesfully.\nPlease check your email.</string>
     <string name="reset_password_failed">Failed to reset password. Please try again.</string>
@@ -211,10 +217,30 @@
     <string name="reset">Reset</string>
     <string name="delete">Delete</string>
     <string name="login_email_not_valid">Email address is not valid</string>
+    <string name="available_job">Available Jobs</string>
+    <string name="message">Messages</string>
+    <string name="newest">Newest</string>
+    <string name="unread">Unread</string>
+    <string name="from">From</string>
+    <string name="date">Date</string>
+    <string name="time">Time</string>
+    <string name="your_friend">Your friends</string>
+    <string name="rate_this_job">Rate this job</string>
+    <string name="all_friends">All</string>
+    <string name="add_friends">Add</string>
+    <string name="unfriend">Un-friend</string>
+    <string name="request_unfriends">Requesting un-friend..</string>
+    <string name="request_friend">Requesting friend..</string>
+    <string name="menu_friends">Friends</string>
+    <string name="failed_try_again">Failed, please try again !</string>
+    <string name="friends_name">Friends name</string>
     <string name="no_network_error">no network provider signal</string>
     <string name="map_availability_area">Your availability job area</string>
     <string name="download_avatar">Downloading avatar...</string>
-
+    <string name="tab_location">Location</string>
+    <string name="required">required</string>
+    <string name="invalid_email_address">Invalid email address</string>
+    
     <string-array name="repeat_value">
         <item>None</item>
         <item>Weekly</item>
@@ -241,6 +267,11 @@
         <item>Family Relative</item>
         <item>Friend</item>
         <item>Colleague</item>
+    </string-array>
+    
+    <string-array name="mediaupload_array">
+        <item>Gallery</item>
+        <item>Camera</item>
     </string-array>
     
     <string-array name="cancelreason_array">

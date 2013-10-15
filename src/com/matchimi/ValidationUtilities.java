@@ -235,6 +235,14 @@ public final class ValidationUtilities {
 			return false;
 		}
 		
+		// Visume
+		String visume = obj.optString(Api.VISUME);
+		if(visume != "") {
+			if(obj.getString(Api.VISUME).length() == 0 ||
+					obj.getString(Api.VISUME) == "null") {
+				return false;
+			}			
+		}
 		
 		return true;
 		

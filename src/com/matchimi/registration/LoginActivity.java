@@ -95,7 +95,7 @@ public class LoginActivity extends Activity {
 				boolean validPassword = Validation
 						.isValidPassword(passwordText);
 				if (validEmail && validPassword) {
-					closeKeyboard();
+//					closeKeyboard();
 
 					extraBundle = new Bundle();
 					extraBundle.putString(CommonUtilities.USER_BIRTHDAY, "");
@@ -125,7 +125,7 @@ public class LoginActivity extends Activity {
 		forgetButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-				closeKeyboard();
+//				closeKeyboard();
 				showForgetDialog();
 			}
 		});

@@ -4,13 +4,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
+import android.view.Display;
 
 public class ApplicationUtils {
 
@@ -84,5 +88,25 @@ public class ApplicationUtils {
 		}
 
 		return res;
+	}
+	
+	@SuppressWarnings("deprecation")
+	@SuppressLint("NewApi")
+	public static int getColumnNumber(Activity a, int w) {
+		int numOfColumn = 0;
+		/* prepare max screen width */
+		Display display = a.getWindowManager().getDefaultDisplay();
+		int availableWidth = 0;
+		try {
+			Point size = new Point();
+			display.getSize(size);
+			availableWidth = size.x;
+		} catch (NoSuchMethodError e) {
+			availableWidth = display.getWidth();
+		}
+
+		numOfColumn = availableWidth / (w + 6);
+		
+		return numOfColumn;
 	}
 }

@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.matchimi.R;
@@ -20,18 +21,21 @@ public class JobAdapter extends BaseAdapter {
 	private List<String> listCompany = null;
 	private List<String> listSchedule = null;
 	private List<String> listTimeLeft = null;
+	private List<String> listProgressBar = null;
 
 	public JobAdapter(Context context) {
 		this.context = context;
 	}
 
 	public void updateList(List<String> price, List<String> address,
-			List<String> company, List<String> schedule, List<String> timeLeft) {
+			List<String> company, List<String> schedule, List<String> timeLeft,
+			 List<String> progressBar) {
 		listPrice = price;
 		listAddress = address;
 		listCompany = company;
 		listSchedule = schedule;
 		listTimeLeft = timeLeft;
+		listProgressBar = progressBar;
 
 		notifyDataSetChanged();
 	}
@@ -73,9 +77,9 @@ public class JobAdapter extends BaseAdapter {
 			holder.textDate = (TextView) v.findViewById(R.id.textDate);
 			holder.textPlace = (TextView) v.findViewById(R.id.textPlace);
 			holder.textPrice = (TextView) v.findViewById(R.id.textPrice);
-			// holder.textTimeLeft = (TextView)
-			// v.findViewById(R.id.textTimeLeft);
-
+			holder.textTimeLeft = (TextView) v.findViewById(R.id.textTimeLeft);
+			holder.jobProgressBar = (ProgressBar) v.findViewById(R.id.jobProgressPercentage);
+			
 			// Associate the holder with the view for latter lookup
 			v.setTag(holder);
 		} else {
@@ -86,9 +90,11 @@ public class JobAdapter extends BaseAdapter {
 		holder.textDate.setText(listSchedule.get(position));
 		holder.textPlace.setText(listCompany.get(position) + "\n"
 				+ listAddress.get(position));
-		// if (listTimeLeft != null && listTimeLeft.size() > position) {
-		// holder.textTimeLeft.setText(listTimeLeft.get(position));
-		// }
+		if (listTimeLeft != null && listTimeLeft.size() > position) {
+			 holder.textTimeLeft.setText(listTimeLeft.get(position));
+		}
+		
+		holder.jobProgressBar.setProgress(Integer.valueOf(listProgressBar.get(position)));
 
 		return v;
 	}
@@ -97,6 +103,7 @@ public class JobAdapter extends BaseAdapter {
 		TextView textPrice;
 		TextView textDate;
 		TextView textPlace;
-		// TextView textTimeLeft;
+		TextView textTimeLeft;
+		ProgressBar jobProgressBar;
 	}
 }

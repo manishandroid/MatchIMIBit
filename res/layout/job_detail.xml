@@ -140,10 +140,17 @@
             android:paddingTop="10dp"
             android:text="@string/none_string" />
 
+        <include 
+            layout="@layout/additional_layout"
+            android:id="@+id/layAdditional"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textOptional"/>
+	        	        
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/textOptional"
+            android:layout_below="@+id/layAdditional"
             android:layout_marginTop="10dp"
             android:orientation="horizontal" >
 

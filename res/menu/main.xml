@@ -21,6 +21,9 @@
                     android:id="@+id/menu_history"
                     android:title="@string/menu_history"/>
                 <item
+                    android:id="@+id/menu_friends"
+                    android:title="@string/menu_friends"/>
+                <item
                     android:id="@+id/menu_setting"
                     android:title="@string/menu_setting"/>
                 <item

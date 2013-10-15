@@ -3,6 +3,7 @@ package com.matchimi.options;
 import static com.matchimi.CommonUtilities.PREFS_NAME;
 import static com.matchimi.CommonUtilities.SETTING_THEME;
 import static com.matchimi.CommonUtilities.THEME_LIGHT;
+import static com.matchimi.CommonUtilities.TAG;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.matchimi.Api;
 import com.matchimi.CommonUtilities;
 import com.matchimi.R;
 import com.matchimi.utils.ApplicationUtils;
@@ -58,11 +60,14 @@ public class HistoryDetail extends SherlockActivity {
 	private List<String> listDescription = null;
 	private List<String> listRequirement = null;
 	private List<String> listOptional = null;
+	private List<String> listLocation = null;
 
 	private JobAdapter adapter;
+	private TextView textTotalHours;
+	private TextView textTotalEarning;
 	
-	private int totalHours = 0;
-	private int totalEarning = 0;
+	private String totalHours;
+	private String totalEarning;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -84,10 +89,8 @@ public class HistoryDetail extends SherlockActivity {
 		ActionBar ab = getSupportActionBar();
 		ab.setDisplayHomeAsUpEnabled(true);
 
-		TextView textTotalHours = (TextView) findViewById(R.id.totalHours);
-		TextView textTotalEarning = (TextView) findViewById(R.id.totalEarning);
-		textTotalHours.setText("0 Hrs");
-		textTotalEarning.setText("$0");
+		textTotalHours = (TextView) findViewById(R.id.totalHours);
+		textTotalEarning = (TextView) findViewById(R.id.totalEarning);
 
 		adapter = new JobAdapter(context);
 		final ListView listview = (ListView) findViewById(R.id.joblistview);
@@ -109,6 +112,7 @@ public class HistoryDetail extends SherlockActivity {
 				i.putExtra("description", listDescription.get(arg2));
 				i.putExtra("requirement", listRequirement.get(arg2));
 				i.putExtra("optional", listOptional.get(arg2));
+				i.putExtra("location", listLocation.get(arg2));
 				i.putExtra("id", listAvailID.get(arg2));
 				i.putExtra("type", "past");
 				startActivity(i);
@@ -117,9 +121,8 @@ public class HistoryDetail extends SherlockActivity {
 	}
 
 	private void loadData() {
-		final String url = CommonUtilities.SERVERURL +
-				CommonUtilities.API_GET_PAST_ACCEPTED_JOB_OFFERS + "?" + 
-				CommonUtilities.PARAM_PT_ID + "=" + pt_id;
+		final String url = Api.SERVERURL + Api.PARAM_GET_JOB_HISTORY + "?" + 
+				Api.PT_ID + "=" + pt_id;
 		
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
@@ -133,10 +136,27 @@ public class HistoryDetail extends SherlockActivity {
 				listDescription = new ArrayList<String>();
 				listRequirement = new ArrayList<String>();
 				listOptional = new ArrayList<String>();
+				listLocation = new ArrayList<String>();
 
 				if (jsonStr != null) {
 					try {
-						JSONArray items = new JSONArray(jsonStr);
+						JSONObject mainObj = new JSONObject(jsonStr);
+						JSONObject historyObj = (JSONObject) mainObj.get(Api.HISTORY);
+						JSONObject parttimerObj = (JSONObject) historyObj.get(Api.PART_TIMERS);
+						
+						totalHours = parttimerObj.getString(Api.TOTAL_WORK_TIME);
+						totalEarning = parttimerObj.getString(Api.TOTAL_EARNED_MONEY);
+						
+						if(totalHours == "null") {
+							totalHours = "0";
+						}
+						
+						if(totalEarning == "null") {
+							totalEarning = "0";
+						}
+						
+						JSONArray items = new JSONArray(mainObj.get(Api.SUB_SLOTS).toString());
+						
 						if (items != null && items.length() > 0) {
 							SimpleDateFormat formatterDate = new SimpleDateFormat(
 									"EE d, MMM", Locale.getDefault());
@@ -147,6 +167,7 @@ public class HistoryDetail extends SherlockActivity {
 								try {
 									JSONObject objs = items.getJSONObject(i);
 									objs = objs.getJSONObject("sub_slots");
+									
 									if (objs != null) {
 										listAvailID.add(jsonParser.getString(
 												objs, "avail_id"));
@@ -158,9 +179,8 @@ public class HistoryDetail extends SherlockActivity {
 														.indexOf(".") + 1)) == 0) {
 											price = price.substring(0,
 													price.indexOf("."));
-											totalEarning += Integer
-													.parseInt(price);
 										}
+										
 										listPrice
 												.add("<font color='#A4A9AF'>$</font><big><big><big><big><font color='#276289'>"
 														+ price
@@ -177,6 +197,8 @@ public class HistoryDetail extends SherlockActivity {
 														"description"));
 										listOptional.add(jsonParser.getString(
 												objs, "optional"));
+										listLocation.add(jsonParser.getString(
+												objs, "location"));
 										listPoint.add(jsonParser.getString(
 												objs, "points"));
 										String startDate = jsonParser
@@ -194,9 +216,6 @@ public class HistoryDetail extends SherlockActivity {
 												+ " - "
 												+ formatterTime.format(calEnd
 														.getTime()));
-										totalHours += (calEnd
-												.get(Calendar.HOUR_OF_DAY) - calStart
-												.get(Calendar.HOUR_OF_DAY));
 									}
 								} catch (JSONException e) {
 									Log.e("Parse Json Object",
@@ -216,12 +235,10 @@ public class HistoryDetail extends SherlockActivity {
 
 				updateTotals();
 				adapter.updateList(listPrice, listAddress, listCompany,
-						listSchedule, null);
+						listSchedule, null, null);
 			}
 		};
 
-		totalEarning = 0;
-		totalHours = 0;
 		progress = ProgressDialog.show(context, getString(R.string.menu_history),
 				getString(R.string.history_loading), true, false);
 		new Thread() {
@@ -237,8 +254,6 @@ public class HistoryDetail extends SherlockActivity {
 	}
 
 	protected void updateTotals() {
-		TextView textTotalHours = (TextView) findViewById(R.id.totalHours);
-		TextView textTotalEarning = (TextView) findViewById(R.id.totalEarning);
 		textTotalHours.setText(totalHours + " Hrs");
 		textTotalEarning.setText("$" + totalEarning);
 	}
