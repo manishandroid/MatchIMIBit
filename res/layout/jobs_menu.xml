@@ -2,26 +2,26 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-	android:background="@android:color/transparent" >
+    android:background="@android:color/transparent" >
 
-    <LinearLayout 
+    <LinearLayout
         android:id="@+id/layTop"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="5dp"
         android:layout_alignParentTop="true"
+        android:layout_margin="5dp"
         android:background="@drawable/bg_button_tab"
-        android:padding="1dp"
-        android:orientation="horizontal">
-        
+        android:orientation="horizontal"
+        android:padding="1dp" >
+
         <TextView
             android:id="@+id/buttonList"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="@drawable/bg_button_tab_def"
             android:gravity="center"
             android:padding="14dp"
-            android:background="@drawable/bg_button_tab_def"
             android:text="@string/available_job" />
 
         <TextView
@@ -29,230 +29,248 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="@drawable/bg_button_tab_def"
             android:gravity="center"
             android:padding="14dp"
-            android:background="@drawable/bg_button_tab_def"
             android:text="@string/tab_location" />
-        
     </LinearLayout>
-    
+
     <ProgressBar
         android:id="@+id/progress"
         style="@android:style/Widget.ProgressBar.Large"
-        android:layout_centerInParent="true"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" />
 
     <ListView
         android:id="@+id/joblistview"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_below="@+id/layTop"
-        android:visibility="gone"
+        android:layout_marginBottom="60dp"
         android:cacheColorHint="@android:color/transparent"
         android:divider="#F5F5F5"
         android:dividerHeight="0dp"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
-        android:scrollbars="none" />
+        android:scrollbars="none"
+        android:visibility="gone" />
 
     <ScrollView
-	    android:id="@+id/scrollView"
-	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent"
+        android:id="@+id/mapScrollView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_below="@+id/layTop"
-	    android:paddingLeft="4dp"
-	    android:paddingRight="4dp"
-	    android:scrollbars="none" >
-	
-	    <RelativeLayout
-	        android:layout_width="fill_parent"
-	        android:layout_height="wrap_content" >
-	
-	        <FrameLayout
-	            android:id="@+id/frame_layout"
-	            android:layout_width="match_parent"
-	            android:layout_height="240dp"
-	            android:layout_alignParentTop="true"
-	            android:background="@android:color/transparent"
-	            android:paddingTop="10dp" >
-	
-	            <fragment
-	                android:id="@+id/map"
-	                android:layout_width="match_parent"
-	                android:layout_height="match_parent"
-	                class="com.google.android.gms.maps.SupportMapFragment" />
-	
-	            <View
-	                android:id="@+id/trans_img"
-	                android:layout_width="match_parent"
-	                android:layout_height="match_parent"
-	                android:background="@android:color/transparent" />
-	        </FrameLayout>
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        android:scrollbars="none" >
 
-		    <RelativeLayout
-		        android:id="@+id/jobDetail"
-	            android:layout_below="@+id/frame_layout"
-		        android:layout_width="fill_parent"
-		        android:layout_height="wrap_content" >
-		            
-		        <TextView
-		            android:id="@+id/textJobPrice"
-		            android:layout_width="wrap_content"
-		            android:layout_height="wrap_content"
-		            android:gravity="top"
-		            android:paddingBottom="10dp"
-		            android:paddingLeft="10dp"
-		            android:paddingRight="10dp"
-		            android:paddingTop="10dp"
-		            android:text="@string/app_name" />
-		
-		        <LinearLayout
-		            android:id="@+id/jobs_schedule_place"
-		            android:layout_width="wrap_content"
-		            android:layout_height="wrap_content"
-		            android:layout_alignParentRight="true"
-		            android:layout_alignRight="@+id/textJobPrice"
-		            android:orientation="vertical"
-		            android:paddingBottom="10dp"
-		            android:paddingLeft="10dp"
-		            android:paddingRight="10dp"
-		            android:paddingTop="10dp" >
-		
-		            <TextView
-		                android:id="@+id/textJobDate"
-		                android:layout_width="match_parent"
-		                android:layout_height="wrap_content"
-		                android:gravity="right"
-		                android:text="@string/none_string"
-		                android:textColor="#2D668E" >
-		            </TextView>
-		
-		            <TextView
-		                android:id="@+id/textJobPlace"
-		                android:layout_width="match_parent"
-		                android:layout_height="wrap_content"
-		                android:layout_marginTop="4dp"
-		                android:gravity="right"
-		                android:text="@string/none_string" 
-		                android:textColor="#8E9090" >
-		            </TextView>
-		        </LinearLayout>
-		
-		        <TextView
-		            android:id="@+id/textExpire"
-		            android:layout_width="fill_parent"
-		            android:layout_height="wrap_content"
-		            android:layout_below="@+id/jobs_schedule_place"
-		            android:layout_marginTop="8dp"
-		            android:background="#CCCCCC"
-		            android:padding="6dp"
-		            android:text="@string/none_string"
-		            android:textColor="@android:color/white" />
-		
-		        <TextView
-		            android:id="@+id/textDescription"
-		            android:layout_width="fill_parent"
-		            android:layout_height="wrap_content"
-		            android:layout_below="@+id/textExpire"
-		            android:paddingBottom="10dp"
-		            android:paddingLeft="10dp"
-		            android:paddingRight="10dp"
-		            android:paddingTop="10dp"
-		            android:text="@string/none_string" />
-		
-		        <TextView
-		            android:id="@+id/labelRequirement"
-		            android:layout_width="fill_parent"
-		            android:layout_height="wrap_content"
-		            android:layout_below="@+id/textDescription"
-		            android:background="#CCCCCC"
-		            android:padding="6dp"
-		            android:text="@string/mandatory_reqs" />
-		
-		        <TextView
-		            android:id="@+id/textRequirement"
-		            android:layout_width="fill_parent"
-		            android:layout_height="wrap_content"
-		            android:layout_below="@+id/labelRequirement"
-		            android:paddingBottom="10dp"
-		            android:paddingLeft="10dp"
-		            android:paddingRight="10dp"
-		            android:paddingTop="10dp"
-		            android:text="@string/none_string" />
-		
-		        <TextView
-		            android:id="@+id/labelOptional"
-		            android:layout_width="fill_parent"
-		            android:layout_height="wrap_content"
-		            android:layout_below="@+id/textRequirement"
-		            android:layout_marginTop="10dp"
-		            android:background="#CCCCCC"
-		            android:padding="6dp"
-		            android:text="@string/optional_reqs" />
-		
-		        <TextView
-		            android:id="@+id/textOptional"
-		            android:layout_width="fill_parent"
-		            android:layout_height="wrap_content"
-		            android:layout_below="@+id/labelOptional"
-		            android:paddingBottom="10dp"
-		            android:paddingLeft="10dp"
-		            android:paddingRight="10dp"
-		            android:paddingTop="10dp"
-		            android:text="@string/none_string" />
-	
-		        <include 
-		            layout="@layout/additional_layout"
-		            android:id="@+id/layAdditional"
-		            android:layout_width="fill_parent"
-		            android:layout_height="wrap_content"
-		            android:layout_below="@+id/textOptional"/>
-		        	        
-			    <LinearLayout
-		            android:layout_width="fill_parent"
-		            android:layout_height="wrap_content"
-		            android:layout_below="@+id/layAdditional"
-		            android:layout_marginTop="10dp"
-		            android:orientation="horizontal" >
-		
-		            <TextView
-		                android:id="@+id/buttonCancel"
-		                android:layout_width="0dp"
-		                android:layout_height="wrap_content"
-		                android:layout_weight="1"
-		                android:background="@drawable/button_reject_offer"
-		                android:gravity="center"
-		                android:padding="12dp"
-		                android:text="@string/cancel_offer"
-		                android:textColor="@android:color/white" />
-		
-		            <TextView
-		                android:id="@+id/buttonReject"
-		                android:layout_width="0dp"
-		                android:layout_height="wrap_content"
-		                android:layout_weight="1"
-		                android:background="@drawable/button_reject_offer"
-		                android:gravity="center"
-		                android:padding="12dp"
-		                android:text="@string/reject_offer"
-		                android:textColor="@android:color/white" />
-		
-		            <TextView
-		                android:id="@+id/buttonAccept"
-		                android:layout_width="0dp"
-		                android:layout_height="wrap_content"
-		                android:layout_weight="1"
-		                android:background="@drawable/button_accept_offer"
-		                android:gravity="center"
-		                android:padding="12dp"
-		                android:text="@string/accept_offer"
-		                android:textColor="@android:color/white" />
-		        </LinearLayout>
-			        		        
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" >
+
+            <FrameLayout
+                android:id="@+id/frame_layout"
+                android:layout_width="match_parent"
+                android:layout_height="240dp"
+                android:layout_alignParentTop="true"
+                android:background="@android:color/transparent"
+                android:paddingTop="10dp" >
+
+                <fragment
+                    android:id="@+id/map"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    class="com.google.android.gms.maps.SupportMapFragment" />
+
+                <View
+                    android:id="@+id/trans_img"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/transparent" />
+            </FrameLayout>
+
+            <RelativeLayout
+                android:id="@+id/mapJobDetail"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/frame_layout" >
+
+                <TextView
+                    android:id="@+id/textJobPrice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="top"
+                    android:paddingBottom="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:paddingTop="10dp"
+                    android:text="@string/app_name" />
+
+                <LinearLayout
+                    android:id="@+id/jobs_schedule_place"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignRight="@+id/textJobPrice"
+                    android:orientation="vertical"
+                    android:paddingBottom="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:paddingTop="10dp" >
+
+                    <TextView
+                        android:id="@+id/textJobDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:text="@string/none_string"
+                        android:textColor="#2D668E" >
+                    </TextView>
+
+                    <TextView
+                        android:id="@+id/textJobPlace"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:gravity="right"
+                        android:text="@string/none_string"
+                        android:textColor="#8E9090" >
+                    </TextView>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/textExpire"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/jobs_schedule_place"
+                    android:layout_marginTop="8dp"
+                    android:background="#CCCCCC"
+                    android:padding="6dp"
+                    android:text="@string/none_string"
+                    android:textColor="@android:color/white" />
+
+                <TextView
+                    android:id="@+id/textDescription"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textExpire"
+                    android:paddingBottom="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:paddingTop="10dp"
+                    android:text="@string/none_string" />
+
+                <TextView
+                    android:id="@+id/labelRequirement"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textDescription"
+                    android:background="#CCCCCC"
+                    android:padding="6dp"
+                    android:text="@string/mandatory_reqs" />
+
+                <TextView
+                    android:id="@+id/textRequirement"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/labelRequirement"
+                    android:paddingBottom="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:paddingTop="10dp"
+                    android:text="@string/none_string" />
+
+                <TextView
+                    android:id="@+id/labelOptional"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textRequirement"
+                    android:layout_marginTop="10dp"
+                    android:background="#CCCCCC"
+                    android:padding="6dp"
+                    android:text="@string/optional_reqs" />
+
+                <TextView
+                    android:id="@+id/textOptional"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/labelOptional"
+                    android:paddingBottom="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:paddingTop="10dp"
+                    android:text="@string/none_string" />
+
+                <include
+                    android:id="@+id/layAdditional"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/textOptional"
+                    layout="@layout/additional_layout" />
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/layAdditional"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal" >
+
+                    <TextView
+                        android:id="@+id/buttonCancel"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/button_reject_offer"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        android:text="@string/cancel_offer"
+                        android:textColor="@android:color/white" />
+
+                    <TextView
+                        android:id="@+id/buttonReject"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/button_reject_offer"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        android:text="@string/reject_offer"
+                        android:textColor="@android:color/white" />
+
+                    <TextView
+                        android:id="@+id/buttonAccept"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/button_accept_offer"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        android:text="@string/accept_offer"
+                        android:textColor="@android:color/white" />
+                </LinearLayout>
             </RelativeLayout>
+        </RelativeLayout>
+    </ScrollView>
 
-	    </RelativeLayout>
-	
-	</ScrollView>
+    <LinearLayout
+        android:id="@+id/jobAddAvailabilityWrapper"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal" >
+        
+        <Button
+            android:id="@+id/buttonJobAvailability"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawableLeft="@drawable/add"
+            android:padding="12dp"
+            android:background="@color/lightcolor"
+            android:text="@string/job_add_availability"
+            android:textColor="@color/darktitle" />
+        
+    </LinearLayout>
+
 </RelativeLayout>

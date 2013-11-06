@@ -11,7 +11,7 @@
     <string name="address_working">Jumbo</string>
     <string name="place_working">Clark Quay</string>
     <string name="menu_jobs">job offers</string>
-    <string name="menu_schedule">my jobs</string>
+    <string name="menu_schedule">my schedule</string>
     <string name="menu_profile">profile</string>
     <string name="next">></string>
     <string name="registration_header">Get Started</string>
@@ -92,6 +92,8 @@
     <string name="cancel_reason">Reason for cancellation</string>
     <string name="cancel_my_availabliity">Cancel my job</string>
     <string name="create_availability">Create Availability</string>
+    <string name="job_add_availability">Have more free time, add slot!</string>
+    
     
     <string name="ill_keep_appoinment">I will keep this appointment</string>
     <string name="pas_job_info">Past job info</string>
@@ -107,7 +109,7 @@
     <string name="start_time">Start Time</string>
     <string name="end_time">End Time</string>
     <string name="repeat">Repeat</string>
-    <string name="location">Location Preference</string>
+    <string name="location_preference">Location Preference</string>
     <string name="ask_salary">Ask Salary</string>
     <string name="availability_set_time">Set Time</string>    
     <string name="availability_detail">Detail Availability</string>
@@ -283,5 +285,72 @@
     </string-array>
 
     <string name="title_activity_settings">SettingsActivity</string>
+    
+    <string name="day_name_format">EEE</string>
+    <string name="invalid_date">Selected date must be after today</string>
+<!-- <string name="invalid_date">Date must be between %1$s and %2$s.</string> -->
+    <string name="month_name_format">MMMM yyyy</string>
+    <string name="datetime_simple_format">yyyy-MM-dd HH:mm:ss</string>
+    <string name="add_bulk_availability">Add bulk availability</string>
+    <string name="add_daily_availability">Add daily availability</string>
+    
+    <string name="submit_bulk_availability">Submit</string>
+    <string name="cancel_bulk_availability">Cancel</string>
+    <string name="availability_repeat">Repeat</string>
+    <string name="availability_weeks">Weeks</string>
+    
+    <string name="schedule_total_hours">Total hours clocked this month : </string>
+    <string name="schedule_total_income">Total income this month : </string>
+        
+    <string name="availability_end_12_hours">You not allowed working more that 12 hours</string>
+    
+    <string name="faceboook_email_failed">Your email not verified by Facebook.\nPlease check your facebook Account Settings. </string>
 
+    <string name="schedule_tab_my_schedule">My Schedule</string>
+    <string name="schedule_tab_my_availability">My Availability</string>
+    <string name="schedule_indicate">Indicate your availability so we can schedule a job for you</string>
+    <string name="schedule_add_availability">Add Availability</string>
+    <string name="image_not_found"><h1>Not Found</h1></string>
+    
+    <string-array name="repeat_week_array">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+    </string-array>
+    
+    <string-array name="repeat_week">
+        <item>Monday</item>
+        <item>Tuesday</item>
+        <item>Wednesday</item>
+        <item>Thursday</item>
+        <item>Friday</item>
+        <item>Saturday</item>
+        <item>Sunday</item>
+    </string-array>
+    
+    <string-array name="repeat_week_short">
+        <item>Mon</item>
+        <item>Tue</item>
+        <item>Wed</item>
+        <item>Thu</item>
+        <item>Fri</item>
+        <item>Sat</item>
+        <item>Sun</item>
+    </string-array>
+    
+    <string-array name="region_availability">
+        <item>North</item>
+        <item>North-East</item>
+        <item>East</item>
+        <item>Central / South</item>
+        <item>West</item>
+    </string-array>    
+    
 </resources>

@@ -1,4 +1,7 @@
 package com.matchimi.registration;
+import static com.matchimi.CommonUtilities.LOGIN;
+import static com.matchimi.CommonUtilities.PREFS_NAME;
+
 import java.util.Arrays;
 
 import org.json.JSONException;
@@ -229,6 +232,7 @@ public class LoginActivity extends Activity {
 
 	protected void postLogin() {
 		Session s = Session.getActiveSession();
+		
 		if (s != null && s.isOpened()) {
 			Request.executeMeRequestAsync(s, new Request.GraphUserCallback() {
 				@Override
@@ -246,8 +250,22 @@ public class LoginActivity extends Activity {
 					editor.putString(CommonUtilities.USER_FACEBOOK_ID, user.getId());
 					editor.commit();
 					
-					loginPartTimer(user.getProperty("email").toString(),
-							user.getId());
+					if(user.getProperty("email") == null) {						
+						// Clear stored data
+						settings.edit().clear().commit();
+						editor.putBoolean(LOGIN, false);				
+						editor.commit();
+						
+						Toast toast = Toast.makeText(context, getResources().getString(R.string.faceboook_email_failed), 
+								Toast.LENGTH_LONG);
+						toast.show();
+						
+						logout();
+					} else {						
+						Log.d(CommonUtilities.TAG, "birth" +  user.getBirthday());
+						loginPartTimer(user.getProperty("email").toString(),
+								user.getId());						
+					}
 				}
 			});
 		} else {
@@ -255,6 +273,15 @@ public class LoginActivity extends Activity {
 		}
 	}
 
+	private void logout(){
+	    // find the active session which can only be facebook in my app
+	    Session session = Session.getActiveSession();
+	    // run the closeAndClearTokenInformation which does the following
+	    // DOCS : Closes the local in-memory Session object and clears any persistent 
+	    // cache related to the Session.
+	    session.closeAndClearTokenInformation();
+	}
+	
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -356,7 +383,12 @@ public class LoginActivity extends Activity {
 									&& userPhoneNumber != "null"
 //									&& userWorkExperience != "null"
 									&& userNRICType != "null") {
-								userBasicComplete = true;							
+								userBasicComplete = true;		
+								Log.d(CommonUtilities.TAG, " complete");
+								
+							} else {
+								Log.d(CommonUtilities.TAG, "Not complete " + userNRICType + 
+										" " + userGender + " " + userDob + " " + userPhoneNumber + " ");
 							}
 							
 							if (settings.getBoolean(CommonUtilities.REGISTERED, false)) {
@@ -467,7 +499,7 @@ public class LoginActivity extends Activity {
 	}
 	
 	private void goHome(Bundle extraBundle) {
-		Intent i = new Intent(context, HomeActivity.class);		
+		Intent i = new Intent(context, HomeActivity.class);
 		i.putExtras(extraBundle);
 		startActivity(i);
 		finish();

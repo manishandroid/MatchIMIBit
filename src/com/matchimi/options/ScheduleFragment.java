@@ -99,7 +99,7 @@ public class ScheduleFragment extends Fragment {
 
 		loadData();
 
-		getActivity().registerReceiver(scheduleReceiver, new IntentFilter("schedule.receiver"));
+//		getActivity().registerReceiver(scheduleReceiver, new IntentFilter("schedule.receiver"));
 		
 		return view;
 	}
@@ -184,13 +184,13 @@ public class ScheduleFragment extends Fragment {
 										listCompany.add(jsonParser.getString(
 												objs, "company_name"));
 										listRequirement
-												.add(jsonParser.getString(objs,
-														"requirements"));
+										.add(jsonParser.getString(objs,
+												"mandatory_requirements"));
 										listDescription
 												.add(jsonParser.getString(objs,
 														"description"));
 										listOptional.add(jsonParser.getString(
-												objs, "optional"));
+												objs, "optional_requirements"));
 										listLocation.add(jsonParser.getString(
 												objs, "location"));
 										

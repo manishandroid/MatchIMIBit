@@ -1,8 +1,10 @@
 package com.matchimi.options;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
@@ -16,6 +18,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -30,6 +33,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.matchimi.CommonUtilities;
 import com.matchimi.R;
+import com.matchimi.availability.DailyAvailabilityPreview;
 import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
 import com.matchimi.utils.NetworkUtils;
@@ -51,21 +55,24 @@ public class AvailabilityActivity extends SherlockFragmentActivity {
 	private List<String> listStartTime = null;
 	private List<String> listEndTime = null;
 	private List<String> listDate = null;
-	private List<Integer> listRepeat = null;
+	private List<String> listRepeat = null;
 	private List<String> listLocation = null;
 	private List<String> listPrice = null;
 	private List<Boolean> listFreeze = null;
-	
+
 	public static final int RC_EDIT_AVAILABILITY = 30;
 	public static final int RC_ADD_AVAILABILITY = 31;
+	private Date selectedDate;
+	private Calendar selectedDateCalendar;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		SharedPreferences settings = getSharedPreferences(CommonUtilities.PREFS_NAME, 
-				Context.MODE_PRIVATE);
-		if (settings.getInt(CommonUtilities.SETTING_THEME, CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
+
+		SharedPreferences settings = getSharedPreferences(
+				CommonUtilities.PREFS_NAME, Context.MODE_PRIVATE);
+		if (settings.getInt(CommonUtilities.SETTING_THEME,
+				CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
 			setTheme(ApplicationUtils.getTheme(true));
 		} else {
 			setTheme(ApplicationUtils.getTheme(false));
@@ -79,7 +86,23 @@ public class AvailabilityActivity extends SherlockFragmentActivity {
 
 		pt_id = settings.getString(CommonUtilities.USER_PTID, null);
 		adapter = new AvailabilityAdapter(context);
-		
+
+		Bundle b = getIntent().getExtras();
+		String selectedDateIntent = b
+				.getString(CommonUtilities.AVAILABILITY_SELECTED_DATE);
+		if (selectedDateIntent != null) {
+			try {
+				selectedDate = CommonUtilities.AVAILABILTY_DATETIME
+						.parse(selectedDateIntent);
+				selectedDateCalendar = Calendar.getInstance();
+				selectedDateCalendar.setTime(selectedDate);
+
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
 		// Build list of availibilities
 		listview = (ListView) findViewById(R.id.listview);
 		listview.setAdapter(adapter);
@@ -90,7 +113,9 @@ public class AvailabilityActivity extends SherlockFragmentActivity {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
-				Intent i = new Intent(context, AvailabilityPreview.class);
+				// Intent i = new Intent(context, AvailabilityPreview.class);
+				Intent i = new Intent(context, DailyAvailabilityPreview.class);
+
 				i.putExtra("pt_id", pt_id);
 				i.putExtra("avail_id", listAvailID.get(arg2));
 				i.putExtra("start", listStartTime.get(arg2));
@@ -99,7 +124,7 @@ public class AvailabilityActivity extends SherlockFragmentActivity {
 				i.putExtra("location", listLocation.get(arg2));
 				i.putExtra("price", listPrice.get(arg2));
 				i.putExtra("is_frozen", listFreeze.get(arg2));
-				
+
 				startActivityForResult(i, RC_EDIT_AVAILABILITY);
 			}
 		});
@@ -111,20 +136,21 @@ public class AvailabilityActivity extends SherlockFragmentActivity {
 	 * Loading all unmatched availabilities
 	 */
 	private void loadDate() {
-		final String url = CommonUtilities.SERVERURL + CommonUtilities.API_GET_AVAILABILITIES_BY_PT_ID + "?" +
-				CommonUtilities.PARAM_PT_ID + "=" + pt_id;
+		final String url = CommonUtilities.SERVERURL
+				+ CommonUtilities.API_GET_AVAILABILITIES_BY_PT_ID + "?"
+				+ CommonUtilities.PARAM_PT_ID + "=" + pt_id;
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
 				listAvailID = new ArrayList<String>();
 				listStartTime = new ArrayList<String>();
 				listEndTime = new ArrayList<String>();
-				listRepeat = new ArrayList<Integer>();
+				listRepeat = new ArrayList<String>();
 				listLocation = new ArrayList<String>();
 				listDate = new ArrayList<String>();
 				listPrice = new ArrayList<String>();
 				listFreeze = new ArrayList<Boolean>();
-				
+
 				if (jsonStr != null) {
 					try {
 						JSONArray items = new JSONArray(jsonStr);
@@ -135,58 +161,40 @@ public class AvailabilityActivity extends SherlockFragmentActivity {
 									JSONObject objs = items.getJSONObject(i);
 									objs = objs.getJSONObject("availabilities");
 									if (objs != null) {
-										listAvailID.add(jsonParser.getString(
-												objs, "avail_id"));
 										String startDate = jsonParser
 												.getString(objs,
 														"start_date_time");
 										String endDate = jsonParser.getString(
 												objs, "end_date_time");
-										
+
 										Calendar calStart = generateCalendar(startDate);
 										Calendar calEnd = generateCalendar(endDate);
 
-										String convertStartDate = CommonUtilities.AVAILABILTY_DATETIME.format(calStart.getTime());
-										String convertEndDate = CommonUtilities.AVAILABILTY_DATETIME.format(calEnd.getTime());
-										
-										listStartTime.add(convertStartDate);
-										listEndTime.add(convertEndDate);
-										
-										listRepeat.add(jsonParser.getInt(objs,
-												"repeat"));
-										listLocation.add(jsonParser.getString(
-												objs, "location"));
-										listPrice.add(jsonParser.getString(
-												objs, "asked_salary"));
-										listFreeze.add(jsonParser.getBoolean(
-												objs, "is_frozen"));
+										if (selectedDate != null) {
+											if (sameDay(calStart,
+													selectedDateCalendar)) {
+												inflateList(objs, calStart,
+														calEnd);
+											}
+										} else {
+											inflateList(objs, calStart, calEnd);
+										}
 
-										listDate.add(CommonUtilities.AVAILABILITY_DATE
-												.format(calStart.getTime())
-												+ "\n"
-												+ CommonUtilities.AVAILABILITY_TIME
-														.format(calStart
-																.getTime())
-														.toLowerCase(
-																Locale.getDefault())
-												+ " - "
-												+ CommonUtilities.AVAILABILITY_TIME
-														.format(calEnd
-																.getTime())
-														.toLowerCase(
-																Locale.getDefault()));
 									}
 								} catch (JSONException e) {
 									Log.e(CommonUtilities.TAG,
-										"Error Array >> " + e.getMessage());
+											"Error Array >> " + e.getMessage());
 								}
-								Log.d(CommonUtilities.TAG, "Availability Results >>>\n " + jsonStr.toString());
+								// Log.d(CommonUtilities.TAG,
+								// "Availability Results >>>\n " +
+								// jsonStr.toString());
 							}
 						} else {
 							Log.e(CommonUtilities.TAG, "Array is null");
 						}
 					} catch (JSONException e1) {
-						NetworkUtils.connectionHandler(context, jsonStr, e1.getMessage());
+						NetworkUtils.connectionHandler(context, jsonStr,
+								e1.getMessage());
 					}
 				} else {
 					Toast.makeText(context, getString(R.string.server_error),
@@ -206,14 +214,48 @@ public class AvailabilityActivity extends SherlockFragmentActivity {
 			public void run() {
 				jsonParser = new JSONParser();
 				jsonStr = jsonParser.getHttpResultUrlGet(url);
-				Log.d(CommonUtilities.TAG, "Result from " + url + " >>>\n" + jsonStr);
+				Log.d(CommonUtilities.TAG, "Result from " + url + " >>>\n"
+						+ jsonStr);
 				mHandlerFeed.post(mUpdateResultsFeed);
 			}
 		}.start();
 	}
 
+	private void inflateList(JSONObject objs, Calendar calStart, Calendar calEnd) {
+		String convertStartDate = CommonUtilities.AVAILABILTY_DATETIME
+				.format(calStart.getTime());
+		String convertEndDate = CommonUtilities.AVAILABILTY_DATETIME
+				.format(calEnd.getTime());
+
+		listStartTime.add(convertStartDate);
+		listEndTime.add(convertEndDate);
+		listAvailID.add(jsonParser.getString(objs, "avail_id"));
+		listRepeat.add(jsonParser.getString(objs, "repeat"));
+		listLocation.add(jsonParser.getString(objs, "location"));
+		listPrice.add(jsonParser.getString(objs, "asked_salary"));
+		listFreeze.add(jsonParser.getBoolean(objs, "is_frozen"));
+
+		listDate.add(CommonUtilities.AVAILABILITY_DATE.format(calStart
+				.getTime())
+				+ "\n"
+				+ CommonUtilities.AVAILABILITY_TIME.format(calStart.getTime())
+				// .toLowerCase(
+				// Locale.getDefault())
+				+ " - "
+				+ CommonUtilities.AVAILABILITY_TIME.format(calEnd.getTime()));
+		// .toLowerCase(
+		// Locale.getDefault()));
+	}
+
+	private static boolean sameDay(Calendar cal, Calendar selectedDate) {
+		return cal.get(Calendar.YEAR) == selectedDate.get(Calendar.YEAR)
+				&& cal.get(Calendar.DAY_OF_YEAR) == selectedDate
+						.get(Calendar.DAY_OF_YEAR);
+	}
+
 	/**
 	 * Convert start / end datetime String into calendar object
+	 * 
 	 * @param str
 	 * @return
 	 */
@@ -233,16 +275,17 @@ public class AvailabilityActivity extends SherlockFragmentActivity {
 
 		MenuItem reload = menu.findItem(R.id.menu_reload);
 		MenuItem add = menu.findItem(R.id.menu_add_availability);
-		SharedPreferences settings = getSharedPreferences(CommonUtilities.PREFS_NAME, 
-				Context.MODE_PRIVATE);
-		if (settings.getInt(CommonUtilities.SETTING_THEME, CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
+		SharedPreferences settings = getSharedPreferences(
+				CommonUtilities.PREFS_NAME, Context.MODE_PRIVATE);
+		if (settings.getInt(CommonUtilities.SETTING_THEME,
+				CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
 			reload.setIcon(R.drawable.navigation_refresh);
 			add.setIcon(R.drawable.add);
 		} else {
 			reload.setIcon(R.drawable.navigation_refresh_dark);
 			add.setIcon(R.drawable.add_dark);
 		}
-		
+
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -250,8 +293,16 @@ public class AvailabilityActivity extends SherlockFragmentActivity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (resultCode == RESULT_OK) {
+			
+			Intent result = new Intent(CommonUtilities.LOCAL_BROADCAST_AVAILABILITY);
+			result.putExtra(CommonUtilities.CREATE_AVAILABILITY_BROADCAST, "true");
+			LocalBroadcastManager.getInstance(context).sendBroadcast(result);
+			setResult(RESULT_OK, result);
+			finish();
+			
 			availabilityChange = true;
 			loadDate();
+
 		}
 	}
 

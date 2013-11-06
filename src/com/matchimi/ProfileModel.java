@@ -315,8 +315,8 @@ public class ProfileModel {
 			this.work_exp == null ||
 			this.ec_name == null ||
 			this.ec_phone == null ||
-			this.ec_relationship == null ||
-			this.visume == null	
+			this.ec_relationship == null
+//			this.visume == null	
 //			|| this.bank_name == null ||
 //			this.bank_acc_branch == null ||
 //			this.bank_acc_number == null
@@ -335,8 +335,8 @@ public class ProfileModel {
 				this.work_exp.length() == 0||
 				this.ec_name.length() == 0||
 				this.ec_phone.length() == 0||
-				this.ec_relationship.length() == 0 ||
-				this.visume.length() == 0
+				this.ec_relationship.length() == 0
+//				this.visume.length() == 0
 //				||this.bank_name.length() == 0||
 //				this.bank_acc_branch.length() == 0||
 //				this.bank_acc_number.length() == 0

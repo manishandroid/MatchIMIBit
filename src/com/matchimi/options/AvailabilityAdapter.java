@@ -15,7 +15,7 @@ public class AvailabilityAdapter extends BaseAdapter {
 	private Context context;
 
 	private List<String> listDate = null;
-	private List<Integer> listRepeat = null;
+	private List<String> listRepeat = null;
 	private List<Boolean> listFrozen = null;	
 	private String[] repeatString = null;
 
@@ -25,7 +25,7 @@ public class AvailabilityAdapter extends BaseAdapter {
 				R.array.repeat_value);
 	}
 
-	public void updateList(List<String> date, List<Integer> repeat, List<Boolean> is_frozen) {
+	public void updateList(List<String> date, List<String> repeat, List<Boolean> is_frozen) {
 		listDate = date;
 		listRepeat = repeat;
 		listFrozen = is_frozen;
@@ -80,8 +80,8 @@ public class AvailabilityAdapter extends BaseAdapter {
 		holder.textDate.setText(listDate.get(position));		
 		if (listRepeat != null && position < listRepeat.size()
 				&& listRepeat.get(position) != null) {
-			holder.textRepeat.setText("Repeats "
-					+ repeatString[listRepeat.get(position)]);
+//			holder.textRepeat.setText("Repeats "
+//					+ repeatString[listRepeat.get(position)]);
 		} else {
 			holder.textRepeat.setText("Repeats None");
 		}

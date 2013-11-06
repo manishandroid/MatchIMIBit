@@ -13,5 +13,4 @@
         android:showAsAction="always"
         android:title="@string/none_string">
     </item>
-
 </menu>

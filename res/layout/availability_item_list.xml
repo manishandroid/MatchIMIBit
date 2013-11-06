@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:text="@string/app_name"
-            android:textAppearance="@android:style/TextAppearance.Medium"
+            android:textAppearance="@android:style/TextAppearance.Small"
             android:textColor="#276289" >
         </TextView>
 
@@ -30,6 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/textDate"
             android:text="@string/app_name"
+            android:textAppearance="@android:style/TextAppearance.Small"
             android:textColor="#8E9090">
         </TextView>
     </LinearLayout>
@@ -40,8 +41,9 @@
       android:layout_height="wrap_content"
       android:layout_alignParentRight="true"
       android:layout_centerVertical="true"
-      android:visibility="invisible"
+      android:visibility="gone"
       android:text="@string/freeze_status" 
+      android:textAppearance="@android:style/TextAppearance.Small"
       android:background="@color/blue_gray"
       android:paddingLeft="5dp"
       android:paddingRight="5dp"

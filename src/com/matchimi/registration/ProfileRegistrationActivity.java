@@ -243,9 +243,7 @@ public class ProfileRegistrationActivity extends Activity {
 					if(birthdayFromFacebook.getTime() > birthdayRestriction) {
 						birthdayRestrictionDialog();
 					} else {
-						defaultBirthday.setTime(birthdayFromFacebook);
-						Log.e(TAG, "Facebook birthday " + birthdayFromFacebook.toString());
-						
+						defaultBirthday.setTime(birthdayFromFacebook);						
 						facebookDateFormat.applyPattern(dobFormat);
 						birthView.setText(facebookDateFormat.format(birthdayFromFacebook));
 					}					
@@ -431,6 +429,7 @@ public class ProfileRegistrationActivity extends Activity {
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
 				// Nothing needed
+				Log.d(TAG, "Download avatar finished");
 			}
 		};
 
@@ -738,7 +737,8 @@ public class ProfileRegistrationActivity extends Activity {
 				try {
 					String url = CommonUtilities.SERVERURL + CommonUtilities.API_UPLOAD_PROFILE_PICTURE;
 					String selectedFileName = CommonUtilities.FILE_IMAGE_PROFILE + ".jpg";
-					String filePath = CommonUtilities.IMAGE_ROOT + selectedFileName;
+					String filePath = CommonUtilities.IMAGE_ROOT + selectedFileName;					
+					Log.d(TAG, "Upload picture to " + url);
 					
 					File file = new File(filePath);
 					String filename = file.getName();
@@ -932,6 +932,7 @@ public class ProfileRegistrationActivity extends Activity {
 					childData.put("bank_account_no", "");
 					childData.put("bank_branch_name", "");
 					childData.put("skills", "[]");
+					childData.put("facebook_id", settings.getString(CommonUtilities.USER_FACEBOOK_ID, ""));
 					parentData.put("part_timer", childData);
 
 					String[] params = { "data" };

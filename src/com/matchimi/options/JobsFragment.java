@@ -24,6 +24,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -73,6 +74,7 @@ import com.matchimi.R;
 import com.matchimi.ValidationUtilities;
 import com.matchimi.Variables;
 import com.matchimi.utils.ApplicationUtils;
+import com.matchimi.utils.ProcessDataUtils;
 import com.matchimi.utils.JSONParser;
 import com.matchimi.utils.NetworkUtils;
 
@@ -89,8 +91,8 @@ public class JobsFragment extends Fragment {
 	private ProgressBar progressBar;
 	private TextView tabList;
 	private TextView tabLocation;
-	private ScrollView scrollView;
-	private RelativeLayout jobDetail;;
+	private ScrollView mapScrollView;
+	private RelativeLayout mapJobDetail;;
 	private ProgressDialog progress;
 	
 	private List<String> listAddress = null;
@@ -99,7 +101,8 @@ public class JobsFragment extends Fragment {
 	private List<String> listCompany = null;
 	private List<String> listSchedule = null;
 	private List<String> listTimeLeft = null;
-	private List<String> listProgressBar = null;
+	private List<Integer> listProgressBar = null;
+	private List<Boolean> listColorStatus = null;	
 	private List<String> listDescription = null;
 	private List<String> listRequirement = null;
 	private List<String> listOptional = null;
@@ -118,10 +121,13 @@ public class JobsFragment extends Fragment {
 	
 	public static final String EXTRA_TITLE = "title";
 	public static final int RC_JOB_DETAIL = 10;
+	
+	private Button jobAvailaibilityButton;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		
 		if (view != null) {
 	        ViewGroup parent = (ViewGroup) view.getParent();
 	        if (parent != null)
@@ -139,7 +145,9 @@ public class JobsFragment extends Fragment {
 		adapter = new JobAdapter(getActivity());
 		listview = (ListView) view.findViewById(R.id.joblistview);
 		listview.setAdapter(adapter);
+		
 		progressBar = (ProgressBar) view.findViewById(R.id.progress);
+		
 		tabList = (TextView)view.findViewById(R.id.buttonList);
 		tabList.setOnClickListener(new OnClickListener() {
 			@Override
@@ -151,6 +159,7 @@ public class JobsFragment extends Fragment {
 				}
 			}
 		});
+		
 		tabLocation = (TextView)view.findViewById(R.id.buttonLocation);
 		tabLocation.setOnClickListener(new OnClickListener() {
 			@Override
@@ -162,13 +171,15 @@ public class JobsFragment extends Fragment {
 				}
 			}
 		});
-		scrollView = (ScrollView)view.findViewById(R.id.scrollView);
-		jobDetail = (RelativeLayout)view.findViewById(R.id.jobDetail);
+		
+		mapScrollView = (ScrollView)view.findViewById(R.id.mapScrollView);
+		mapJobDetail = (RelativeLayout)view.findViewById(R.id.mapJobDetail);
 
 		listview.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-					long arg3) {
+					long arg3) {				
+				
 				Intent i = new Intent(getActivity(), JobDetails.class);
 				i.putExtra("price", listPrice.get(arg2));
 				i.putExtra("date", listSchedule.get(arg2));
@@ -176,12 +187,15 @@ public class JobsFragment extends Fragment {
 						listCompany.get(arg2) + "\n" + listAddress.get(arg2));
 				i.putExtra("expire", listTimeLeft.get(arg2));
 				i.putExtra("description", listDescription.get(arg2));
-				i.putExtra(Variables.job_requirement, listRequirement.get(arg2));
+				i.putExtra("requirement", listRequirement.get(arg2));
 				i.putExtra("optional", listOptional.get(arg2));
 				i.putExtra("id", listAvailID.get(arg2));
 				i.putExtra("type", "offer");
 				i.putExtra("rating", listRating.get(arg2));
-				i.putExtra("location", listLocation.get(arg2));				
+				i.putExtra("location", listLocation.get(arg2));
+				i.putExtra("progressbar", listProgressBar.get(arg2));
+				i.putExtra("colorstatus", listColorStatus.get(arg2));
+				
 				startActivityForResult(i, RC_JOB_DETAIL);
 			}
 		});
@@ -190,11 +204,29 @@ public class JobsFragment extends Fragment {
 			map = ((SupportMapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 		}
 		
+		jobAvailaibilityButton = (Button) view.findViewById(R.id.buttonJobAvailability);
+		jobAvailaibilityButton.setOnClickListener(jobAvailabilityListener);
+		
 		loadData();
-		getActivity().registerReceiver(jobsReceiver, new IntentFilter("jobs.receiver"));
+		
+		try {
+			getActivity().registerReceiver(jobsReceiver, new IntentFilter("jobs.receiver"));			
+		} catch (IllegalArgumentException e) {
+			
+		}
 
 		return view;
 	}
+	
+	private android.view.View.OnClickListener jobAvailabilityListener = new OnClickListener() {
+		@Override
+		public void onClick(View arg0) {
+			Intent intent = new Intent(getActivity(), CreateAvailability.class);
+			intent.putExtra("id", pt_id);
+			intent.putExtra("update", false);
+			startActivity(intent);
+		}
+	};
 
 	BroadcastReceiver jobsReceiver = new BroadcastReceiver() {
 		@Override
@@ -283,7 +315,12 @@ public class JobsFragment extends Fragment {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		getActivity().unregisterReceiver(jobsReceiver);
+		
+		try {
+			
+		} catch(Exception e) {
+			getActivity().unregisterReceiver(jobsReceiver);			
+		}
 	}
 	
 	@Override
@@ -441,8 +478,9 @@ public class JobsFragment extends Fragment {
 				listRequirement = new ArrayList<String>();
 				listOptional = new ArrayList<String>();
 				listLocation = new ArrayList<String>();
-				listProgressBar = new ArrayList<String>();
-
+				listProgressBar = new ArrayList<Integer>();
+				listColorStatus = new ArrayList<Boolean>();
+				
 				if (jsonStr != null) {
 					try {
 						JSONArray items = new JSONArray(jsonStr);
@@ -480,12 +518,12 @@ public class JobsFragment extends Fragment {
 												objs, "company_name"));
 										listRequirement
 												.add(jsonParser.getString(objs,
-														"requirements"));
+														"mandatory_requirements"));
 										listDescription
 												.add(jsonParser.getString(objs,
 														"description"));
 										listOptional.add(jsonParser.getString(
-												objs, "optional"));
+												objs, "optional_requirements"));
 										listLocation.add(jsonParser.getString(
 												objs, "location"));
 										
@@ -513,34 +551,83 @@ public class JobsFragment extends Fragment {
 																.toLowerCase(
 																		Locale.getDefault()));
 										
-										String expiredAt = jsonParser
-												.getString(objs,
+										String expiredAt = jsonParser.getString(objs,
 														"expired_at");
 										Calendar calExpiredAt = generateCalendar(expiredAt);
 										
 										int diffMnt = (int) ((calExpiredAt
 												.getTimeInMillis() - calToday
 												.getTimeInMillis()) / (1000 * 60));
-										String timeLeft = "";
-										if (diffMnt / (60 * 24) > 0) {
-											timeLeft = (diffMnt / (60 * 24))
-													+ " day ";
-											diffMnt = diffMnt % (60 * 24);
+										
+										float progressPercentage =0;
+										
+										String timeLeft = "";										
+										Integer timeLeftDay = (diffMnt / (60 * 24));
+										
+										if (timeLeftDay > 0) {					
+											timeLeft = (timeLeftDay) + "";
+
+											if(timeLeftDay >= 2) {
+												timeLeft += " days ";
+												progressPercentage = 25;
+											} else {
+												timeLeft += " day ";
+												progressPercentage = 50;												
+											}
+											
+											diffMnt = diffMnt % (60 * 24);											
+											Integer hourLeft = diffMnt / 60;
+											
+											if(hourLeft > 0) {
+												if(hourLeft > 1) {
+													timeLeft += (hourLeft) + " hours left";
+												} else if(hourLeft == 1) {
+													timeLeft += (hourLeft) + " hour left";
+												} else {
+													timeLeft += " left";
+												}
+											} else {
+												timeLeft += " left";
+											}
+											
+											listTimeLeft.add(timeLeft);
+
+										} else{
+											
+											int hourLeft =  (diffMnt / 60);
+											
+											if(hourLeft < 2 && hourLeft > 0) {
+												timeLeft = String.valueOf(hourLeft) + " hour ";
+											} else if (hourLeft >= 2) {
+												timeLeft = String.valueOf(hourLeft) + " hours ";												
+											}
+											
+											float additionalTimes =  0.5f * ((24f - (float) hourLeft) / 24f);
+											progressPercentage = (0.5f + additionalTimes) * 100;
+											
+											timeLeft += (diffMnt % 60) + " minutes left";
+											listTimeLeft.add(timeLeft);	
+										}
+
+//										Log.d(TAG, "Percentage " + progressPercentage);
+										
+										listProgressBar.add((int) progressPercentage);
+										
+										// Calculate colors										
+										Boolean redStatus = false;
+										if(progressPercentage > 50) {
+											redStatus = true;
 										}
 										
-										listTimeLeft
-												.add(timeLeft + (diffMnt / 60)
-														+ " hrs "
-														+ (diffMnt % 60)
-														+ " mins left");
-										
-										listProgressBar.add("50");
+										listColorStatus.add(redStatus);
 									}
+									
 								} catch (JSONException e) {
 									Log.e("Parse Json Object",
 											">> " + e.getMessage());
 								}
 							}
+							
 						} else {
 							Log.e("Parse Json Object", ">> Array is null");
 						}
@@ -557,7 +644,7 @@ public class JobsFragment extends Fragment {
 				}
 
 				adapter.updateList(listPrice, listAddress, listCompany,
-						listSchedule, listTimeLeft, listProgressBar);				
+						listSchedule, listTimeLeft, listProgressBar, listColorStatus);				
 
 				loadFriends();				
 			}
@@ -639,15 +726,19 @@ public class JobsFragment extends Fragment {
 					String selected = arg0.getSnippet();
 					int idx = selected.indexOf(".");
 					selectedList = Integer.parseInt(selected.substring(0, idx));
-					jobDetail.setVisibility(View.VISIBLE);
-					loadJobDetail();
+					mapJobDetail.setVisibility(View.VISIBLE);
+					loadMapJobDetail();
+					
 					return false;
 				}
 			});
 		}
 	}
 	
-	protected void loadJobDetail() {
+	/**
+	 * Load data in Location Map Tab
+	 */
+	protected void loadMapJobDetail() {
 		TextView textPrice = (TextView) view.findViewById(R.id.textJobPrice);
 		textPrice.setText(Html.fromHtml(listPrice.get(selectedList)));
 		TextView textDate = (TextView) view.findViewById(R.id.textJobDate);
@@ -658,14 +749,25 @@ public class JobsFragment extends Fragment {
 		textExpire.setText(listTimeLeft.get(selectedList) + " before this offer expires");
 		TextView textDescription = (TextView) view.findViewById(R.id.textDescription);
 		textDescription.setText(listDescription.get(selectedList));
+		
+		// Set requirements details
 		TextView textRequirement = (TextView) view.findViewById(R.id.textRequirement);
-		textRequirement.setText(listRequirement.get(selectedList));
+		if (listOptional.get(selectedList) == null || listOptional.get(selectedList).length() == 0) {
+			textRequirement.setText("");
+		} else {
+			String requirementDetail = ProcessDataUtils.parseRequirement(listRequirement.get(selectedList));
+			textRequirement.setText(requirementDetail);			
+		}
+		
+		// Set optional details		
 		TextView textOptional = (TextView) view.findViewById(R.id.textOptional);
 		if (listOptional.get(selectedList) == null || listOptional.get(selectedList).length() == 0) {
-			textOptional.setText("none");
+			textOptional.setText("");
 		} else {
-			textOptional.setText(listOptional.get(selectedList));
-		}
+			String optionalDetail = ProcessDataUtils.parseRequirement(listOptional.get(selectedList));
+			textOptional.setText(optionalDetail);
+		}		
+		
 		TextView buttonCancel = (TextView) view.findViewById(R.id.buttonCancel);
 		buttonCancel.setVisibility(View.GONE);
 		
@@ -798,7 +900,6 @@ public class JobsFragment extends Fragment {
 				showMessage();
 			}
 		});
-		
 		
 		TextView textFrom = (TextView)view.findViewById(R.id.selectedTittle);
 		TextView textDate = (TextView)view.findViewById(R.id.selectedDate);
@@ -978,47 +1079,49 @@ public class JobsFragment extends Fragment {
 		listFriend.add(icon);
 		listFriend.add(icon);
 		
-		final Handler mHandlerFeed = new Handler();
-		final Runnable mUpdateResultsFeed = new Runnable() {
-			public void run() {
-				if (jsonStr != null) {
-					try {
-						JSONArray items = new JSONArray(jsonStr);
-						if (items != null && items.length() > 0) {
-							for (int i = 0; i < items.length(); i++) {
-								/* get all json items, and put it on list */
-								try {
-									JSONObject objs = items.getJSONObject(i);
-									objs = objs.getJSONObject("friends");
-									if (objs != null) {
-										byte[] imageAsBytes = Base64.decode(jsonParser.getString(
-												objs, "image").getBytes(), 0);
-										listFriend.add(BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length));
-									}
-								} catch (Exception e) {
-								}
-							}
-						}
-					} catch (Exception e) {
-						Log.e(CommonUtilities.TAG, ">>> " + e.getMessage());
-					}
-				}
-				
-				loadMessage();
-			}
-		};
-
-		new Thread() {
-			public void run() {
-				String url = CommonUtilities.SERVERURL + CommonUtilities.API_GET_FRIEND_BY_PT_ID 
-						+"?" + CommonUtilities.PARAM_PT_ID + "=" + pt_id;
-
-				jsonParser = new JSONParser();
-				jsonStr = jsonParser.getHttpResultUrlGet(url);
-
-				mHandlerFeed.post(mUpdateResultsFeed);
-			}
-		}.start();
+		loadMessage();
+		
+//		final Handler mHandlerFeed = new Handler();
+//		final Runnable mUpdateResultsFeed = new Runnable() {
+//			public void run() {
+//				if (jsonStr != null) {
+//					try {
+//						JSONArray items = new JSONArray(jsonStr);
+//						if (items != null && items.length() > 0) {
+//							for (int i = 0; i < items.length(); i++) {
+//								/* get all json items, and put it on list */
+//								try {
+//									JSONObject objs = items.getJSONObject(i);
+//									objs = objs.getJSONObject("friends");
+//									if (objs != null) {
+//										byte[] imageAsBytes = Base64.decode(jsonParser.getString(
+//												objs, "image").getBytes(), 0);
+//										listFriend.add(BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length));
+//									}
+//								} catch (Exception e) {
+//								}
+//							}
+//						}
+//					} catch (Exception e) {
+//						Log.e(CommonUtilities.TAG, ">>> " + e.getMessage());
+//					}
+//				}
+//				
+//				loadMessage();
+//			}
+//		};
+//
+//		new Thread() {
+//			public void run() {
+//				String url = CommonUtilities.SERVERURL + CommonUtilities.API_GET_FRIEND_BY_PT_ID 
+//						+"?" + CommonUtilities.PARAM_PT_ID + "=" + pt_id;
+//
+//				jsonParser = new JSONParser();
+//				jsonStr = jsonParser.getHttpResultUrlGet(url);
+//
+//				mHandlerFeed.post(mUpdateResultsFeed);
+//			}
+//		}.start();
 	}
 
 	private void loadRating() {
@@ -1028,36 +1131,41 @@ public class JobsFragment extends Fragment {
 		listRating.add(2f);
 		listRating.add(4f);
 		listRating.add(5f);
+		listRating.add(6f);
+		listRating.add(7f);
+		listRating.add(8f);
+		listRating.add(9f);
+		manageTab();
 		
-		final Handler mHandlerFeed = new Handler();
-		final Runnable mUpdateResultsFeed = new Runnable() {
-			public void run() {
-				manageTab();
-			}
-		};
-
-		new Thread() {
-			public void run() {
-				for (String id : listAvailID) {
-					String url = CommonUtilities.SERVERURL + CommonUtilities.API_GET_RATING 
-							+"?" + CommonUtilities.PARAM_AVAIL_ID + "=" + id;
-
-					jsonParser = new JSONParser();
-					jsonStr = jsonParser.getHttpResultUrlGet(url);
-					if (jsonStr != null) {
-						try {
-							JSONObject obj = new JSONObject(jsonStr);
-							String rating = jsonParser.getString(obj, "rating");
-							listRating.add(Float.parseFloat(rating));
-						} catch (Exception e) {
-							Log.e(CommonUtilities.TAG, ">>> " + e.getMessage());
-						}
-					}
-				}
-
-				mHandlerFeed.post(mUpdateResultsFeed);
-			}
-		}.start();
+//		final Handler mHandlerFeed = new Handler();
+//		final Runnable mUpdateResultsFeed = new Runnable() {
+//			public void run() {
+//				manageTab();
+//			}
+//		};
+//
+//		new Thread() {
+//			public void run() {
+//				for (String id : listAvailID) {
+//					String url = CommonUtilities.SERVERURL + CommonUtilities.API_GET_RATING 
+//							+"?" + CommonUtilities.PARAM_AVAIL_ID + "=" + id;
+//
+//					jsonParser = new JSONParser();
+//					jsonStr = jsonParser.getHttpResultUrlGet(url);
+//					if (jsonStr != null) {
+//						try {
+//							JSONObject obj = new JSONObject(jsonStr);
+//							String rating = jsonParser.getString(obj, "rating");
+//							listRating.add(Float.parseFloat(rating));
+//						} catch (Exception e) {
+//							Log.e(CommonUtilities.TAG, ">>> " + e.getMessage());
+//						}
+//					}
+//				}
+//
+//				mHandlerFeed.post(mUpdateResultsFeed);
+//			}
+//		}.start();
 	}
 
 	private void loadMessage() {
@@ -1105,77 +1213,82 @@ public class JobsFragment extends Fragment {
 		msg.setMessage("This is my message\n\nRegards,\nMe!");
 		msg.setRead(false);
 		listMessage.add(msg);
+		loadRating();
 		
-		final Handler mHandlerFeed = new Handler();
-		final Runnable mUpdateResultsFeed = new Runnable() {
-			public void run() {
-				if (jsonStr != null) {
-					try {
-						JSONArray items = new JSONArray(jsonStr);
-						if (items != null && items.length() > 0) {
-							for (int i = 0; i < items.length(); i++) {
-								/* get all json items, and put it on list */
-								try {
-									JSONObject objs = items.getJSONObject(i);
-									objs = objs.getJSONObject("message");
-									if (objs != null) {
-										MessageModel msg = new MessageModel();
-										msg.setDate(jsonParser.getString(objs, "date"));
-										msg.setFrom(jsonParser.getString(objs, "from"));
-										msg.setId(jsonParser.getString(objs, "id"));
-										msg.setMessage(jsonParser.getString(objs, "message"));
-										msg.setRead(Boolean.parseBoolean(jsonParser.getString(objs, "read")));
-										msg.setTime(jsonParser.getString(objs, "time"));
-										listMessage.add(msg);
-									}
-								} catch (Exception e) {
-								}
-							}
-						}
-					} catch (Exception e) {
-						Log.e(CommonUtilities.TAG, ">>> " + e.getMessage());
-					}
-				}
-				
-				loadRating();
-			}
-		};
-
-		new Thread() {
-			public void run() {
-				String url = CommonUtilities.SERVERURL + CommonUtilities.API_GET_MESSAGE 
-						+"?" + CommonUtilities.PARAM_PT_ID + "=" + pt_id;
-
-				jsonParser = new JSONParser();
-				jsonStr = jsonParser.getHttpResultUrlGet(url);
-
-				mHandlerFeed.post(mUpdateResultsFeed);
-			}
-		}.start();
+//		final Handler mHandlerFeed = new Handler();
+//		final Runnable mUpdateResultsFeed = new Runnable() {
+//			public void run() {
+//				if (jsonStr != null) {
+//					try {
+//						JSONArray items = new JSONArray(jsonStr);
+//						if (items != null && items.length() > 0) {
+//							for (int i = 0; i < items.length(); i++) {
+//								/* get all json items, and put it on list */
+//								try {
+//									JSONObject objs = items.getJSONObject(i);
+//									objs = objs.getJSONObject("message");
+//									if (objs != null) {
+//										MessageModel msg = new MessageModel();
+//										msg.setDate(jsonParser.getString(objs, "date"));
+//										msg.setFrom(jsonParser.getString(objs, "from"));
+//										msg.setId(jsonParser.getString(objs, "id"));
+//										msg.setMessage(jsonParser.getString(objs, "message"));
+//										msg.setRead(Boolean.parseBoolean(jsonParser.getString(objs, "read")));
+//										msg.setTime(jsonParser.getString(objs, "time"));
+//										listMessage.add(msg);
+//									}
+//								} catch (Exception e) {
+//								}
+//							}
+//						}
+//					} catch (Exception e) {
+//						Log.e(CommonUtilities.TAG, ">>> " + e.getMessage());
+//					}
+//				}
+//				
+//				loadRating();
+//			}
+//		};
+//
+//		new Thread() {
+//			public void run() {
+//				String url = CommonUtilities.SERVERURL + CommonUtilities.API_GET_MESSAGE 
+//						+"?" + CommonUtilities.PARAM_PT_ID + "=" + pt_id;
+//
+//				jsonParser = new JSONParser();
+//				jsonStr = jsonParser.getHttpResultUrlGet(url);
+//
+//				mHandlerFeed.post(mUpdateResultsFeed);
+//			}
+//		}.start();
 	}
 
 	protected void manageTab() {
 		if (modeList) {
+			Log.d(TAG, "TABBED ");
 			tabList.setBackgroundResource(R.drawable.bg_button_tab);
 			tabList.setTextColor(Color.WHITE);
 			tabLocation.setBackgroundResource(R.drawable.bg_button_tab_def);
 			tabLocation.setTextColor(Color.BLACK);
 			listview.setVisibility(View.VISIBLE);
-			scrollView.setVisibility(View.GONE);
+			mapScrollView.setVisibility(View.GONE);
 		} else {
+			
 			tabLocation.setBackgroundResource(R.drawable.bg_button_tab);
 			tabLocation.setTextColor(Color.WHITE);
 			tabList.setBackgroundResource(R.drawable.bg_button_tab_def);
 			tabList.setTextColor(Color.BLACK);
 			listview.setVisibility(View.GONE);
-			scrollView.setVisibility(View.VISIBLE);
+			mapScrollView.setVisibility(View.VISIBLE);
+			
 			if (selectedList == -1) {
-				jobDetail.setVisibility(View.GONE);
+				mapJobDetail.setVisibility(View.GONE);
 			} else {
-				jobDetail.setVisibility(View.VISIBLE);
+				mapJobDetail.setVisibility(View.VISIBLE);
 			}
 			loadMap();
 		}
+		
 		progressBar.setVisibility(View.GONE);
 		
 		TextView buttonReject = (TextView)view.findViewById(R.id.buttonReject);

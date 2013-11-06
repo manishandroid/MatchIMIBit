@@ -44,4 +44,28 @@ public final class NetworkUtils {
 		}
 	}
 	
+	public static final String connectionHandlerString(Context context, String jsonStr, String error) {
+		try {
+			JSONObject items = new JSONObject(jsonStr);
+			String status = items.optString("status", "");
+			
+			if(status.contains(CommonUtilities.NOINTERNET)) {
+				Log.e(CommonUtilities.TAG, "No internet connection");				
+				return context.getApplicationContext().getString(R.string.no_internet);
+				
+			} else if(status.contains(CommonUtilities.FILECORRUPT)) { 
+				Log.e(CommonUtilities.TAG, "File has been corrupted");
+				return context.getApplicationContext().getString(R.string.file_corrupt);
+			} else {
+				Log.e(CommonUtilities.TAG, "Invalid response value" + jsonStr);
+				return jsonStr;
+			}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			Log.d(CommonUtilities.TAG, "Network error message " + e.toString());
+
+			return "Network error message " + e.toString();
+		}
+	}
+	
 }

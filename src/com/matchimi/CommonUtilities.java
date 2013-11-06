@@ -7,7 +7,9 @@ import com.matchimi.utils.ApplicationUtils;
 
 public final class CommonUtilities {
 	public static final String TAG = "matchimi";
-	public static final String SERVERURL = "http://matchimi.buuukapps.com/";
+//	public static final String SERVERURL = "http://matchimi.buuukapps.com/";
+	public static final String SERVERURL = "http://api.staging.matchimi.com/";
+//	public static final String SERVERURL = "http://api.matchimi.com/";
 //	public static final String SERVERURL = "http://192.168.43.214:8000/";
 	
 	public static final Boolean USER_REGISTERED = false;
@@ -50,6 +52,8 @@ public final class CommonUtilities {
 
 	public static final String API_ACCEPT_JOB_OFFER = "accept_job_offer";
 	public static final String API_UPLOAD_PROFILE_PICTURE = "upload_profile_pic";
+	public static final String API_UPLOAD_PROFILE_PICTURE_BY_PT_ID = "upload_profile_pic_by_pt_id";
+	
 //	public static final String API_UPLOAD_PROFILE_PICTURE = "posts/upload/";	
 	public static final String API_UPLOAD_FRONT_NRIC_PHOTOS = "upload_nric_front";
 	public static final String API_UPLOAD_BACK_NRIC_PHOTOS = "upload_nric_back";
@@ -70,11 +74,9 @@ public final class CommonUtilities {
 	public static final String API_GET_PART_TIMER_BY_PT_ID = "get_part_timer_by_pt_id";
 	public static final String API_GET_BLOCKED_COMPANIES_BY_PT_ID = "get_blocked_companies_by_pt_id";
 	
-//	public static final String API_GET_CURRENT_JOB_OFFERS = "get_current_job_offers";
-	public static final String API_GET_CURRENT_JOB_OFFERS = "get_current_job_offers_new";	
+	public static final String API_GET_CURRENT_JOB_OFFERS = "get_current_job_offers";
 
-	//	public static final String API_GET_CURRENT_ACCEPTED_JOB_OFFERS = "get_current_accepted_job_offers";
-	public static final String API_GET_CURRENT_ACCEPTED_JOB_OFFERS = "get_current_accepted_job_offers_new";
+	public static final String API_GET_CURRENT_ACCEPTED_JOB_OFFERS = "get_current_accepted_job_offers";
 	
 	public static final String API_GET_PART_TIMER_PROFILE_WITH_DEFAULT_DATA_BY_PT_ID = "get_part_timer_profile_with_default_data_by_pt_id";
 	public static final String API_GET_PROFILE_DEFAULT_DATA = "get_profile_default_data";
@@ -86,8 +88,7 @@ public final class CommonUtilities {
 	public static final String API_GET_FREEZE_AVAILABILITY = "get_freeze_availabilities";	
 	public static final String API_GET_PROFILE = "get_mobile_part_timer_profile_by_pt_id";
 	
-//	public static final String API_GET_PAST_ACCEPTED_JOB_OFFERS = "get_past_accepted_job_offers";
-	public static final String API_GET_PAST_ACCEPTED_JOB_OFFERS = "get_past_accepted_job_offers_new";
+	public static final String API_GET_PAST_ACCEPTED_JOB_OFFERS = "get_past_accepted_job_offers";
 	
 	public static final String API_GET_BANK_INFO = "get_bank_account_by_pt_id";
 	public static final String API_GET_EC_INFO = "get_emergency_contact_by_pt_id";	
@@ -234,4 +235,54 @@ public final class CommonUtilities {
 	public static final SimpleDateFormat AVAILABILITY_TIME = new SimpleDateFormat("hh:mm a",
 			Locale.getDefault());
 	public static final SimpleDateFormat AVAILABILTY_DATETIME = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+
+	public static final String OCCUPIED_DATES = "occupied_dates";
+	
+	public static final String HOMEAVAILABILITY_BUNDLE = "homeavailability_bundle";
+	public static final String IS_AVAILABILITY_CALENDAR  = "is_availability_calendar";
+	public static final String AVAILABILITY_SELECTED = "availability_selected";
+	public static final int CALENDAR_DAILY_DETAIL = 199;
+
+	public static final String AVAILABILITY_LIST_AVAIL_ID = "availability_list_avail_id";
+	public static final String AVAILABILITY_LIST_START_TIME = "availability_start_time";
+	public static final String AVAILABILITY_LIST_END_TIME = "availability_end_time";
+	public static final String AVAILABILITY_LIST_REPEAT = "availability_list_repeat";
+	public static final String AVAILABILITY_LIST_LOCATION = "availability_list_location";
+	public static final String AVAILABILITY_SELECTED_DATE = "availability_selected_date";
+	public static final String AVAILABILITY_DATA_LOCATION = "location";
+
+	public static final String LOCAL_BROADCAST_AVAILABILITY = "local_broadcast_availability";
+	public static final String CREATE_AVAILABILITY_BROADCAST = "create_availability_broadcast";
+	public static final String CALENDAR_DATE_YEAR = "calendar_date_year";
+	public static final String CALENDAR_DATE_MONTH = "calendar_date_month";
+	public static final String CALENDAR_MENU_AVAILABILITY = "calendar_availability";
+	
+	public static final String SCHEDULE_LIST_JOB_ID = "schedule_list_job_id";
+	public static final String SCHEDULE_LIST_AVAIL_ID = "schedule_list_avail_id";
+	public static final String SCHEDULE_START_TIME = "schedule_start_time";
+	public static final String SCHEDULE_END_TIME = "schedule_end_time";
+	public static final String SCHEDULE_PRICE = "schedule_price";
+	public static final String SCHEDULE_COMPANY = "schedule_company";
+	public static final String SCHEDULE_ADDRESS = "schedule_address";
+	public static final String SCHEDULE_DATA_LOCATION = "schedule_location";
+	public static final String SCHEDULE_HEADER = "schedule_header";
+	public static final String SCHEDULE_TIMEWORK = "schedule_timework";
+	public static final String SCHEDULE_LIST_OPTIONAL = "schedule_optional";
+	public static final String SCHEDULE_LIST_REQUIREMENT = "schedule_requirement";
+	public static final String SCHEDULE_DESCRIPTION = "schedule_description";
+	
+	public static final String SCHEDULE_LOCAL_BROADCAST = "schedule_local_broadcast";
+	public static final Integer RC_SCHEDULE_DETAIL = 11;
+	
+	public static final String AVAIL_ID = "param_avail_id";
+	public static final String AVAIL_START_TIME = "param_avail_start";
+	public static final String AVAIL_END_TIME = "param_avail_end";
+	public static final String AVAIL_REPEAT = "param_avail_repeat";
+	public static final String AVAIL_LOCATION = "param_avail_location";
+	public static final String AVAIL_PRICE = "param_avail_price";
+	public static final String AVAIL_FREEZE = "param_avail_freeze";
+	public static final String AVAIL_DATE = "param_avail_date";
+	public static final String TOTAL_EARNING = "param_total_earning";
+	public static final String TOTAL_HOURS = "param_total_hours";
+
 }

@@ -10,10 +10,14 @@ import static com.matchimi.CommonUtilities.TAG;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.matchimi.availability.HomeAvailabilityActivity;
+import com.matchimi.availability.LocationPreferenceActivity;
 import com.matchimi.options.JobsFragment;
 import com.matchimi.options.ProfileFragment;
+import com.matchimi.options.ScheduleCalendarFragment;
 import com.matchimi.options.ScheduleFragment;
 import com.matchimi.registration.LoginActivity;
+import com.matchimi.schedule.CalendarScheduleFragment;
 
 public class HomeActivity extends TabSwipeActivity {
 
@@ -34,15 +38,22 @@ public class HomeActivity extends TabSwipeActivity {
 			finish();
 		}
 		
+//		Intent i = new Intent(this, LocationPreferenceActivity.class);
+//		startActivity(i);
+//		finish();
+
         int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
         if(status == ConnectionResult.SUCCESS) {
 
     		// inflating Tab
     		addTab(getResources().getString(R.string.menu_jobs),
     				JobsFragment.class, JobsFragment.createBundle("Fragment 1"));
+//    		addTab(getResources().getString(R.string.menu_schedule),
+//    				ScheduleFragment.class,
+//    				ScheduleFragment.createBundle("Fragment 2"));
     		addTab(getResources().getString(R.string.menu_schedule),
-    				ScheduleFragment.class,
-    				ScheduleFragment.createBundle("Fragment 2"));
+    				CalendarScheduleFragment.class,
+    				CalendarScheduleFragment.createBundle("Fragment 2"));
     		addTab(getResources().getString(R.string.menu_profile),
     				ProfileFragment.class,
     				ProfileFragment.createBundle("Fragment 3"));
@@ -62,7 +73,6 @@ public class HomeActivity extends TabSwipeActivity {
         	int requestCode = 10;
         	Dialog dialog = GooglePlayServicesUtil.getErrorDialog(status, this, requestCode);
         	dialog.show();
-        	
         }
 	}
 

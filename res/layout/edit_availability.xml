@@ -101,7 +101,7 @@
                     android:paddingBottom="12dp"
                     android:paddingLeft="14dp"
                     android:paddingTop="12dp"
-                    android:text="@string/location"
+                    android:text="@string/location_preference"
                     android:textStyle="bold" />
 
                 <FrameLayout

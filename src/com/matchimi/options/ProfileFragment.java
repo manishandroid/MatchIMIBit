@@ -168,11 +168,12 @@ public class ProfileFragment extends Fragment {
 				String picName = settings.getString(USER_PROFILE_PICTURE, null);
 				Log.d(TAG, "picture: " + picName);
 				
-				if(picName != null) {
+				if(picName != null && picName != getResources().getString(R.string.image_not_found)) {
 					String url = SERVERURL + CommonUtilities.API_GET_PROFILE_PIC + "?"
 							+ PARAM_PT_ID + "=" + pt_id;
 					checkAndDownloadPic(picName, url);
 				}
+				
 				loadData();
 			}
 		};
@@ -193,7 +194,10 @@ public class ProfileFragment extends Fragment {
 		File f = new File(imageStoragePath);
 		String filename = f.getName();
 		
+		Log.d(TAG, "Looking " + apiURL);
+		
 		File imageFile = new File(CommonUtilities.IMAGE_ROOT, filename);
+		
 		if (!imageFile.exists()) {
 			String[] params = {apiURL, filename};
 			new downloadWebPage().execute(params);
@@ -229,7 +233,6 @@ public class ProfileFragment extends Fragment {
 				File f = new File(CommonUtilities.IMAGE_ROOT, picName);
 
 				FileOutputStream output = new FileOutputStream(f);
-
 	            byte data[] = new byte[1024];
 	            int count;
 	            while ((count = is.read(data)) > 0) {
@@ -239,6 +242,7 @@ public class ProfileFragment extends Fragment {
 	            output.flush();
 	            output.close();
 	            is.close();
+	            
 	        } catch (Exception e) {
 	            // TODO Auto-generated catch block
 				Log.e(TAG, ">>> " + e.getMessage());
@@ -327,6 +331,7 @@ public class ProfileFragment extends Fragment {
 	}
 
 	protected void createLayout() {
+		layFeedback.removeAllViews();
 		if (listFeedbackTitle != null && listFeedbackTitle.size() > 0) {
 			for (int i = 0; i < listFeedbackTitle.size(); i++) {
 				LayoutInflater li = LayoutInflater.from(context);

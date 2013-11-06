@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="10"
+        android:minSdkVersion="11"
         android:targetSdkVersion="17" />
 
     <permission
@@ -100,7 +100,7 @@
             android:name="com.matchimi.options.MapsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:windowSoftInputMode="adjustResize|stateHidden"
-            android:label="@string/location" >
+            android:label="@string/location_preference" >
         </activity>
         <activity
             android:name="com.matchimi.registration.RegistrationActivity"
@@ -141,6 +141,48 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:windowSoftInputMode="adjustResize|stateHidden"
             android:label="@string/edit_profile" >
+        </activity>        
+        
+        <activity
+            android:name="com.matchimi.availability.HomeAvailabilityActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden"
+            android:label="@string/menu_availability" >
+        </activity>
+        
+        <activity
+            android:name="com.matchimi.availability.BulkAvailabilityActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden"
+            android:label="@string/menu_availability" >
+        </activity>
+        
+        <activity
+            android:name="com.matchimi.availability.LocationPreferenceActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden"
+            android:label="@string/location_preference" >
+        </activity>
+        
+        <activity
+            android:name="com.matchimi.availability.ListAvailabilityActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden"
+            android:label="@string/menu_availability" >
+        </activity>
+        
+         <activity
+            android:name="com.matchimi.availability.DailyAvailabilityPreview"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden"
+            android:label="@string/menu_availability" >
+        </activity>
+        
+         <activity
+            android:name="com.matchimi.options.ScheduleDetailsActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden"
+            android:label="@string/menu_availability" >
         </activity>
         
         <meta-data

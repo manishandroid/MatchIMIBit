@@ -79,7 +79,7 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 		avail_id = b.getString("avail_id");
 		final String start = b.getString("start");
 		final String end = b.getString("end");
-		final int repeat = b.getInt("repeat");
+		final String repeat = b.getString("repeat");
 		final String location = b.getString("location");
 		final String price = b.getString("price");
 		is_frozen = b.getBoolean("is_frozen");
@@ -99,7 +99,7 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 		String[] repeatString = context.getResources().getStringArray(
 				R.array.repeat_value);
 		TextView textRepeat = (TextView) findViewById(R.id.textRepeat);
-		textRepeat.setText(repeatString[repeat]);
+		textRepeat.setText(repeat);
 
 		final TextView buttonEdit = (TextView) findViewById(R.id.buttonEdit);
 		buttonEdit.setOnClickListener(new OnClickListener() {
@@ -154,7 +154,7 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 		}		
 		buttonFreeze.setOnClickListener(freezeListener);
 		
-		loadMap(location);
+//		loadMap(location);
 	}
 
 	private OnClickListener freezeListener = new OnClickListener() {
@@ -189,6 +189,7 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 		}
 	};
 	
+	@Deprecated
 	protected void loadMap(String location) {
 		if (location != null && !location.equalsIgnoreCase("null")
 				&& location.length() > 1) {

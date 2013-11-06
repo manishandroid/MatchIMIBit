@@ -117,6 +117,8 @@ public class EditProfile extends SherlockActivity {
 	private List<String> listSchoolId;
 	private List<CharSequence> listWorkExperience;
 	private List<String> listWorkExpID;
+	private List<Boolean> listSkillsSelected;
+	
 	private int selectedWorkIdx = -1;
 	private List<CharSequence> listECRelation;
 	private int selectedECRelationIdx = -1;
@@ -124,6 +126,7 @@ public class EditProfile extends SherlockActivity {
 	private ProgressDialog progress;
 	private JSONParser jsonParser = null;
 	private String jsonStr = null;
+	private String responseString = null;
 	
 	private int selectedIdx = -1;
 	private int selectedPhotoId = -1;
@@ -600,31 +603,56 @@ public class EditProfile extends SherlockActivity {
 			final List<Integer> listSelectedItems = new ArrayList<Integer>();
 			final ArrayList<CharSequence> selectedSkills = new ArrayList<CharSequence>();
 			final List<Integer> selectedIdx = new ArrayList<Integer>();
+			
+			for(int i = 0; i < listSkillsSelected.size(); i++) {
+				if(listSkillsSelected.get(i) == true) {
+					selectedIdx.add(i);
+					listSelectedItems.add(Integer.parseInt(listSkillId.get(i)));
+				}
+			}
 
 			AlertDialog.Builder builder = new AlertDialog.Builder(context);
-
+			
 			// Set the dialog title
 			builder.setTitle("Select " + getString(R.string.registration_profile_skills))
 					.setMultiChoiceItems(
 							listSkill.toArray(new CharSequence[listSkill
-									.size()]),
-							null,
+									.size()]), toPrimitiveArray(listSkillsSelected),
 							new DialogInterface.OnMultiChoiceClickListener() {
 								@Override
 								public void onClick(DialogInterface dialog,
 										int which, boolean isChecked) {
-									if (isChecked) {
-										listSelectedItems.add(Integer
-												.parseInt(listSkillId
-														.get(which)));
-										selectedIdx.add(which);
-									} else if (listSelectedItems
-											.contains(which)) {
-										listSelectedItems.remove(Integer
-												.valueOf(listSchoolId.get(which)));
-										selectedIdx.remove(Integer
-												.valueOf(which));
+									
+									if (isChecked) {										
+										if(!selectedIdx.contains(which)) {
+											listSelectedItems.add(Integer.parseInt(listSkillId
+													.get(which)));											
+									
+											selectedIdx.add(which);								
+										}
+										
+									} else {
+										listSelectedItems.remove(Integer.valueOf(listSkillId.get(which)));
+										
+										// Avoid list integer bug
+										selectedIdx.remove(new Integer(which));
 									}
+									
+									listSkillsSelected = new ArrayList<Boolean>();
+									
+									for(String skillID : listSkillId) {
+										Boolean isMatched = false;
+										for(int selectItem : listSelectedItems) {
+											if(selectItem == Integer.parseInt(skillID)) {
+												isMatched = true;
+											}
+										}
+										
+										listSkillsSelected.add(isMatched);
+									}
+									
+									Log.d(TAG, " " + listSkillsSelected.toString());
+									
 								}
 							})
 					.setPositiveButton(R.string.ok,
@@ -657,6 +685,15 @@ public class EditProfile extends SherlockActivity {
 			dialog.show();
 		}
 	};
+	
+	private boolean[] toPrimitiveArray(final List<Boolean> booleanList) {
+	    final boolean[] primitives = new boolean[booleanList.size()];
+	    int index = 0;
+	    for (Boolean object : booleanList) {
+	        primitives[index++] = object;
+	    }
+	    return primitives;
+	}
 	
 	/**
 	 * IC Type listener
@@ -918,6 +955,10 @@ public class EditProfile extends SherlockActivity {
 		}
 	}
 
+	/**
+	 * Loading gender
+	 * @param isUpload
+	 */
 	private void loadGender(final boolean isUpload) {
 		final String url = SERVERURL + API_GET_GENDERS;
 		final Handler mHandlerFeed = new Handler();
@@ -1225,12 +1266,29 @@ public class EditProfile extends SherlockActivity {
 			profileInfo.setLast_name(obj.getString("last_name"));
 			profileInfo.setPhone_num(obj.getString("phone_no"));
 			profileInfo.setGender(obj.getString("gender"));
-			profileInfo.setProfile_pic(obj
-					.getString("profile_picture"));
-			profileInfo.setIc_back_picture(obj
-					.getString("ic_back_picture"));
-			profileInfo.setIc_front_picture(obj
-					.getString("ic_front_picture"));
+			
+			String pictureTemp = obj.getString("profile_picture");
+					
+			if(pictureTemp != null && pictureTemp != "" &&
+					pictureTemp != getResources().getString(R.string.image_not_found)){
+				profileInfo.setProfile_pic(obj
+						.getString("profile_picture"));					 
+			}
+
+			pictureTemp = obj.getString("ic_back_picture");
+			if(pictureTemp != null && pictureTemp != "" &&
+					pictureTemp != getResources().getString(R.string.image_not_found)){
+				profileInfo.setIc_back_picture(obj
+						.getString("ic_back_picture"));				
+			}
+			
+			pictureTemp = obj.getString("ic_front_picture");
+			if(pictureTemp != null && pictureTemp != "" &&
+					pictureTemp != getResources().getString(R.string.image_not_found)){
+				profileInfo.setIc_front_picture(obj
+						.getString("ic_front_picture"));			
+			}			
+			
 			profileInfo.setIc_no(obj.getString("ic_no"));
 			profileInfo.setIc_type(obj.getString("ic_type"));
 			profileInfo.setIc_type_id(obj.getString("ic_type_id"));
@@ -1248,7 +1306,8 @@ public class EditProfile extends SherlockActivity {
 			}						
 
 			String studentMatricCardPicture = obj.optString("matric_card_picture");
-			if(studentMatricCardPicture != "") {
+			if(studentMatricCardPicture != "" &&
+					studentMatricCardPicture != getResources().getString(R.string.image_not_found)) {
 				profileInfo.setCard_picture(obj.getString("matric_card_picture"));							
 			}
 			
@@ -1504,13 +1563,27 @@ public class EditProfile extends SherlockActivity {
 			expiryDateView.setText(profileInfo.getIc_expired());			
 		}
 
+		listSkillsSelected = new ArrayList<Boolean>();
+		
 		if (profileInfo.getSkill() != null) {
 			List<String> tmp = new ArrayList<String>();
-			Log.d(TAG, ">>> " + profileInfo.getSkill().toString());
+			Log.d(TAG, "Skills >>> " + profileInfo.getSkill().toString());
 			
 			for (int i = 0; i < profileInfo.getSkill().size(); i++) {
 				int x = listSkillId.indexOf("" + profileInfo.getSkill().get(i));
 				tmp.add(listSkill.get(x));
+			}
+			
+			for(String skillID : listSkillId) {
+				Boolean isSkillMatch = false;
+				
+				for(int profileSkillID : profileInfo.getSkill()) {
+					if(profileSkillID == Integer.parseInt(skillID)) {
+						isSkillMatch = true;
+					}
+				}
+				
+				listSkillsSelected.add(isSkillMatch);
 			}
 			
 			String s = tmp.toString();
@@ -1518,6 +1591,11 @@ public class EditProfile extends SherlockActivity {
 			String skillString = s.substring(1, s.length() - 1).replace(
 					", ", ", ");
 			skillView.setText(skillString);
+			
+		} else {
+			for(String skillID : listSkillId) {
+				listSkillsSelected.add(false);
+			}
 		}
 
 		String workExperienceText = "";
@@ -1666,6 +1744,7 @@ public class EditProfile extends SherlockActivity {
 	
 	private String checkAndDownloadPic(String imageStoragePath,
 			String apiURL) {
+		Log.d(TAG, "Downloading url " + apiURL);
 		File f = new File(imageStoragePath);
 		String filename = f.getName();
 		
@@ -2005,7 +2084,7 @@ public class EditProfile extends SherlockActivity {
 		case TAKE_IMG_PROFILE:
 			selectedFileName = CommonUtilities.FILE_IMAGE_PROFILE + ".jpg";
 			uploadImage = CommonUtilities.IMAGE_ROOT + selectedFileName;
-			uploadURL += CommonUtilities.API_UPLOAD_PROFILE_PICTURE;
+			uploadURL += CommonUtilities.API_UPLOAD_PROFILE_PICTURE_BY_PT_ID;
 			break;
 			
 		case TAKE_IMG_CARD:
@@ -2242,6 +2321,15 @@ public class EditProfile extends SherlockActivity {
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
+				if(responseString != null) {
+					Toast.makeText(context, responseString,
+							Toast.LENGTH_SHORT).show();
+				}
+				
+				// Update profile
+				Intent iBroadcast = new Intent("profile.receiver");
+				sendBroadcast(iBroadcast);
+				
 				updateImageLayout();
 			}
 		};
@@ -2250,7 +2338,9 @@ public class EditProfile extends SherlockActivity {
 				getString(R.string.uploading),
 				true, false);
 		new Thread() {
-			public void run() {				
+			public void run() {
+				responseString = null;
+				
 				File file = new File(filePath);
 				String filename = file.getName();
 				
@@ -2285,7 +2375,8 @@ public class EditProfile extends SherlockActivity {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-					NetworkUtils.connectionHandler(context, jsonStr.toString(), e.getMessage());						
+					
+					responseString = NetworkUtils.connectionHandlerString(context, jsonStr.toString(), e.getMessage());						
 					Log.e(CommonUtilities.TAG, "Error uploading image " + " >> " + e.getMessage());
 				}
 				
@@ -2307,6 +2398,8 @@ public class EditProfile extends SherlockActivity {
 							HttpMultipartMode.BROWSER_COMPATIBLE);
 					reqEntity.addPart("file", bab);
 					reqEntity.addPart("filename", new StringBody(filename));
+					reqEntity.addPart("pt_id", new StringBody(pt_id));
+					
 					postRequest.setEntity(reqEntity);
 					HttpResponse response = httpClient.execute(postRequest);
 					BufferedReader reader = new BufferedReader(
@@ -2347,7 +2440,7 @@ public class EditProfile extends SherlockActivity {
 					JSONObject json = new JSONObject(); 
 					try {
 						json.put("status", CommonUtilities.NOINTERNET);
-						NetworkUtils.connectionHandler(context, jsonStr.toString(), e.getMessage());						
+						responseString = NetworkUtils.connectionHandlerString(context, jsonStr.toString(), e.getMessage());						
 					} catch (JSONException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -2378,7 +2471,6 @@ public class EditProfile extends SherlockActivity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
 
 	@Deprecated
 	protected void loadBankInfo() {

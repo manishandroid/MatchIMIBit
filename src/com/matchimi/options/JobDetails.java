@@ -44,6 +44,7 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.RatingBar;
 import android.widget.RatingBar.OnRatingBarChangeListener;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -64,6 +65,8 @@ import com.matchimi.Variables;
 import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
 import com.matchimi.utils.NetworkUtils;
+import com.matchimi.utils.ProcessDataUtils;
+import com.matchimi.utils.TextProgressBar;
 
 public class JobDetails extends SherlockFragmentActivity {
 
@@ -92,9 +95,14 @@ public class JobDetails extends SherlockFragmentActivity {
 	private boolean newestMode = true;
 
 	private SharedPreferences settings;
-	private String optional;
-	private String requirement;
-	
+	private String optional = "";
+	private String requirement = "";
+	private String location;
+	private String rawOptional = "";
+	private String rawRequirement = "";
+	private int progressbar;
+	private boolean colorstatus;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -116,7 +124,7 @@ public class JobDetails extends SherlockFragmentActivity {
 
 		ActionBar ab = getSupportActionBar();
 		ab.setDisplayHomeAsUpEnabled(true);
-
+		
 		Bundle b = getIntent().getExtras();
 		jobID = b.getString("id");
 		String price = b.getString("price");
@@ -124,23 +132,16 @@ public class JobDetails extends SherlockFragmentActivity {
 		final String place = b.getString("place");
 		String expire = b.getString("expire");
 		String description = b.getString("description");
-		String reqs = b.getString(Variables.job_requirement);
-		Log.d(TAG, "Hello ");
-		String location = b.getString("location");
+		rawRequirement = b.getString("requirement");		
+		rawOptional = b.getString("optional");
+		location = b.getString("location");
+		progressbar = b.getInt("progressbar");
+		colorstatus = b.getBoolean("colorstatus");
 		
-		if (reqs.contains("|")) {
-			String[] tmp = reqs.split("\\|");
-			reqs = "";
-			for (int i = 0; i < tmp.length; i++) {
-				if (i + 1 == tmp.length) {
-					reqs += (i + 1) + tmp[i];
-				} else {
-					reqs += (i + 1) + tmp[i] + "\n";
-				}
-			}
-		}
-		requirement = reqs;
-		optional = b.getString("optional");
+		// Parsing requirements mandatory and optional
+		requirement = ProcessDataUtils.parseRequirement(rawRequirement);		
+		optional = ProcessDataUtils.parseRequirement(rawOptional);
+				
 		String jobType = b.getString("type");
 
 		TextView textPrice = (TextView) findViewById(R.id.textPrice);
@@ -149,21 +150,48 @@ public class JobDetails extends SherlockFragmentActivity {
 		textDate.setText(date);
 		TextView textPlace = (TextView) findViewById(R.id.textPlace);
 		textPlace.setText(place);
-		TextView textExpire = (TextView) findViewById(R.id.textExpire);
+		
+//		TextView textExpire = (TextView) findViewById(R.id.textExpire);
+//		if (jobType.equalsIgnoreCase("offer")) {
+//			textExpire.setText(expire + " before this offer expires");
+//		} else if (jobType.equalsIgnoreCase("accepted")) {
+//			textExpire.setText("Job for " + expire);
+//		} else {
+//			textExpire.setText(expire);
+//		}
+
+		TextProgressBar textProgressBar = (TextProgressBar) findViewById(R.id.progressBarWithText);
 		if (jobType.equalsIgnoreCase("offer")) {
-			textExpire.setText(expire + " before this offer expires");
+			textProgressBar.setText(expire + " before this offer expires");			
 		} else if (jobType.equalsIgnoreCase("accepted")) {
-			textExpire.setText("Job for " + expire);
+			textProgressBar.setText("Job for " + expire);
 		} else {
-			textExpire.setText(expire);
+			textProgressBar.setText(expire);
 		}
+		
+		// The gesture threshold expressed in dip
+		float GESTURE_THRESHOLD_DIP = 13.0f;
+
+		// Convert the dips to pixels
+		float scale = context.getResources().getDisplayMetrics().density;
+		float mGestureThreshold = (int) (GESTURE_THRESHOLD_DIP * scale + 0.5f);		
+	    textProgressBar.setProgress(progressbar);
+	    textProgressBar.setTextSize(mGestureThreshold);
+	    
+	    if(colorstatus == true) {
+	    	textProgressBar.setProgressDrawable(getResources().getDrawable(R.drawable.job_percentage_detail_red));
+	    } else {
+	    	textProgressBar.setProgressDrawable(getResources().getDrawable(R.drawable.job_percentage_detail_green));	    	
+	    }
+	    
+		
 		TextView textDescription = (TextView) findViewById(R.id.textDescription);
 		textDescription.setText(description);
 		TextView textRequirement = (TextView) findViewById(R.id.textRequirement);
 		textRequirement.setText(requirement);
 		TextView textOptional = (TextView) findViewById(R.id.textOptional);
 		if (optional == null || optional.length() == 0) {
-			textOptional.setText("none");
+			textOptional.setText("");
 		} else {
 			textOptional.setText(optional);
 		}
@@ -201,22 +229,22 @@ public class JobDetails extends SherlockFragmentActivity {
 			}
 		});
 
-		RelativeLayout additionalLaayouy = (RelativeLayout)findViewById(R.id.layAdditional);
+		RelativeLayout additionalLayout = (RelativeLayout)findViewById(R.id.layAdditional);
 		if (jobType.equalsIgnoreCase("offer")) {
 			buttonAccept.setVisibility(View.VISIBLE);
 			buttonReject.setVisibility(View.VISIBLE);
 			buttonCancel.setVisibility(View.GONE);
-			additionalLaayouy.setVisibility(View.VISIBLE);
+			additionalLayout.setVisibility(View.VISIBLE);
 		} else if (jobType.equalsIgnoreCase("accepted")) {
 			buttonAccept.setVisibility(View.GONE);
 			buttonReject.setVisibility(View.GONE);
 			buttonCancel.setVisibility(View.VISIBLE);
-			additionalLaayouy.setVisibility(View.GONE);
+			additionalLayout.setVisibility(View.GONE);
 		} else {
 			buttonAccept.setVisibility(View.GONE);
 			buttonReject.setVisibility(View.GONE);
 			buttonCancel.setVisibility(View.GONE);
-			additionalLaayouy.setVisibility(View.GONE);
+			additionalLayout.setVisibility(View.GONE);
 		}
 
 		map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
@@ -295,12 +323,11 @@ public class JobDetails extends SherlockFragmentActivity {
 	
 	private void allowAcceptJob() {
 		Intent i = new Intent(context, RequirementsDetail.class);
-		i.putExtra("optional", optional);
-		if (requirement != null
-				&& !requirement.equalsIgnoreCase("null")
-				&& requirement.trim().length() > 1) {
-			i.putExtra("requirement", requirement.split("\n"));
+		i.putExtra("optional", rawOptional);
+		if(rawRequirement.length() > 0) {
+			i.putExtra("requirement", rawRequirement);			
 		}
+		
 		startActivityForResult(i, RC_ACCEPT);
 	}
 	
@@ -319,40 +346,41 @@ public class JobDetails extends SherlockFragmentActivity {
 	}
 
 	private void loadLocation() {
-		final String url = CommonUtilities.SERVERURL + CommonUtilities.API_GET_AVAILABILITY_BY_AVAIL_ID 
-				+"?" + CommonUtilities.PARAM_AVAIL_ID + "=";
-
-		final Handler mHandlerFeed = new Handler();
-		final Runnable mUpdateResultsFeed = new Runnable() {
-			public void run() {
-				if (jsonStr != null) {
-					try {
-						JSONObject obj = new JSONObject(jsonStr);
-						obj = obj.getJSONObject("availabilities");
-						String location = jsonParser.getString(obj, "location");
-						Log.d(TAG, "Load location " + location);
-						
-						loadMap(location);
-					} catch (JSONException e1) {						
-						NetworkUtils.connectionHandler(JobDetails.this, jsonStr, e1.getMessage());
-					} catch (Exception e) {
-						Log.e(CommonUtilities.TAG, ">>> " + e.getMessage());
-					}
-				} else {
-					Toast.makeText(JobDetails.this,
-							getString(R.string.server_error), Toast.LENGTH_SHORT).show();
-				}
-			}
-		};
-
-		new Thread() {
-			public void run() {
-				jsonParser = new JSONParser();
-				jsonStr = jsonParser.getHttpResultUrlGet(url + jobID);
-
-				mHandlerFeed.post(mUpdateResultsFeed);
-			}
-		}.start();
+		loadMap(location);
+//		final String url = CommonUtilities.SERVERURL + CommonUtilities.API_GET_AVAILABILITY_BY_AVAIL_ID 
+//				+"?" + CommonUtilities.PARAM_AVAIL_ID + "=";
+//
+//		final Handler mHandlerFeed = new Handler();
+//		final Runnable mUpdateResultsFeed = new Runnable() {
+//			public void run() {
+//				if (jsonStr != null) {
+//					try {
+//						JSONObject obj = new JSONObject(jsonStr);
+//						obj = obj.getJSONObject("availabilities");
+//						String location = jsonParser.getString(obj, "location");
+//						Log.d(TAG, "Load location " + location);
+//						
+//						loadMap(location);
+//					} catch (JSONException e1) {						
+//						NetworkUtils.connectionHandler(JobDetails.this, jsonStr, e1.getMessage());
+//					} catch (Exception e) {
+//						Log.e(CommonUtilities.TAG, ">>> " + e.getMessage());
+//					}
+//				} else {
+//					Toast.makeText(JobDetails.this,
+//							getString(R.string.server_error), Toast.LENGTH_SHORT).show();
+//				}
+//			}
+//		};
+//
+//		new Thread() {
+//			public void run() {
+//				jsonParser = new JSONParser();
+//				jsonStr = jsonParser.getHttpResultUrlGet(url + jobID);
+//
+//				mHandlerFeed.post(mUpdateResultsFeed);
+//			}
+//		}.start();
 	}
 
 	protected void loadMap(String location) {

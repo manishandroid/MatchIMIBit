@@ -235,7 +235,7 @@ public class HistoryDetail extends SherlockActivity {
 
 				updateTotals();
 				adapter.updateList(listPrice, listAddress, listCompany,
-						listSchedule, null, null);
+						listSchedule, null, null, null);
 			}
 		};
 

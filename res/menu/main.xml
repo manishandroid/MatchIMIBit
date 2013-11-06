@@ -16,7 +16,8 @@
             <group android:id="@+id/menu_more_group" >
                 <item
                     android:id="@+id/menu_availability"
-                    android:title="@string/menu_availability"/>
+                    android:title="@string/menu_availability"
+                    android:visible="false"/>
                 <item
                     android:id="@+id/menu_history"
                     android:title="@string/menu_history"/>

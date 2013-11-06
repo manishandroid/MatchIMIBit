@@ -1,24 +1,7 @@
 package com.matchimi;
 
 import static com.matchimi.CommonUtilities.LOGIN;
-import static com.matchimi.CommonUtilities.PARAM_PROFILE_EMAIL;
-import static com.matchimi.CommonUtilities.PARAM_PROFILE_FIRSTNAME;
-import static com.matchimi.CommonUtilities.PARAM_PROFILE_GRADE_ID;
-import static com.matchimi.CommonUtilities.PARAM_PROFILE_IC_NUMBER;
-import static com.matchimi.CommonUtilities.PARAM_PROFILE_IC_TYPE;
-import static com.matchimi.CommonUtilities.PARAM_PROFILE_IC_TYPE_ID;
-import static com.matchimi.CommonUtilities.PARAM_PROFILE_LASTNAME;
-import static com.matchimi.CommonUtilities.PARAM_PROFILE_PICTURE;
 import static com.matchimi.CommonUtilities.PREFS_NAME;
-import static com.matchimi.CommonUtilities.USER_EMAIL;
-import static com.matchimi.CommonUtilities.USER_FIRSTNAME;
-import static com.matchimi.CommonUtilities.USER_LASTNAME;
-import static com.matchimi.CommonUtilities.USER_NRIC_NUMBER;
-import static com.matchimi.CommonUtilities.USER_NRIC_TYPE;
-import static com.matchimi.CommonUtilities.USER_NRIC_TYPE_ID;
-import static com.matchimi.CommonUtilities.USER_PROFILE_PICTURE;
-import static com.matchimi.CommonUtilities.USER_PTID;
-import static com.matchimi.CommonUtilities.USER_RATING;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,9 +18,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
@@ -47,7 +27,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.SubMenu;
 import com.actionbarsherlock.widget.ShareActionProvider;
-import com.matchimi.options.AvailabilityActivity;
+import com.matchimi.availability.HomeAvailabilityActivity;
 import com.matchimi.options.FriendsActivity;
 import com.matchimi.options.HistoryDetail;
 import com.matchimi.options.JobsFragment;
@@ -232,6 +212,11 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 			for (int i = 0; i < mTabs.size(); i++) {
 				if (mTabs.get(i) == tabInfo) {
 					Log.e(CommonUtilities.TAG, "Page Selected : " + i);
+					if(i != 1) {
+						final Intent scheduleIntent = new Intent("schedule.receiver");						
+						mActivity.sendBroadcast(scheduleIntent);
+					}
+					
 					mPager.setCurrentItem(i);
 				}
 			}
@@ -298,7 +283,7 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 				break;
 			case R.id.menu_availability:
 				i = new Intent(getApplicationContext(),
-						AvailabilityActivity.class);
+						HomeAvailabilityActivity.class);
 				startActivityForResult(i, JobsFragment.RC_JOB_DETAIL);
 				break;
 			case R.id.menu_logout:	
