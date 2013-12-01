@@ -15,6 +15,10 @@
         <menu>
             <group android:id="@+id/menu_more_group" >
                 <item
+                    android:id="@+id/menu_notifications"
+                    android:title="@string/notifications"
+                    android:visible="true"/>
+                <item
                     android:id="@+id/menu_availability"
                     android:title="@string/menu_availability"
                     android:visible="false"/>

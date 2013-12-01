@@ -92,7 +92,7 @@ public class RegistrationActivity extends Activity {
 					extraBundle.putString(USER_GENDER, "");
 
 					createLogin(emailText.getText().toString(), passwordText
-							.getText().toString());
+							.getText().toString(), false);
 				}
 			}
 		});
@@ -122,13 +122,11 @@ public class RegistrationActivity extends Activity {
 							user.getId());
 					extraBundle.putString(USER_LASTNAME,
 							user.getLastName());
-					extraBundle.putString(USER_FIRSTNAME,
-							user.getName());
 					extraBundle.putString(USER_GENDER, user
 							.getProperty("gender").toString());
 
 					createLogin(user.getProperty("email").toString(),
-							user.getId());
+							user.getId(), true);
 				}
 			});
 		} else {
@@ -156,10 +154,18 @@ public class RegistrationActivity extends Activity {
 		}
 	}
 	
-	protected void createLogin(final String email, final String password) {
-		final String url = SERVERURL + API_CREATE_AND_PARTIMER_LOGIN;
+	protected void createLogin(final String email, final String password,
+			final boolean isFacebook) {
+		
+		final String url;
+
+		if(isFacebook) {
+			url = SERVERURL + API_CREATE_AND_PART_TIMER_FB_LOGIN;
+		} else {
+			url = SERVERURL + API_CREATE_AND_PARTIMER_LOGIN;
+		}
+		
 		final Handler mHandlerFeed = new Handler();
-		Log.d(CommonUtilities.TAG, "Create login");
 		
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
@@ -227,8 +233,14 @@ public class RegistrationActivity extends Activity {
 				try {
 					JSONObject parentData = new JSONObject();
 					JSONObject childData = new JSONObject();
+
 					childData.put("email", email);
-					childData.put("password", password);
+					if(isFacebook) {
+						childData.put(COMMON_FACEBOOK_ID, password);						
+					} else {
+						childData.put(COMMON_PASSWORD, password);						
+					}
+
 					parentData.put("part_timer", childData);
 
 					String[] params = { "data" };

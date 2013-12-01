@@ -36,6 +36,7 @@ public class ProfileModel {
 	private String bank_acc_branch;
 	private String bank_acc_number;
 	private String bank_statement;
+	private String is_student;
 	private String visume;
 	
 	public ProfileModel() {
@@ -71,6 +72,7 @@ public class ProfileModel {
 		this.bank_acc_branch = null;
 		this.bank_acc_number = null;
 		this.bank_statement = null;
+		this.is_student = null;
 		this.visume = null;
 	}
 	
@@ -103,6 +105,12 @@ public class ProfileModel {
 	}
 	public void setGender(String gender) {
 		this.gender = gender;
+	}
+	public String getIsStudent() {
+		return is_student;
+	}
+	public void setStudent(String is_student) {
+		this.is_student = is_student;
 	}
 	public String getDob() {
 		return dob;
@@ -311,7 +319,7 @@ public class ProfileModel {
 			this.ic_type_id == null ||
 			this.ic_back_picture == null ||
 			this.ic_front_picture == null ||
-			this.skill == null ||
+//			this.skill == null ||
 			this.work_exp == null ||
 			this.ec_name == null ||
 			this.ec_phone == null ||

@@ -47,6 +47,7 @@ import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -106,6 +107,8 @@ public class ProfileRegistrationActivity extends Activity {
 
 	private EditText firstName;
 	private EditText lastName;
+	private String fname;
+	private String lname;
 	
 //	private EditText phoneNumber;
 	private EditText editExperience;
@@ -131,7 +134,7 @@ public class ProfileRegistrationActivity extends Activity {
 	String currentPhotoPath = "";
 	
 	private final String dobFormat = "dd/MM/yyyy";
-	private final SimpleDateFormat facebookDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+	private final SimpleDateFormat facebookDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
 	private final SimpleDateFormat dobDateFormat = new SimpleDateFormat(dobFormat, Locale.US);	
 	private long birthdayRestriction = 0;
 	private Calendar defaultBirthday;
@@ -164,7 +167,7 @@ public class ProfileRegistrationActivity extends Activity {
 		context = this;
 
 		firstName = (EditText) findViewById(R.id.regprofile_family_name);
-		lastName = (EditText) findViewById(R.id.regprofile_given_name);
+//		lastName = (EditText) findViewById(R.id.regprofile_given_name);
 		
 //		phoneNumber = (EditText) findViewById(R.id.editPhoneNumber);
 		genderView = (RadioGroup) findViewById(R.id.gender_group);
@@ -221,35 +224,44 @@ public class ProfileRegistrationActivity extends Activity {
 		if (bundleExtras != null) {
 			Log.d(TAG, "Incoming intent to profile");
 			
-			String userFirstName = bundleExtras
+			fname = bundleExtras
 					.getString(CommonUtilities.USER_FIRSTNAME);
-			String userLastName = bundleExtras
+			lname = bundleExtras
 					.getString(CommonUtilities.USER_LASTNAME);
-
+			
+			Log.d(CommonUtilities.TAG, "Fname and Lname " + fname + " " + lname + " " + fname.length());
+			
 			// Set default value for user fullname
-			if (userFirstName != null) {
-				firstName.setText(userFirstName);
+			if (fname != null) {
+				if(fname.length() > 0) {
+					firstName.setText(fname + " " + lname);
+					firstName.setEnabled(false);					
+				}
+			} else {
+				firstName.setEnabled(true);
 			}
 			
-			if(userLastName != null) {
-				lastName.setText(userLastName);
-			}
+//			if(userLastName != null) {
+//				lastName.setText(userLastName);
+//			}
 
 			String bday = bundleExtras.getString(CommonUtilities.USER_BIRTHDAY);
 			if (bday.length() == 10) {
+				
 				try {
 					Date birthdayFromFacebook = facebookDateFormat.parse(bday);
-
+					
 					if(birthdayFromFacebook.getTime() > birthdayRestriction) {
 						birthdayRestrictionDialog();
 					} else {
 						defaultBirthday.setTime(birthdayFromFacebook);						
 						facebookDateFormat.applyPattern(dobFormat);
 						birthView.setText(facebookDateFormat.format(birthdayFromFacebook));
-					}					
-
+						birthView.setOnClickListener(null);
+						birthView.setTextColor(Color.GRAY);
+					}
 					
-				} catch (ParseException e) {
+				} catch (ParseException e) {					
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}			
@@ -357,7 +369,6 @@ public class ProfileRegistrationActivity extends Activity {
 			listNRICType = new ArrayList<String>();
 			listNRICTypeId = new ArrayList<String>();
 
-
 			for (int i = 0; i < jsonArray.length(); i++) {
 				JSONObject obj = jsonArray.getJSONObject(i);
 				obj = obj.getJSONObject("nric_types");
@@ -412,6 +423,7 @@ public class ProfileRegistrationActivity extends Activity {
 						}
 					}
 				});
+				
 				genderView.addView(rb);
 				Bundle b = getIntent().getExtras();
 				if (getIntent().hasExtra(CommonUtilities.USER_GENDER)
@@ -419,6 +431,11 @@ public class ProfileRegistrationActivity extends Activity {
 								.equalsIgnoreCase(listGender.get(i))) {
 					genderSelected = listGender.get(i);
 					rb.setChecked(true);
+				}
+				
+				if (getIntent().hasExtra(CommonUtilities.USER_GENDER) &&
+						b.getString(CommonUtilities.USER_GENDER).length() > 0) {
+					rb.setEnabled(false);
 				}
 			}
 		}
@@ -631,9 +648,9 @@ public class ProfileRegistrationActivity extends Activity {
 				errors += "* " + getString(R.string.registration_profile_family_name) + "\n";
 			}
 
-			if (lastName.getText().toString().trim().length() == 0) {
-				errors += "* " + getString(R.string.registration_profile_given_name) + "\n";
-			}
+//			if (lastName.getText().toString().trim().length() == 0) {
+//				errors += "* " + getString(R.string.registration_profile_given_name) + "\n";
+//			}
 
 			if (genderSelected == null) {
 				errors += "* " + getString(R.string.registration_profile_gender) + "\n";
@@ -826,18 +843,20 @@ public class ProfileRegistrationActivity extends Activity {
 						editor.putBoolean(CommonUtilities.LOGIN, true);
 						editor.putBoolean(CommonUtilities.REGISTERED, true);
 						
-//						String name = fullName.getText().toString().trim();
-//						String fname = "";
-//						String lname = "";
-//						if (name.contains(" ")) {
-//							fname = name.substring(0, name.lastIndexOf(" "));
-//							lname = name.substring(name.lastIndexOf(" ") + 1);
-//						} else {
-//							fname = name;
-//						}
+						String name = firstName.getText().toString().trim();
+						fname = "";
+						lname = "";
+						if (name.contains(" ")) {
+							fname = name.substring(0, name.lastIndexOf(" "));
+							lname = name.substring(name.lastIndexOf(" ") + 1);
+						} else {
+							fname = name;
+						}
 						
-						editor.putString(USER_FIRSTNAME, firstName.getText().toString().trim());
-						editor.putString(USER_LASTNAME, lastName.getText().toString().trim());
+						editor.putString(USER_FIRSTNAME, fname);
+						editor.putString(USER_LASTNAME, lname);						
+//						editor.putString(USER_FIRSTNAME, firstName.getText().toString().trim());
+//						editor.putString(USER_LASTNAME, lastName.getText().toString().trim());
 						editor.putString(USER_NRIC_TYPE, listNRICType.get(nricSelected));
 						editor.putString(USER_NRIC_TYPE_ID, listNRICTypeId.get(nricSelected));						
 						editor.commit();
@@ -876,15 +895,15 @@ public class ProfileRegistrationActivity extends Activity {
 					JSONObject childData = new JSONObject();
 					childData.put("pt_id", pt_id);
 					
-//					String name = fullName.getText().toString().trim();
-//					String fname = "";
-//					String lname = "";
-//					if (name.contains(" ")) {
-//						fname = name.substring(0, name.lastIndexOf(" "));
-//						lname = name.substring(name.lastIndexOf(" ") + 1);
-//					} else {
-//						fname = name;
-//					}
+					String name = firstName.getText().toString().trim();
+					fname = "";
+					lname = "";
+					if (name.contains(" ")) {
+						fname = name.substring(0, name.lastIndexOf(" "));
+						lname = name.substring(name.lastIndexOf(" ") + 1);
+					} else {
+						fname = name;
+					}
 					
 					childData.put("first_name", firstName.getText().toString().trim());
 					childData.put("last_name", lastName.getText().toString().trim());

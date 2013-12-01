@@ -103,7 +103,6 @@ public class LocationPreferenceRegionAdapter extends BaseAdapter {
 		if(locationModels.get(position).isSelected()) {
 			holder.checkbox.setChecked(true);
 		}
-		
 
 		return v;
 	}

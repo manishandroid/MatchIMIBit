@@ -3,7 +3,7 @@ package com.matchimi;
 import com.matchimi.utils.ApplicationUtils;
 
 public final class Api {
-	public static final String SERVERURL = "http://matchimi.buuukapps.com/";
+//	public static final String SERVERURL = "http://matchimi.buuukapps.com/";
 	
 	// GLOBAL
 	public static final String AVAIL_ID = "avail_id";
@@ -12,7 +12,7 @@ public final class Api {
 	public static final String IMAGE_ROOT = ApplicationUtils.getAppRootDir() + "/";
 	
 	// HISTORY
-	public static final String PARAM_GET_JOB_HISTORY = "get_job_history";
+	public static final String PARAM_GET_JOB_HISTORY = "get_past_accepted_job_offers";
 	public static final String HISTORY = "history";
 	public static final String SUB_SLOTS = "sub_slots";	
 	public static final String BRANCH_ID = "branch_id";

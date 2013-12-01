@@ -28,6 +28,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.SubMenu;
 import com.actionbarsherlock.widget.ShareActionProvider;
 import com.matchimi.availability.HomeAvailabilityActivity;
+import com.matchimi.NotificationActivity;
 import com.matchimi.options.FriendsActivity;
 import com.matchimi.options.HistoryDetail;
 import com.matchimi.options.JobsFragment;
@@ -279,6 +280,10 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 				break;
 			case R.id.menu_friends:
 				i = new Intent(getApplicationContext(), FriendsActivity.class);
+				startActivity(i);
+				break;
+			case R.id.menu_notifications:
+				i = new Intent(getApplicationContext(), NotificationActivity.class);
 				startActivity(i);
 				break;
 			case R.id.menu_availability:

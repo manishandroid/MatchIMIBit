@@ -66,6 +66,8 @@ import android.widget.Toast;
 import com.matchimi.CommonUtilities;
 import com.matchimi.ProfileModel;
 import com.matchimi.R;
+import com.matchimi.profile.FeedbacksActivity;
+import com.matchimi.profile.PreferredJobsActivity;
 import com.matchimi.registration.EditProfile;
 import com.matchimi.registration.Utilities;
 import com.matchimi.utils.ApplicationUtils;
@@ -86,14 +88,12 @@ public class ProfileFragment extends Fragment {
 	private ProgressBar progressBar;
 
 	private SharedPreferences settings;
-	private LinearLayout layFeedback;
 	private View view;
-	
-	private List<String> listFeedbackTitle;
-	private List<String> listFeedbackComment;
-	private List<String> listFeedbackRating;
 
 	private String pt_id = null;
+	
+	private Button preferredJobsButton;
+	private Button feedbackButton;	
 
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -111,9 +111,14 @@ public class ProfileFragment extends Fragment {
 		Button blockedCompanyButton = (Button) view
 				.findViewById(R.id.profile_blocked_companies_button);
 		blockedCompanyButton.setOnClickListener(blockedCompanyListener);
-		layFeedback = (LinearLayout) view.findViewById(R.id.layFeedback);
-
-		Button editProfile = (Button)view.findViewById(R.id.editProfile);
+		
+		preferredJobsButton = (Button) view.findViewById(R.id.preferred_jobs_button);
+		preferredJobsButton.setOnClickListener(preferredJobsListener);
+		
+		feedbackButton = (Button) view.findViewById(R.id.feedback_button);
+		feedbackButton.setOnClickListener(feedbackListener);
+		
+		TextView editProfile = (TextView) view.findViewById(R.id.editProfile);
 		editProfile.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
@@ -127,6 +132,35 @@ public class ProfileFragment extends Fragment {
 
 		return view;
 	}
+	
+
+	private OnClickListener blockedCompanyListener = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			Intent intent = new Intent(getActivity(),
+					BlockedCompaniesActivity.class);
+			startActivity(intent);
+		}
+	};
+	
+	private OnClickListener feedbackListener = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			Intent intent = new Intent(getActivity(),
+					FeedbacksActivity.class);
+			startActivity(intent);
+		}
+	};
+	
+	private OnClickListener preferredJobsListener = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			Intent intent = new Intent(getActivity(),
+					PreferredJobsActivity.class);
+			startActivity(intent);
+		}
+	};
+
 
 	private void loadProfile() {
 		final String url = SERVERURL + CommonUtilities.API_GET_PROFILE + "?"
@@ -168,18 +202,23 @@ public class ProfileFragment extends Fragment {
 				String picName = settings.getString(USER_PROFILE_PICTURE, null);
 				Log.d(TAG, "picture: " + picName);
 				
-				if(picName != null && picName != getResources().getString(R.string.image_not_found)) {
-					String url = SERVERURL + CommonUtilities.API_GET_PROFILE_PIC + "?"
-							+ PARAM_PT_ID + "=" + pt_id;
-					checkAndDownloadPic(picName, url);
+				if(getResources() != null) {
+					if(picName != null && picName != getResources().getString(R.string.image_not_found)) {
+						String url = SERVERURL + CommonUtilities.API_GET_PROFILE_PIC + "?"
+								+ PARAM_PT_ID + "=" + pt_id;
+						checkAndDownloadPic(picName, url);
+					}										
 				}
 				
 				loadData();
+				progressBar.setVisibility(View.GONE);
+				scrollView.setVisibility(View.VISIBLE);
 			}
 		};
 
 		progressBar.setVisibility(View.VISIBLE);
 		scrollView.setVisibility(View.GONE);
+		
 		new Thread() {
 			public void run() {
 				jsonParser = new JSONParser();
@@ -267,100 +306,6 @@ public class ProfileFragment extends Fragment {
 		}
 	};
 	
-	private void loadFeedback() {
-		final String url = CommonUtilities.SERVERURL + CommonUtilities.API_GET_FEEDBACKS_BY_PT_ID 
-				+ "?" + CommonUtilities.PARAM_PT_ID + "=" + pt_id;
-		final Handler mHandlerFeed = new Handler();
-		final Runnable mUpdateResultsFeed = new Runnable() {
-			public void run() {
-				listFeedbackTitle = new ArrayList<String>();
-				listFeedbackComment = new ArrayList<String>();
-				listFeedbackRating = new ArrayList<String>();
-
-				if (jsonStr != null) {
-					try {
-						Log.e(CommonUtilities.TAG, "Feedback result >>> " + jsonStr);
-						JSONArray items = new JSONArray(jsonStr);
-						if (items != null && items.length() > 0) {
-							for (int i = 0; i < items.length(); i++) {
-								JSONObject objs = items.getJSONObject(i);
-								objs = objs.getJSONObject("availabilities");
-								listFeedbackTitle.add(jsonParser.getString(
-										objs, "branch_name")
-										+ ", "
-										+ jsonParser.getString(objs,
-												"company_name"));
-								listFeedbackComment.add(jsonParser.getString(
-										objs, "feedback"));
-								listFeedbackRating.add(jsonParser.getString(
-										objs, "grade"));
-							}
-						} else {
-							Log.e(TAG, ">> Array is null");
-						}
-					} catch (JSONException e1) {						
-						NetworkUtils.connectionHandler(getActivity(), jsonStr, 
-								e1.getMessage());
-						
-						Log.e(CommonUtilities.TAG, "Load feedback result " +
-								jsonStr + " >> " + e1.getMessage());
-					}
-				} else {
-					Toast.makeText(getActivity().getApplicationContext(),
-							getString(R.string.server_error), Toast.LENGTH_SHORT).show();
-				}
-				createLayout();
-				progressBar.setVisibility(View.GONE);
-				scrollView.setVisibility(View.VISIBLE);
-			}
-		};
-
-//		progress = ProgressDialog.show(context, context.getString(R.string.app_name),
-//				"Loading...", true, false);
-		new Thread() {
-			public void run() {
-				jsonParser = new JSONParser();
-				jsonStr = jsonParser.getHttpResultUrlGet(url);
-				mHandlerFeed.post(mUpdateResultsFeed);
-//				if (progress != null && progress.isShowing()) {
-//					progress.dismiss();
-//					mHandlerFeed.post(mUpdateResultsFeed);
-//				}
-			}
-		}.start();
-	}
-
-	protected void createLayout() {
-		layFeedback.removeAllViews();
-		if (listFeedbackTitle != null && listFeedbackTitle.size() > 0) {
-			for (int i = 0; i < listFeedbackTitle.size(); i++) {
-				LayoutInflater li = LayoutInflater.from(context);
-				View v = li.inflate(R.layout.feedback_list, null);
-				TextView textTitle = (TextView) v
-						.findViewById(R.id.feedback_company_name);
-				textTitle.setText(listFeedbackTitle.get(i));
-				TextView textCommand = (TextView) v
-						.findViewById(R.id.feedback_comment);
-				textCommand.setText(listFeedbackComment.get(i));
-				RatingBar rateGrade = (RatingBar) v
-						.findViewById(R.id.feedback_grade);
-				rateGrade
-						.setRating(Float.parseFloat(listFeedbackRating.get(i)));
-
-				layFeedback.addView(v);
-			}
-		}
-	}
-
-	private OnClickListener blockedCompanyListener = new OnClickListener() {
-		@Override
-		public void onClick(View v) {
-			Intent intent = new Intent(getActivity(),
-					BlockedCompaniesActivity.class);
-			startActivity(intent);
-		}
-	};
-
 	public static Bundle createBundle(String title) {
 		Bundle bundle = new Bundle();
 		bundle.putString(EXTRA_TITLE, title);
@@ -428,8 +373,6 @@ public class ProfileFragment extends Fragment {
 
 		RatingBar ratingBar = (RatingBar) view.findViewById(R.id.ratingBar);
 		ratingBar.setRating(settings.getInt(CommonUtilities.USER_RATING, 0));
-		
-		loadFeedback();
 	}
 	
 	@Override

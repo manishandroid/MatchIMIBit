@@ -60,7 +60,6 @@ public class BlockedCompaniesActivity extends SherlockActivity {
 	private List<String> listPostalCode;
 	private LinearLayout blockedCompaniesLayout;
 	
-	
 	private JSONParser jsonParser = null;
 	private String jsonStr = null;
 

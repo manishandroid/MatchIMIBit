@@ -110,6 +110,12 @@ public class JobsFragment extends Fragment {
 	private List<MessageModel> listMessage = null;
 	private List<Float> listRating = null;
 	private List<Bitmap> listFriend = null;
+	
+	private List<String> listScheduleFriendsFacebookID = null;
+	private List<String> listScheduleFriendsFirstName = null;	
+	private List<String> listScheduleFriendsLastName = null;	
+	private List<String> listScheduleFriendsProfilePicture = null;
+	private List<String> listScheduleFriendsPtID = null;
 
 	private String pt_id = null;
 	private int selectedList = -1;
@@ -196,6 +202,12 @@ public class JobsFragment extends Fragment {
 				i.putExtra("progressbar", listProgressBar.get(arg2));
 				i.putExtra("colorstatus", listColorStatus.get(arg2));
 				
+				i.putExtra(CommonUtilities.JSON_KEY_FRIEND_FACEBOOK_ID, listScheduleFriendsFacebookID.toString());
+				i.putExtra(CommonUtilities.JSON_KEY_FRIEND_FACEBOOK_FIRST_NAME, listScheduleFriendsFirstName.toString());	
+				i.putExtra(CommonUtilities.JSON_KEY_FRIEND_FACEBOOK_LAST_NAME, listScheduleFriendsLastName.toString());	
+				i.putExtra(CommonUtilities.JSON_KEY_FRIEND_FACEBOOK_PROFILE_PICTURE, listScheduleFriendsProfilePicture.toString());
+				i.putExtra(CommonUtilities.PARAM_PT_ID, listScheduleFriendsPtID.toString());
+				
 				startActivityForResult(i, RC_JOB_DETAIL);
 			}
 		});
@@ -238,56 +250,56 @@ public class JobsFragment extends Fragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
-		Log.e(TAG, "onActivityCreated !!!");
+//		Log.e(TAG, "onActivityCreated !!!");
 		super.onActivityCreated(savedInstanceState);
 	}
 
 	@Override
 	public void onAttach(Activity activity) {
 		// TODO Auto-generated method stub
-		Log.e(TAG, "onAttach !!!");
+//		Log.e(TAG, "onAttach !!!");
 		super.onAttach(activity);
 	}
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		// TODO Auto-generated method stub
-		Log.e(TAG, "onContextItemSelected !!!");
+//		Log.e(TAG, "onContextItemSelected !!!");
 		return super.onContextItemSelected(item);
 	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
-		Log.e(TAG, "onCreate !!!");
+//		Log.e(TAG, "onCreate !!!");
 		super.onCreate(savedInstanceState);
 	}
 
 	@Override
 	public void onDestroyView() {
 		// TODO Auto-generated method stub
-		Log.e(TAG, "onDestroyView !!!");
+//		Log.e(TAG, "onDestroyView !!!");
 		super.onDestroyView();
 	}
 
 	@Override
 	public void onDetach() {
 		// TODO Auto-generated method stub
-		Log.e(TAG, "onDetach !!!");
+//		Log.e(TAG, "onDetach !!!");
 		super.onDetach();
 	}
 
 	@Override
 	public void onHiddenChanged(boolean hidden) {
 		// TODO Auto-generated method stub
-		Log.e(TAG, "onHiddenChanged !!!");
+//		Log.e(TAG, "onHiddenChanged !!!");
 		super.onHiddenChanged(hidden);
 	}
 
 	@Override
 	public void onPause() {
 		// TODO Auto-generated method stub
-		Log.e(TAG, "onPause !!!");
+//		Log.e(TAG, "onPause !!!");
 		super.onPause();
 	}
 
@@ -414,7 +426,7 @@ public class JobsFragment extends Fragment {
 				if (jsonStr != null) {
 					if (jsonStr.trim().equalsIgnoreCase("0")) {
 						// Reload schedule
-						Intent i = new Intent("schedule.receiver");
+						Intent i = new Intent(CommonUtilities.BROADCAST_SCHEDULE_RECEIVER);
 						getActivity().sendBroadcast(i);
 						
 						Toast.makeText(getActivity(), getString(R.string.job_accept_offer_success),
@@ -480,6 +492,15 @@ public class JobsFragment extends Fragment {
 				listLocation = new ArrayList<String>();
 				listProgressBar = new ArrayList<Integer>();
 				listColorStatus = new ArrayList<Boolean>();
+				
+				listScheduleFriendsFacebookID = new ArrayList<String>();
+				listScheduleFriendsFirstName = new ArrayList<String>();	
+				listScheduleFriendsLastName = new ArrayList<String>();	
+				listScheduleFriendsProfilePicture = new ArrayList<String>();
+				listScheduleFriendsPtID = new ArrayList<String>();
+				
+				// Dummy job offers
+//				jsonStr = "[{\"sub_slots\":{\"address\":\"No 1 CPF Tampines Building Tampines Central 5 #01-04\",\"avail_id\":403,\"branch_id\":9,\"branch_name\":\"Tampines CPF\",\"company_id\":2,\"company_name\":\"ABC F&B\",\"description\":\"\",\"end_date_time\":\"2013-11-26T15:30:00+08:00\",\"friends\":[{\"part_timer_friends\":{\"facebook_id\":\"715383314\",\"first_name\":\"Jack\",\"last_name\":\"Tan\",\"profile_picture\":\"/matchimi/matchimi_api/data/images/profile_pic/1383738044_image.jpeg\",\"pt_id\":24}},{\"part_timer_friends\":{\"facebook_id\":\"100006545287128\",\"first_name\":\"Polatic\",\"last_name\":\"Dev\",\"profile_picture\":\"/matchimi/matchimi_api/data/images/profile_pic/1383630071_man3.jpeg\",\"pt_id\":27}}],\"grade\":\"3\",\"job_function_id\":1,\"job_function_name\":\"Waiter\",\"latitude\":\"1.352954\",\"location\":\"1.352954,103.943696\",\"longitude\":\"103.943696\",\"main_slot_id\":58,\"mandatory_requirements\":[\"Must wear black shoe.\"],\"offered_salary\":6.0,\"optional_requirements\":[],\"postal_code\":\"529508\",\"start_date_time\":\"2013-11-26T10:00:00+08:00\",\"expired_at\":\"2013-11-26T10:00:00+08:00\", \"status\":\"PA\",\"sub_slot_id\":455,\"ts_end_date_time\":1385479800,\"ts_start_date_time\":1385460000}}]";
 				
 				if (jsonStr != null) {
 					try {
@@ -620,6 +641,36 @@ public class JobsFragment extends Fragment {
 										}
 										
 										listColorStatus.add(redStatus);
+										
+										// Load friend list
+										JSONArray friends = new JSONArray(jsonParser
+												.getString(objs, "friends"));										
+
+										if (friends != null && friends.length() > 0) {
+											for (int k = 0; k < friends.length(); k++) {
+												JSONObject friendsObjs = friends.getJSONObject(k);
+												friendsObjs = friendsObjs.getJSONObject(CommonUtilities.JSON_KEY_PART_TIMER_FRIEND);
+																								
+												listScheduleFriendsFacebookID.add(jsonParser
+														.getString(friendsObjs,
+																CommonUtilities.JSON_KEY_FRIEND_FACEBOOK_ID));
+
+												listScheduleFriendsFirstName.add(jsonParser
+														.getString(friendsObjs,
+																CommonUtilities.JSON_KEY_FRIEND_FACEBOOK_FIRST_NAME));
+
+												listScheduleFriendsLastName.add(jsonParser
+														.getString(friendsObjs,
+																CommonUtilities.JSON_KEY_FRIEND_FACEBOOK_LAST_NAME));
+
+												listScheduleFriendsProfilePicture.add(jsonParser
+														.getString(friendsObjs, CommonUtilities.JSON_KEY_FRIEND_FACEBOOK_PROFILE_PICTURE));
+
+												listScheduleFriendsPtID.add(jsonParser
+														.getString(friendsObjs,
+																CommonUtilities.PARAM_PT_ID));
+											}
+										}
 									}
 									
 								} catch (JSONException e) {
@@ -1265,7 +1316,7 @@ public class JobsFragment extends Fragment {
 
 	protected void manageTab() {
 		if (modeList) {
-			Log.d(TAG, "TABBED ");
+//			Log.d(TAG, "TABBED ");
 			tabList.setBackgroundResource(R.drawable.bg_button_tab);
 			tabList.setTextColor(Color.WHITE);
 			tabLocation.setBackgroundResource(R.drawable.bg_button_tab_def);

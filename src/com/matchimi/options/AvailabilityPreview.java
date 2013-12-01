@@ -223,6 +223,10 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 		        	if (response.equalsIgnoreCase("0")) {
 						Toast.makeText(context, getString(R.string.delete_availability_success),
 								Toast.LENGTH_SHORT).show();
+						
+						Intent i = new Intent(CommonUtilities.BROADCAST_SCHEDULE_RECEIVER);
+						sendBroadcast(i);
+						
 						Intent result = new Intent();
 						setResult(RESULT_OK, result);
 						finish();
@@ -313,6 +317,10 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 					if (jsonStr.trim().equalsIgnoreCase("0")) {
 						Toast.makeText(context, getString(R.string.freeze_availability_success),
 								Toast.LENGTH_SHORT).show();
+						
+						Intent i = new Intent(CommonUtilities.BROADCAST_SCHEDULE_RECEIVER);
+						sendBroadcast(i);
+						
 						Intent result = new Intent();
 						setResult(RESULT_OK, result);
 						finish();
@@ -363,6 +371,10 @@ public class AvailabilityPreview extends SherlockFragmentActivity {
 					if (jsonStr.trim().equalsIgnoreCase("0")) {
 						Toast.makeText(context, getString(R.string.unfreeze_availability_success),
 								Toast.LENGTH_SHORT).show();
+						
+						Intent i = new Intent(CommonUtilities.BROADCAST_SCHEDULE_RECEIVER);
+						sendBroadcast(i);
+						
 						Intent result = new Intent();
 						setResult(RESULT_OK, result);
 						finish();

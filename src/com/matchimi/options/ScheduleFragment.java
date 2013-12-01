@@ -104,18 +104,18 @@ public class ScheduleFragment extends Fragment {
 		return view;
 	}
 
-	BroadcastReceiver scheduleReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context arg0, Intent arg1) {
-			Log.d(TAG, "Receive broadcast from jobs");
-			loadData();
-		}
-	};
+//	BroadcastReceiver scheduleReceiver = new BroadcastReceiver() {
+//		@Override
+//		public void onReceive(Context arg0, Intent arg1) {
+//			Log.d(TAG, "Receive broadcast from jobs");
+//			loadData();
+//		}
+//	};
 	
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		getActivity().unregisterReceiver(scheduleReceiver);
+//		getActivity().unregisterReceiver(scheduleReceiver);
 	}
 
 	@Override

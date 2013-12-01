@@ -27,7 +27,7 @@ public class LocationModel {
 	}
 
 	public void setSelected(boolean selected) {
-		Log.d(CommonUtilities.TAG, "This is seleted " + selected);
+//		Log.d(CommonUtilities.TAG, "This is seleted " + selected);
 		this.selected = selected;
 	}
 

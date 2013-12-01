@@ -1,15 +1,26 @@
 package com.matchimi.options;
 
 import static com.matchimi.CommonUtilities.API_WITHDRAW_AVAILABILITY;
+import static com.matchimi.CommonUtilities.PARAM_PT_ID;
 import static com.matchimi.CommonUtilities.PREFS_NAME;
 import static com.matchimi.CommonUtilities.SERVERURL;
 import static com.matchimi.CommonUtilities.SETTING_THEME;
 import static com.matchimi.CommonUtilities.TAG;
 import static com.matchimi.CommonUtilities.THEME_LIGHT;
+import static com.matchimi.CommonUtilities.USER_PROFILE_PICTURE;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,7 +37,9 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
@@ -62,6 +75,7 @@ import com.matchimi.CommonUtilities;
 import com.matchimi.R;
 import com.matchimi.ValidationUtilities;
 import com.matchimi.Variables;
+import com.matchimi.registration.Utilities;
 import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
 import com.matchimi.utils.NetworkUtils;
@@ -100,6 +114,19 @@ public class JobDetails extends SherlockFragmentActivity {
 	private String location;
 	private String rawOptional = "";
 	private String rawRequirement = "";
+	
+	private String friendsFacebookId = null;
+	private String friendsFacebookFirstName = null;
+	private String friendsFacebookLastName = null;
+	private String friendsFacebookProfilePicture = null;
+	private String friendsFacebookPtID = null;
+	
+	private List<String> listScheduleFriendsFacebookID = new ArrayList<String>();
+	private List<String> listScheduleFriendsFirstName = new ArrayList<String>();	
+	private List<String> listScheduleFriendsLastName = new ArrayList<String>();	
+	private List<String> listScheduleFriendsProfilePicture = new ArrayList<String>();
+	private List<String> listScheduleFriendsPtID = new ArrayList<String>();
+	
 	private int progressbar;
 	private boolean colorstatus;
 
@@ -132,15 +159,58 @@ public class JobDetails extends SherlockFragmentActivity {
 		final String place = b.getString("place");
 		String expire = b.getString("expire");
 		String description = b.getString("description");
-		rawRequirement = b.getString("requirement");		
+		rawRequirement = b.getString("requirement");
+		
+		friendsFacebookId = b.getString(CommonUtilities.JSON_KEY_FRIEND_FACEBOOK_ID);
+		Log.d(CommonUtilities.TAG, "Received " + friendsFacebookId);
+		
+		if(friendsFacebookId != null) {
+			listScheduleFriendsFacebookID = convertStringToList(friendsFacebookId);
+		}
+		
+		friendsFacebookFirstName = b.getString(CommonUtilities.JSON_KEY_FRIEND_FACEBOOK_FIRST_NAME);
+		if(friendsFacebookFirstName != null) {
+			listScheduleFriendsFacebookID = convertStringToList(friendsFacebookFirstName);
+		}
+				
+		friendsFacebookLastName = b.getString(CommonUtilities.JSON_KEY_FRIEND_FACEBOOK_LAST_NAME);
+		if(friendsFacebookLastName != null) {
+			listScheduleFriendsLastName = convertStringToList(friendsFacebookLastName);
+		}
+		
+		friendsFacebookProfilePicture = b.getString(CommonUtilities.JSON_KEY_FRIEND_FACEBOOK_PROFILE_PICTURE);
+		if(friendsFacebookProfilePicture != null) {
+			listScheduleFriendsProfilePicture = convertStringToList(friendsFacebookProfilePicture);
+		}
+		
+		friendsFacebookPtID =  b.getString(CommonUtilities.PARAM_PT_ID);
+		if(friendsFacebookPtID != null) {
+			listScheduleFriendsPtID = convertStringToList(friendsFacebookPtID);
+		}
+		Log.d(CommonUtilities.TAG, "Received " + friendsFacebookPtID + " " + listScheduleFriendsPtID.size());
+
+		
+		if(rawRequirement == null) {
+			rawRequirement = b.getString("mandatory_requirements");
+		}
+		
 		rawOptional = b.getString("optional");
+		if(rawOptional == null) {
+			rawOptional = b.getString("optional_requirements");
+		}
+		
 		location = b.getString("location");
 		progressbar = b.getInt("progressbar");
 		colorstatus = b.getBoolean("colorstatus");
 		
 		// Parsing requirements mandatory and optional
-		requirement = ProcessDataUtils.parseRequirement(rawRequirement);		
-		optional = ProcessDataUtils.parseRequirement(rawOptional);
+		if(rawRequirement != null) {
+			requirement = ProcessDataUtils.parseRequirement(rawRequirement);		
+		}
+		
+		if(rawOptional != null) {			
+			optional = ProcessDataUtils.parseRequirement(rawOptional);
+		}
 				
 		String jobType = b.getString("type");
 
@@ -184,7 +254,6 @@ public class JobDetails extends SherlockFragmentActivity {
 	    	textProgressBar.setProgressDrawable(getResources().getDrawable(R.drawable.job_percentage_detail_green));	    	
 	    }
 	    
-		
 		TextView textDescription = (TextView) findViewById(R.id.textDescription);
 		textDescription.setText(description);
 		TextView textRequirement = (TextView) findViewById(R.id.textRequirement);
@@ -228,6 +297,7 @@ public class JobDetails extends SherlockFragmentActivity {
 				startActivityForResult(i, RC_CANCEL);
 			}
 		});
+		
 
 		RelativeLayout additionalLayout = (RelativeLayout)findViewById(R.id.layAdditional);
 		if (jobType.equalsIgnoreCase("offer")) {
@@ -246,7 +316,7 @@ public class JobDetails extends SherlockFragmentActivity {
 			buttonCancel.setVisibility(View.GONE);
 			additionalLayout.setVisibility(View.GONE);
 		}
-
+		
 		map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
 				.getMap();
 
@@ -263,6 +333,16 @@ public class JobDetails extends SherlockFragmentActivity {
 		
 		loadMessage();
 		loadFriends();
+	}
+	
+	private List<String> convertStringToList(String listString) {
+		listString = listString.replaceAll("\\s+","");
+		List<String> listObject = new ArrayList<String>();
+		listString = listString.replace("[", "").replace("]", "");
+		String[] split = listString.split(",");
+		listObject = Arrays.asList(split);
+		
+		return listObject;
 	}
 	
 	/**
@@ -523,13 +603,14 @@ public class JobDetails extends SherlockFragmentActivity {
 				if (jsonStr != null) {
 					if (jsonStr.trim().equalsIgnoreCase("0")) {
 						// Reload schedule
-						Intent i = new Intent("schedule.receiver");
+						Intent i = new Intent(CommonUtilities.BROADCAST_SCHEDULE_RECEIVER);
 						sendBroadcast(i);
 						
 						Toast.makeText(context, getString(R.string.job_accept_offer_success),
 								Toast.LENGTH_SHORT).show();
 						setResult(RESULT_OK);
 						finish();
+
 					} else if(jsonStr.trim().equalsIgnoreCase("1")) {
 						Toast.makeText(
 								context,
@@ -643,60 +724,145 @@ public class JobDetails extends SherlockFragmentActivity {
 	private void loadFriends() {
 		// TODO Auto-generated method stub
 		listFriend = new ArrayList<Bitmap>();
-		Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
-		listFriend.add(icon);
-		listFriend.add(icon);
-		listFriend.add(icon);
-		listFriend.add(icon);
-		listFriend.add(icon);
-		listFriend.add(icon);
+		Log.d(CommonUtilities.TAG, "Loading friends STEp " + listScheduleFriendsPtID.size());
 		
-		final Handler mHandlerFeed = new Handler();
-		final Runnable mUpdateResultsFeed = new Runnable() {
-			public void run() {
-				if (jsonStr != null) {
-					try {
-						JSONArray items = new JSONArray(jsonStr);
-						if (items != null && items.length() > 0) {
-							for (int i = 0; i < items.length(); i++) {
-								/* get all json items, and put it on list */
-								try {
-									JSONObject objs = items.getJSONObject(i);
-									objs = objs.getJSONObject("friend");
-									if (objs != null) {
-										byte[] imageAsBytes = Base64.decode(jsonParser.getString(
-												objs, "image").getBytes(), 0);
-										listFriend.add(BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length));
-									}
-								} catch (Exception e) {
-								}
-							}
-						}
-					} catch (Exception e) {
-						Log.e(CommonUtilities.TAG, ">>> " + e.getMessage());
-					}
-				}
+		if(listScheduleFriendsPtID != null && listScheduleFriendsPtID.size() > 0) {			
+			for(int i = 0; i < listScheduleFriendsPtID.size(); i++) {
+				String friendImage = new File(listScheduleFriendsProfilePicture.get(i)).getName();				
+				String url = SERVERURL + CommonUtilities.API_GET_PROFILE_PIC + "?"
+						+ PARAM_PT_ID + "=" + listScheduleFriendsPtID.get(i);
+
+				String imagePath = checkAndDownloadPic(friendImage, url);				
+				File f = new File(CommonUtilities.IMAGE_ROOT, imagePath);
 				
-				showFriends();
+				if(imagePath.length() > 0) {
+					if (f.exists()) {
+						Bitmap b = BitmapFactory.decodeFile(f.getAbsolutePath());
+						listFriend.add(b);
+					}	
+				}
 			}
-		};
-
-		new Thread() {
-			public void run() {
-				String url = CommonUtilities.SERVERURL + CommonUtilities.API_GET_FRIEND_BY_PT_ID 
-						+"?" + CommonUtilities.PARAM_PT_ID + "=" + pt_id;
-
-				jsonParser = new JSONParser();
-				jsonStr = jsonParser.getHttpResultUrlGet(url);
-
-				mHandlerFeed.post(mUpdateResultsFeed);
-			}
-		}.start();
+		}
+		
+		showFriends();
+		
+//		final Handler mHandlerFeed = new Handler();
+//		final Runnable mUpdateResultsFeed = new Runnable() {
+//			public void run() {
+//				if (jsonStr != null) {
+//					try {
+//						JSONArray items = new JSONArray(jsonStr);
+//						if (items != null && items.length() > 0) {
+//							for (int i = 0; i < items.length(); i++) {
+//								/* get all json items, and put it on list */
+//								try {
+//									JSONObject objs = items.getJSONObject(i);
+//									objs = objs.getJSONObject("friend");
+//									if (objs != null) {
+//										byte[] imageAsBytes = Base64.decode(jsonParser.getString(
+//												objs, "image").getBytes(), 0);
+//										listFriend.add(BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length));
+//									}
+//								} catch (Exception e) {
+//								}
+//							}
+//						}
+//					} catch (Exception e) {
+//						Log.e(CommonUtilities.TAG, ">>> " + e.getMessage());
+//					}
+//				}
+//				
+//				showFriends();
+//			}
+//		};
+//
+//		new Thread() {
+//			public void run() {
+//				String url = CommonUtilities.SERVERURL + CommonUtilities.API_GET_FRIEND_BY_PT_ID 
+//						+"?" + CommonUtilities.PARAM_PT_ID + "=" + pt_id;
+//
+//				jsonParser = new JSONParser();
+//				jsonStr = jsonParser.getHttpResultUrlGet(url);
+//
+//				mHandlerFeed.post(mUpdateResultsFeed);
+//			}
+//		}.start();
+	}
+	
+	/**
+	 * Check and download pictures if not exists
+	 * @param imageStoragePath
+	 * @param apiURL
+	 * @return
+	 */
+	private String checkAndDownloadPic(String imageStoragePath,
+			String apiURL) {
+		File f = new File(imageStoragePath);
+		String filename = f.getName();
+		Log.d(TAG, "Looking " + apiURL);
+		
+		File imageFile = new File(CommonUtilities.IMAGE_ROOT, filename);
+		
+		if (!imageFile.exists()) {
+			String[] params = {apiURL, filename};
+			new downloadWebPage().execute(params);
+		} else {
+			Log.d(TAG, "Image exists");
+		}
+		
+		return filename;
 	}
 
+	private class downloadWebPage extends AsyncTask<String, Void, String> {
+
+	    @Override
+		protected void onPostExecute(String result) {
+			super.onPostExecute(result);
+			Log.d(TAG, "Finished download friends profile picture");
+			File f = new File(CommonUtilities.IMAGE_ROOT, result);
+			Bitmap b = BitmapFactory.decodeFile(f.getAbsolutePath());
+			listFriend.add(b);
+			showFriends();
+		}
+
+		@Override
+	    protected String doInBackground(String... params) {
+	        try {
+	            HttpClient httpClient = new DefaultHttpClient();
+	            HttpGet httpGet = new HttpGet(params[0]);
+	            HttpResponse response;
+	            response = httpClient.execute(httpGet);
+	            HttpEntity entity = response.getEntity();
+	            InputStream is = entity.getContent();
+	            				
+				File f = new File(CommonUtilities.IMAGE_ROOT, params[1]);
+
+				FileOutputStream output = new FileOutputStream(f);
+	            byte data[] = new byte[1024];
+	            int count;
+	            while ((count = is.read(data)) > 0) {
+	                output.write(data, 0, count);
+	            }
+	            
+	            output.flush();
+	            output.close();
+	            is.close();
+	            
+	        } catch (Exception e) {
+	            // TODO Auto-generated catch block
+				Log.e(TAG, ">>> " + e.getMessage());
+	            e.printStackTrace();
+	        }
+
+	        return params[1];
+	    }
+
+	}
+		
 	private void showFriends() {
 		LinearLayout layFriend = (LinearLayout)findViewById(R.id.layFriend);
 		layFriend.removeAllViews();
+
 		if (listFriend != null && listFriend.size() > 0) {
 			LinearLayout layRow = new LinearLayout(context);
 			LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
@@ -721,10 +887,10 @@ public class JobDetails extends SherlockFragmentActivity {
 
 	private ImageView createImageView(Bitmap b) {
 		ImageView res = new ImageView(context);
-		LayoutParams params = new LayoutParams(70, 70);
+		LayoutParams params = new LayoutParams(140, 140);
 		res.setLayoutParams(params);
 		res.setPadding(3, 3, 3, 3);
-		res.setScaleType(ScaleType.CENTER_INSIDE);
+		res.setScaleType(ScaleType.FIT_XY);		
 		res.setImageBitmap(b);
 		
 		return res;

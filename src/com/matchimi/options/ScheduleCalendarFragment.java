@@ -107,27 +107,27 @@ public class ScheduleCalendarFragment extends Fragment {
 		calendarLayout = (RelativeLayout) view.findViewById(R.id.calendar_schedule_availability);
 		
 		loadData();
-		getActivity().registerReceiver(scheduleReceiver, new IntentFilter("schedule.receiver"));
+//		getActivity().registerReceiver(scheduleReceiver, new IntentFilter("schedule.receiver"));
 		
 		return view;
 	}
 	
-	BroadcastReceiver scheduleReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context arg0, Intent arg1) {
-			Log.d(TAG, "Receive broadcast from jobs");
-			loadData();
-		}
-	};
+//	BroadcastReceiver scheduleReceiver = new BroadcastReceiver() {
+//		@Override
+//		public void onReceive(Context arg0, Intent arg1) {
+//			Log.d(TAG, "Receive broadcast from jobs");
+//			loadData();
+//		}
+//	};
 	
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
 		
-		try {
-			getActivity().unregisterReceiver(scheduleReceiver);			
-		} catch (IllegalArgumentException e) {			
-		}
+//		try {
+//			getActivity().unregisterReceiver(scheduleReceiver);			
+//		} catch (IllegalArgumentException e) {			
+//		}
 	}
 
 	@Override
@@ -143,7 +143,7 @@ public class ScheduleCalendarFragment extends Fragment {
 	}
 
 	private void loadHistory() {
-		final String url = Api.SERVERURL + Api.PARAM_GET_JOB_HISTORY + "?" + 
+		final String url = CommonUtilities.SERVERURL + Api.PARAM_GET_JOB_HISTORY + "?" + 
 				Api.PT_ID + "=" + pt_id;
 		
 		final Handler mHandlerFeed = new Handler();

@@ -46,8 +46,20 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 
 			// Set it
 			if (backgroundResource != null) {
-				textView.setBackgroundResource(R.drawable.circle_schedule_availability);
+//				Log.d(CommonUtilities.TAG, "Datetime is " + dateTime);
+				
+				if (dateTime.compareTo(getToday()) < 0) {
+					textView.setBackgroundResource(R.drawable.circle_past);
+				} else {
+					textView.setBackgroundResource(R.drawable.circle_schedule_availability);
+				}
+				
+			} else if (backgroundResource == null && sameDay(dateTime, getToday())) {
+				textView.setBackgroundResource(R.drawable.circle_today);
+			} else {
+				textView.setBackgroundResource(R.drawable.cell_bg);
 			}
+
 		}
 
 		// Set custom text color
@@ -61,7 +73,11 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 			if (textColorResource != null) {
 				textView.setTextColor(resources.getColor(textColorResource
 						.intValue()));
-			}
+			} else if (sameDay(dateTime, getToday())) {
+				textView.setTextColor(resources.getColor(R.color.white));
+			} else {
+				textView.setTextColor(Color.GRAY);
+			}			
 		}
 		
 		// Set custom text color
@@ -69,7 +85,9 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 				.get(CaldroidFragment._POINT_COLOR_FOR_DATETIME_MAP);
 		
 		if (pointColorForDateTimeMap != null) {
-			Iterator iter = pointColorForDateTimeMap.keySet().iterator();			
+			Iterator iter = pointColorForDateTimeMap.keySet().iterator();
+			boolean isMoreThanOne = false;
+			
 			while(iter.hasNext()) { 
 				DateTime key = (DateTime) iter.next();
 				
@@ -83,9 +101,18 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 						
 						View labelIndicate = new View(convertView.getContext());
 						LayoutParams params = new LayoutParams(pixels, pixels);		
+						if(isMoreThanOne) {
+							params.setMargins((int) (5 * scale + 0.5f), 0, 0, 0);													
+						}
 						labelIndicate.setBackgroundResource(pointColorResource.intValue());	
-						labelIndicate.setLayoutParams(params);		
-						dotLayout.addView(labelIndicate);			
+						labelIndicate.setLayoutParams(params);
+						
+						if (dateTime.compareTo(getToday()) < 0) {
+							dotLayout.removeAllViews();
+						} else {
+							dotLayout.addView(labelIndicate);
+							isMoreThanOne = true;
+						}
 					}
 				}
 			}
@@ -140,8 +167,9 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 				tv1.setBackgroundResource(CaldroidFragment.disabledBackgroundDrawable);
 			}
 
-			if (dateTime.equals(getToday())) {
-				tv1.setBackgroundResource(R.drawable.red_border_gray_bg);
+			if (sameDay(dateTime, getToday())) {
+				tv1.setBackgroundResource(R.drawable.circle_today);
+				tv1.setTextColor(resources.getColor(R.color.white));
 			}
 		} else {
 			shouldResetDiabledView = true;
@@ -164,11 +192,13 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 
 		if (shouldResetDiabledView && shouldResetSelectedView) {
 			// Customize for today
-			if (dateTime.equals(getToday())) {
-				tv1.setBackgroundResource(R.drawable.red_border);
+			if (sameDay(dateTime, getToday())) {
+				tv1.setBackgroundResource(R.drawable.circle_today);
+				tv1.setTextColor(resources.getColor(R.color.white));
 			} else {
 				tv1.setBackgroundResource(R.drawable.cell_bg);
 			}
+
 		}
 
 		tv1.setText("" + dateTime.getDayOfMonth());

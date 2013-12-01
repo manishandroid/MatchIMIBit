@@ -23,13 +23,38 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <uses-feature android:name="android.hardware.camera" />
+
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET" ></uses-permission>
+    <uses-permission android:name="android.permission.INTERNET" >
+    </uses-permission>
     <uses-permission android:name="android.permission.CAMERA" />
 
+    <!-- permission required to use Alarm Manager -->
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
+
     <uses-feature android:name="android.hardware.camera.autofocus" />
+
+    <!-- GCM requires a Google account. -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+
+    <!-- Keeps the processor from sleeping when a message is received. -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!--
+     Creates a custom permission so only this app can receive its messages.
+
+     NOTE: the permission *must* be called PACKAGE.permission.C2D_MESSAGE,
+           where PACKAGE is the application's package name.    -->
+    <permission
+        android:name="com.matchimi.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="com.matchimi.permission.C2D_MESSAGE" />
+
+    <!-- This app has permission to register and receive data message. -->
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
     <application
         android:allowBackup="true"
@@ -38,11 +63,12 @@
         android:largeHeap="true"
         android:theme="@style/Theme.Sherlock.Light" >
         <uses-library android:name="com.google.android.maps" />
+
         <activity
             android:name="com.matchimi.HomeActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -52,26 +78,26 @@
         <activity
             android:name="com.matchimi.options.JobDetails"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            android:label="@string/details" >
+            android:label="@string/details"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
         <activity
             android:name="com.matchimi.options.RequirementsDetail"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            android:label="@string/requirements" >
+            android:label="@string/requirements"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
         <activity
             android:name="com.matchimi.options.RejectPreview"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            android:label="@string/reject_offer" >
+            android:label="@string/reject_offer"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
         <activity
             android:name="com.matchimi.options.CancelPreview"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            android:label="@string/cancel_availability" >
+            android:label="@string/cancel_availability"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
         <activity
             android:name="com.matchimi.options.HistoryDetail"
@@ -81,50 +107,50 @@
         <activity
             android:name="com.matchimi.options.AvailabilityActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            android:label="@string/menu_availability" >
+            android:label="@string/menu_availability"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
         <activity
             android:name="com.matchimi.options.AvailabilityPreview"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            android:label="@string/availability_detail" >
+            android:label="@string/availability_detail"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
         <activity
             android:name="com.matchimi.options.CreateAvailability"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            android:label="@string/add_availability" >
+            android:label="@string/add_availability"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
         <activity
             android:name="com.matchimi.options.MapsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            android:label="@string/location_preference" >
+            android:label="@string/location_preference"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
         <activity
             android:name="com.matchimi.registration.RegistrationActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
         <activity
             android:name="com.matchimi.registration.ProfileRegistrationActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
         <activity
             android:name="com.matchimi.registration.LoginActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            android:label="@string/login" >
+            android:label="@string/login"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
         <activity
             android:name="com.matchimi.options.FriendsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            android:label="@string/menu_friends" >
+            android:label="@string/menu_friends"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
         <activity
             android:name="com.facebook.LoginActivity"
@@ -139,52 +165,102 @@
         <activity
             android:name="com.matchimi.registration.EditProfile"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            android:label="@string/edit_profile" >
-        </activity>        
-        
+            android:label="@string/edit_profile"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
+        </activity>
         <activity
             android:name="com.matchimi.availability.HomeAvailabilityActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            android:label="@string/menu_availability" >
+            android:label="@string/menu_availability"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
-        
         <activity
             android:name="com.matchimi.availability.BulkAvailabilityActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            android:label="@string/menu_availability" >
+            android:label="@string/menu_availability"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
-        
         <activity
             android:name="com.matchimi.availability.LocationPreferenceActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            android:label="@string/location_preference" >
+            android:label="@string/location_preference"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
-        
         <activity
             android:name="com.matchimi.availability.ListAvailabilityActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            android:label="@string/menu_availability" >
+            android:label="@string/menu_availability"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
-        
-         <activity
+        <activity
             android:name="com.matchimi.availability.DailyAvailabilityPreview"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            android:label="@string/menu_availability" >
+            android:label="@string/menu_availability"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
-        
-         <activity
+        <activity
             android:name="com.matchimi.options.ScheduleDetailsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            android:label="@string/menu_availability" >
+            android:label="@string/menu_availability"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
+        <activity
+            android:name="com.matchimi.availability.RepeatAvailabilityActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/menu_availability"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
+        </activity>
+        <activity
+            android:name="com.matchimi.NotificationActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/notifications"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
+        </activity>
+		<activity
+            android:name="com.matchimi.profile.FeedbacksActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/profile_feedback"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
+        </activity>
+        <activity
+            android:name="com.matchimi.profile.PreferredJobsActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/preferred_jobs"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
+        </activity>
+        <!--
+          BroadcastReceiver that will receive intents from GCM
+          services and handle them to the custom IntentService.
+
+          The com.google.android.c2dm.permission.SEND permission is necessary
+          so only GCM services can send data messages for the app.
+        -->
+        <receiver
+            android:name="com.google.android.gcm.GCMBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+
+                <!-- Receives the actual messages. -->
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <!-- Receives the registration id. -->
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+
+                <category android:name="com.matchimi" />
+            </intent-filter>
+        </receiver>
         
+       <!-- Register the Alarm Receiver -->
+       <receiver android:name="com.matchimi.MatchimiAlarmReceiver"/> 
+
+        <!--
+          Application-specific subclass of GCMBaseIntentService that will
+          handle received messages.
+
+          By default, it must be named .GCMIntentService, unless the
+          application uses a custom BroadcastReceiver that redefines its name.
+        -->
+        <service android:name=".GCMIntentService" />
+
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyAK2bBQsPTrcZFyVCl13lh7-2DtSearJDs" />

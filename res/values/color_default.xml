@@ -26,5 +26,6 @@
     <color name="darkdescription">#867B72</color>
     <color name="progress_green">#80E80F</color>
     <color name="progress_red">#C20000</color>
+    <color name="lightgray">#DBDBDB</color>
     <color name="blue_sky">#ff379bff</color>
 </resources>

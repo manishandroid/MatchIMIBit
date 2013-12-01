@@ -121,7 +121,7 @@ public class HistoryDetail extends SherlockActivity {
 	}
 
 	private void loadData() {
-		final String url = Api.SERVERURL + Api.PARAM_GET_JOB_HISTORY + "?" + 
+		final String url = CommonUtilities.SERVERURL + Api.PARAM_GET_JOB_HISTORY + "?" + 
 				Api.PT_ID + "=" + pt_id;
 		
 		final Handler mHandlerFeed = new Handler();

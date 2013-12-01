@@ -1,8 +1,19 @@
 package com.matchimi.registration;
+import static com.matchimi.CommonUtilities.COMMON_FACEBOOK_ID;
+import static com.matchimi.CommonUtilities.COMMON_PASSWORD;
 import static com.matchimi.CommonUtilities.LOGIN;
 import static com.matchimi.CommonUtilities.PREFS_NAME;
+import static com.matchimi.CommonUtilities.SERVERURL;
+import static com.matchimi.CommonUtilities.TAG;
+import static com.matchimi.CommonUtilities.USER_FIRSTNAME;
+import static com.matchimi.CommonUtilities.USER_LASTNAME;
+import static com.matchimi.CommonUtilities.USER_NRIC_NUMBER;
+import static com.matchimi.CommonUtilities.USER_NRIC_TYPE;
+import static com.matchimi.CommonUtilities.USER_NRIC_TYPE_ID;
+import static com.matchimi.CommonUtilities.USER_PROFILE_PICTURE;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,6 +72,10 @@ public class LoginActivity extends Activity {
 	private String userNRICType;
 	private String userNRICTypeID;
 	private boolean userBasicComplete = false;
+	private String pt_id;
+	private String facebookFriends = "";
+	private SharedPreferences settings;
+	private SharedPreferences.Editor editor;
 	
 	private Session.StatusCallback callback = new Session.StatusCallback() {
 		@Override
@@ -81,7 +96,7 @@ public class LoginActivity extends Activity {
 		fbLoginButton = (LoginButton) findViewById(R.id.login_button);
 		fbLoginButton.setReadPermissions(Arrays.asList("email",
 				"user_about_me", "user_birthday", "user_education_history",
-				"user_location", "user_work_history"));
+				"user_location", "user_work_history", "friends_birthday"));
 		fbLoginButton.setSessionStatusCallback(callback);
 
 		final EditText emailText = (EditText) findViewById(R.id.registration_email);
@@ -109,7 +124,7 @@ public class LoginActivity extends Activity {
 					extraBundle.putString(CommonUtilities.USER_IS_VERIFIED, "false");
 
 					loginPartTimer(emailText.getText().toString(), passwordText
-							.getText().toString());
+							.getText().toString(), false);
 				}
 			}
 		});
@@ -132,7 +147,7 @@ public class LoginActivity extends Activity {
 				showForgetDialog();
 			}
 		});
-	}
+	}	
 	
 	private void closeKeyboard() {
 		InputMethodManager inputManager = (InputMethodManager)
@@ -244,33 +259,164 @@ public class LoginActivity extends Activity {
 					extraBundle.putString(CommonUtilities.USER_FACEBOOK_ID, user.getId());
 					extraBundle.putString(CommonUtilities.USER_GENDER, user.getProperty("gender").toString());
 
-					SharedPreferences settings = getSharedPreferences(
+					Log.d(CommonUtilities.TAG, "User birthday from post login " + user.getBirthday());
+					
+					settings = getSharedPreferences(
 							CommonUtilities.PREFS_NAME, Context.MODE_PRIVATE);
-					SharedPreferences.Editor editor = settings.edit();
+					editor = settings.edit();
 					editor.putString(CommonUtilities.USER_FACEBOOK_ID, user.getId());
 					editor.commit();
 					
-					if(user.getProperty("email") == null) {						
-						// Clear stored data
-						settings.edit().clear().commit();
-						editor.putBoolean(LOGIN, false);				
-						editor.commit();
-						
-						Toast toast = Toast.makeText(context, getResources().getString(R.string.faceboook_email_failed), 
-								Toast.LENGTH_LONG);
-						toast.show();
-						
-						logout();
-					} else {						
-						Log.d(CommonUtilities.TAG, "birth" +  user.getBirthday());
-						loginPartTimer(user.getProperty("email").toString(),
-								user.getId());						
-					}
+					getFriends(user, settings, editor);
+					
+					
 				}
 			});
 		} else {
 			Log.e(CommonUtilities.TAG, "updateUI NULL");
 		}
+	}
+	
+	private void getFriends(final GraphUser user, final SharedPreferences settings,
+			final SharedPreferences.Editor editor) {
+	    Session activeSession = Session.getActiveSession();
+	    if(activeSession.getState().isOpened()){
+	        Request friendRequest = Request.newMyFriendsRequest(activeSession, 
+	            new Request.GraphUserListCallback(){
+	                @Override
+	                public void onCompleted(List<GraphUser> users,
+	                        Response response) {
+	                   
+	                	for(GraphUser user : users) {
+							// TODO Auto-generated method stub
+							facebookFriends += user.getId() + ",";
+						}
+	                	
+	                	// Remove last comma if any
+	            		if (facebookFriends.length() > 0) {
+	            			facebookFriends = facebookFriends.substring(0,
+	            					facebookFriends.length() - 1);
+	            		}
+	            		
+	            		Log.d(TAG, "Facebook friends " + facebookFriends);
+	            		
+	            		if(user.getProperty("email") == null) {						
+							// Clear stored data
+							settings.edit().clear().commit();
+							editor.putBoolean(LOGIN, false);				
+							editor.commit();
+							
+							Toast toast = Toast.makeText(context,
+									getResources().getString(R.string.faceboook_email_failed), 
+									Toast.LENGTH_LONG);
+							toast.show();
+							
+							logout();
+							
+						} else {			
+							loginPartTimer(user.getProperty("email").toString(),
+									user.getId(), true);						
+						}
+	            		
+	                }
+	        });
+	        
+	        Bundle params = new Bundle();
+	        params.putString("fields", "id, name, picture");
+	        friendRequest.setParameters(params);
+	        friendRequest.executeAsync();
+	    }
+	}
+	
+	protected void submitFriendFacebook() {
+		final String url = SERVERURL + CommonUtilities.API_CREATE_PART_TIMER_FRIENDS_BY_PT_ID;
+		
+		final Handler mHandlerFeed = new Handler();
+		final Runnable mUpdateResultsFeed = new Runnable() {
+			public void run() {
+				if (jsonStr != null) {
+					if (jsonStr.trim().equalsIgnoreCase("0")) {
+						if (settings.getBoolean(CommonUtilities.REGISTERED, false)) {
+							editor.putBoolean(CommonUtilities.LOGIN, true);
+							editor.commit();
+							
+							// If user not verified, remind them
+							if(userIsVerified == "false") {
+								notifyUserVerification(extraBundle, editor, true);
+							} else {
+								goHome(extraBundle);
+							}
+							
+						} else {
+							// Check if user already completed basic profile
+							if(userBasicComplete) {
+								editor.putBoolean(CommonUtilities.LOGIN, true);
+								editor.commit();
+								
+								// If user not verified, remind them
+								if(userIsVerified == "false") {
+									notifyUserVerification(extraBundle, editor, true);
+								} else {
+									goHome(extraBundle);
+								}
+							} else {
+								editor.commit();
+								if(userIsVerified == "false") {
+									notifyUserVerification(extraBundle, editor, false);
+								} else {
+									goRegistrationProfile(extraBundle);								
+								}
+							}
+						}	
+					} else if (jsonStr.trim().equalsIgnoreCase("1")) {
+						Toast.makeText(context,
+								getString(R.string.edit_profile_error),
+								Toast.LENGTH_LONG).show();
+					}
+				} else {
+					Toast.makeText(context,
+							getString(R.string.something_wrong),
+							Toast.LENGTH_LONG).show();
+				}
+			}
+		};
+
+		progress = ProgressDialog.show(context,
+				getString(R.string.profile_header),
+				getString(R.string.updating_profile), true, false);
+		
+		new Thread() {
+			public void run() {
+				jsonParser = new JSONParser();
+				
+				try {
+					JSONObject parentData = new JSONObject();
+					JSONObject childData = new JSONObject();
+					
+					childData.put("pt_id", pt_id);
+					childData.put("friends", "[" + facebookFriends + "]");
+					
+					parentData.put("part_timer", childData);
+
+					String[] params = { "data" };
+					String[] values = { parentData.toString() };
+					jsonStr = jsonParser.getHttpResultUrlPost(url, params,
+							values);
+
+					Log.e(TAG, "Post data" + childData.toString());
+					Log.e(TAG, "Create friend list to " + url + "Result >>>\n "
+							+ jsonStr);
+				} catch (Exception e) {
+					jsonStr = null;
+					Log.e(TAG, ">> " + e.getMessage());
+				}
+
+				if (progress != null && progress.isShowing()) {
+					progress.dismiss();
+					mHandlerFeed.post(mUpdateResultsFeed);
+				}
+			}
+		}.start();
 	}
 
 	private void logout(){
@@ -302,8 +448,15 @@ public class LoginActivity extends Activity {
 		}
 	}
 
-	protected void loginPartTimer(final String email, final String password) {
-		final String url = CommonUtilities.SERVERURL + CommonUtilities.API_LOGIN_PART_TIMER;
+	protected void loginPartTimer(final String email, final String password, final boolean isFacebook) {
+		final String url;		
+		
+		if(isFacebook) {
+			url = CommonUtilities.SERVERURL + CommonUtilities.API_LOGIN_FB_PART_TIMER;
+		} else {
+			url = CommonUtilities.SERVERURL + CommonUtilities.API_LOGIN_PART_TIMER;
+		}
+
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
@@ -322,17 +475,17 @@ public class LoginActivity extends Activity {
 								getString(R.string.something_wrong),
 								Toast.LENGTH_LONG).show();
 					} else if (jsonStr.trim().length() > 0){
-						SharedPreferences settings = getSharedPreferences(
+						settings = getSharedPreferences(
 								CommonUtilities.PREFS_NAME, Context.MODE_PRIVATE);
-						SharedPreferences.Editor editor = settings.edit();
+						editor = settings.edit();
 
-						String ptid = "";
+						pt_id = "";
 						
 						try {
 							JSONObject obj = new JSONObject(jsonStr);
 							JSONObject partTimer = obj
 									.getJSONObject("part_timers");
-							ptid = partTimer.getString(CommonUtilities.PARAM_PT_ID);
+							pt_id = partTimer.getString(CommonUtilities.PARAM_PT_ID);
 							
 							userIsVerified = partTimer.getString(CommonUtilities.PARAM_PROFILE_IS_VERIFIED);
 							userDob = partTimer.getString(CommonUtilities.PARAM_PROFILE_DATE_OF_BIRTH);
@@ -348,7 +501,7 @@ public class LoginActivity extends Activity {
 								nricNumber = "";
 							}
 							
-							editor.putString(CommonUtilities.USER_PTID, ptid);
+							editor.putString(CommonUtilities.USER_PTID, pt_id);
 							editor.putString(CommonUtilities.USER_FIRSTNAME, 
 									partTimer.getString(CommonUtilities.PARAM_PROFILE_FIRSTNAME));
 							editor.putString(CommonUtilities.USER_LASTNAME, 
@@ -368,7 +521,7 @@ public class LoginActivity extends Activity {
 							editor.putBoolean(CommonUtilities.USER_PROFILE_COMPLETE, 
 									ValidationUtilities.checkProfileComplete(partTimer));							
 
-							extraBundle.putString(CommonUtilities.USER_PTID, ptid);
+							extraBundle.putString(CommonUtilities.USER_PTID, pt_id);
 							extraBundle.putString(CommonUtilities.USER_EMAIL, email);
 							extraBundle.putString(CommonUtilities.USER_IS_VERIFIED, userIsVerified);
 							extraBundle.putString(CommonUtilities.USER_BIRTHDAY, userDob);
@@ -391,38 +544,7 @@ public class LoginActivity extends Activity {
 										" " + userGender + " " + userDob + " " + userPhoneNumber + " ");
 							}
 							
-							if (settings.getBoolean(CommonUtilities.REGISTERED, false)) {
-								editor.putBoolean(CommonUtilities.LOGIN, true);
-								editor.commit();
-								
-								// If user not verified, remind them
-								if(userIsVerified == "false") {
-									notifyUserVerification(extraBundle, editor, true);
-								} else {
-									goHome(extraBundle);
-								}
-								
-							} else {
-								// Check if user already completed basic profile
-								if(userBasicComplete) {
-									editor.putBoolean(CommonUtilities.LOGIN, true);
-									editor.commit();
-									
-									// If user not verified, remind them
-									if(userIsVerified == "false") {
-										notifyUserVerification(extraBundle, editor, true);
-									} else {
-										goHome(extraBundle);
-									}
-								} else {
-									editor.commit();
-									if(userIsVerified == "false") {
-										notifyUserVerification(extraBundle, editor, false);
-									} else {
-										goRegistrationProfile(extraBundle);								
-									}
-								}
-							}
+							submitFriendFacebook();
 							
 						} catch (JSONException e1) {			
 							NetworkUtils.connectionHandler(context, jsonStr, e1.getMessage());
@@ -446,8 +568,14 @@ public class LoginActivity extends Activity {
 				try {
 					JSONObject parentData = new JSONObject();
 					JSONObject childData = new JSONObject();
-					childData.put(CommonUtilities.COMMON_EMAIL, email);
-					childData.put(CommonUtilities.COMMON_PASSWORD, password);
+					
+					childData.put("email", email);
+					if(isFacebook) {
+						childData.put(COMMON_FACEBOOK_ID, password);						
+					} else {
+						childData.put(COMMON_PASSWORD, password);						
+					}
+					
 					parentData.put(CommonUtilities.COMMON_PART_TIMER, childData);
 
 					String[] params = { CommonUtilities.COMMON_DATA };

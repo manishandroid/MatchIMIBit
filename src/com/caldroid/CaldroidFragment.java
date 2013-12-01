@@ -12,10 +12,12 @@ import org.joda.time.format.DateTimeFormatter;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,10 +29,13 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.GridView;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.antonyt.infiniteviewpager.InfinitePagerAdapter;
 import com.antonyt.infiniteviewpager.InfiniteViewPager;
+import com.matchimi.CommonUtilities;
 import com.matchimi.R;
 
 /**
@@ -86,8 +91,8 @@ public class CaldroidFragment extends DialogFragment {
 	/**
 	 * Caldroid view components
 	 */
-	private Button leftArrowButton;
-	private Button rightArrowButton;
+	private ImageButton leftArrowButton;
+	private ImageButton rightArrowButton;
 	private TextView monthTitleTextView;
 	private GridView weekdayGridView;
 	private InfiniteViewPager dateViewPager;
@@ -210,11 +215,11 @@ public class CaldroidFragment extends DialogFragment {
 	/**
 	 * To let user customize the navigation buttons
 	 */
-	public Button getLeftArrowButton() {
+	public ImageButton getLeftArrowButton() {
 		return leftArrowButton;
 	}
 
-	public Button getRightArrowButton() {
+	public ImageButton getRightArrowButton() {
 		return rightArrowButton;
 	}
 
@@ -1008,8 +1013,8 @@ public class CaldroidFragment extends DialogFragment {
 				.findViewById(R.id.calendar_month_year_textview);
 
 		// For the left arrow button
-		leftArrowButton = (Button) view.findViewById(R.id.calendar_left_arrow);
-		rightArrowButton = (Button) view
+		leftArrowButton = (ImageButton) view.findViewById(R.id.calendar_left_arrow);
+		rightArrowButton = (ImageButton) view
 				.findViewById(R.id.calendar_right_arrow);
 
 		// Navigate to previous month when user click
@@ -1029,6 +1034,19 @@ public class CaldroidFragment extends DialogFragment {
 				nextMonth();
 			}
 		});
+		
+		
+		LinearLayout monthView = (LinearLayout) view.findViewById(R.id.calendar_month_year_layout);
+		monthView.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Log.d(TAG, "Month clicked now");
+				Intent intent = new Intent(CommonUtilities.BROADCAST_LOAD_HISTORY);
+				LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+			}
+		});
+
 
 		// Show navigation arrows depend on initial arguments
 		setShowNavigationArrows(showNavigationArrows);

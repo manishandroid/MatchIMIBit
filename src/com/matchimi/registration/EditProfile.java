@@ -107,6 +107,7 @@ public class EditProfile extends SherlockActivity {
 	private ProfileModel profileInfo;
 
 	private List<String> listGender;
+	private List<String> listStudent;
 	private List<String> listGenderId;
 	private List<String> listNRICType;
 	private List<String> listNRICTypeId;
@@ -160,12 +161,14 @@ public class EditProfile extends SherlockActivity {
 	
 	private TextView workExperienceView;
 	private RadioGroup genderView;
+	private RadioGroup studentView;
 	
 	private ImageView imageProfileView;
 	private ImageView imageICBackView;
 	private ImageView imageICFrontView;
-	private ImageView imageCardView;
-	private ImageView imageBankStatementView;	
+	private ImageView imageStudentCardBackView;
+	private ImageView imageStudentCardFrontView;	
+	private ImageView imageBankStatementView;
 	private ImageView visumeImageView;
 	
 	private Calendar defaultBirthday = Calendar.getInstance();
@@ -230,6 +233,13 @@ public class EditProfile extends SherlockActivity {
 			((RadioButton) genderView.getChildAt(i)).setEnabled(false);
 		}
 		
+		studentView = (RadioGroup) findViewById(R.id.student_group);
+		listStudent = new ArrayList<String>();
+		listStudent.add("Yes");
+		listStudent.add("No");
+		createStudentView(studentView);
+		
+		
 //		EcEmailView = (EditText) findViewById(R.id.editEcEmail);
 //		addressView = (EditText) findViewById(R.id.editAddress);
 //		postalCodeView = (EditText) findViewById(R.id.editPostalCode);
@@ -278,7 +288,7 @@ public class EditProfile extends SherlockActivity {
 		
 		// Nric number
 		nricNumberView = (EditText) findViewById(R.id.editNricNumber);
-
+		
 		// Set expiry layout
 		expiryDateLayout = (RelativeLayout) findViewById(R.id.expiry_date_layout);
 				
@@ -309,8 +319,16 @@ public class EditProfile extends SherlockActivity {
 			}
 		});
 
-		imageCardView = (ImageView) findViewById(R.id.buttonCardPicture);
-		imageCardView.setOnClickListener(new OnClickListener() {
+		imageStudentCardFrontView = (ImageView) findViewById(R.id.card_student_front_button);
+		imageStudentCardFrontView.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				askImageFrom(TAKE_IMG_CARD);
+			}
+		});
+		
+		imageStudentCardBackView = (ImageView) findViewById(R.id.card_student_back_button);
+		imageStudentCardBackView.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
 				askImageFrom(TAKE_IMG_CARD);
@@ -1771,10 +1789,13 @@ public class EditProfile extends SherlockActivity {
 		insertImage(imageICFrontView, imagePath);
 	}
 	
-	private void updateImageCardPicture(String imagePath) {
-		insertImage(imageCardView, imagePath);
+	private void updateImageStudentCardFrontPicture(String imagePath) {
+		insertImage(imageStudentCardFrontView, imagePath);
 	}
 	
+	private void updateImageStudentCardBackPicture(String imagePath) {
+		insertImage(imageStudentCardBackView, imagePath);
+	}
 
 	/**
 	 * Refreshing image layout
@@ -1803,12 +1824,20 @@ public class EditProfile extends SherlockActivity {
 			updateImageICFront(icFrontImagePath);		
 		}
 		
-		if(profileInfo.getCard_picture() != null && profileInfo.getCard_picture().length() > 0) {			
-			String url = SERVERURL + CommonUtilities.API_GET_MATRIC_CARD_PIC_BY_PT_ID + "?"
-					+ PARAM_PT_ID + "=" + pt_id;
-			cardImagePath = checkAndDownloadPic(profileInfo.getCard_picture(), url);
-			updateImageCardPicture(cardImagePath);	
-		}
+		//@TODO: FIX THIS BRO!
+//		if(profileInfo.getStudentBackCard_picture() != null && profileInfo.getCard_picture().length() > 0) {			
+//			String url = SERVERURL + CommonUtilities.API_GET_MATRIC_CARD_PIC_BY_PT_ID + "?"
+//					+ PARAM_PT_ID + "=" + pt_id;
+//			cardImagePath = checkAndDownloadPic(profileInfo.getCard_picture(), url);
+//			updateImageStudentCardFrontPicture(cardImagePath);	
+//		}
+//		
+//		if(profileInfo.getStudentFrontCard_picture() != null && profileInfo.getCard_picture().length() > 0) {			
+//			String url = SERVERURL + CommonUtilities.API_GET_MATRIC_CARD_PIC_BY_PT_ID + "?"
+//					+ PARAM_PT_ID + "=" + pt_id;
+//			cardImagePath = checkAndDownloadPic(profileInfo.getCard_picture(), url);
+//			updateImageStudentCardFrontPicture(cardImagePath);	
+//		}
 		
 		if(profileInfo.getBank_statement() != null && profileInfo.getBank_statement().length() > 0) {			
 			String url = SERVERURL + CommonUtilities.API_GET_BANK_STATEMENT_PIC_BY_PT_ID + "?"
@@ -1829,11 +1858,11 @@ public class EditProfile extends SherlockActivity {
 		LinearLayout layStudent = (LinearLayout) findViewById(R.id.layStudent);
 		if (show) {
 			layStudent.setVisibility(View.VISIBLE);
-			expiryDateLayout.setVisibility(View.VISIBLE);			
+//			expiryDateLayout.setVisibility(View.VISIBLE);			
 			isStudentInfoRequired = true;
 		} else {
 			layStudent.setVisibility(View.GONE);
-			expiryDateLayout.setVisibility(View.GONE);			
+//			expiryDateLayout.setVisibility(View.GONE);			
 			isStudentInfoRequired = false;
 		}
 	}
@@ -1879,6 +1908,34 @@ public class EditProfile extends SherlockActivity {
 				if (profileInfo.getGender().equalsIgnoreCase(listGender.get(i))) {
 					rb.setChecked(true);
 				}
+			}
+		}
+	}
+	
+	protected void createStudentView(RadioGroup studentView) {
+		if (listStudent.size() > 0) {
+			studentView.removeAllViews();
+			for (int i = 0; i < listStudent.size(); i++) {
+				final RadioButton rb = new RadioButton(context);
+				rb.setText(listStudent.get(i));
+				rb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+					@Override
+					public void onCheckedChanged(CompoundButton arg0,
+							boolean arg1) {
+						if (arg1) {
+							if(arg0.getText().toString().equals("Yes")) {
+								showStudentInfo(true);
+							} else {
+								showStudentInfo(false);								
+							}
+							profileInfo.setStudent(arg0.getText().toString());
+						}
+					}
+				});
+				studentView.addView(rb);
+//				if (profileInfo.getIsStudent().equalsIgnoreCase(listStudent.get(i))) {
+//					rb.setChecked(true);
+//				}
 			}
 		}
 	}

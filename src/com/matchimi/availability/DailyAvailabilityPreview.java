@@ -3,11 +3,15 @@ package com.matchimi.availability;
 import static com.matchimi.CommonUtilities.AVAILABILITY_SELECTED;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Locale;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -50,6 +54,9 @@ public class DailyAvailabilityPreview extends SherlockFragmentActivity {
 	private TextView buttonFreeze;
 	private String avail_id;
 	private Boolean is_frozen = false;
+	private String status;
+	private String expired_at;
+	private String[] regionAvailabilityArray;
 
 	public static final int RC_PREV_AVAILABILITY_EDIT = 40;
 
@@ -80,6 +87,9 @@ public class DailyAvailabilityPreview extends SherlockFragmentActivity {
 		final String repeat = b.getString("repeat");
 		final String location = b.getString("location");
 		final String price = b.getString("price");
+		status = b.getString("status");
+		expired_at = b.getString("expired_at");
+
 		is_frozen = b.getBoolean("is_frozen");
 
 		final Calendar calStart = generateCalendar(start);
@@ -95,7 +105,8 @@ public class DailyAvailabilityPreview extends SherlockFragmentActivity {
 		TextView textEnd = (TextView) findViewById(R.id.textEnd);
 		// textEnd.setText(CommonUtilities.AVAILABILITY_TIME.format(calEnd.getTime()).toLowerCase(
 		// Locale.getDefault()));
-		textEnd.setText(CommonUtilities.AVAILABILITY_TIME.format(calEnd.getTime()));
+		textEnd.setText(CommonUtilities.AVAILABILITY_TIME.format(calEnd
+				.getTime()));
 
 		String[] repeatString = context.getResources().getStringArray(
 				R.array.repeat_value);
@@ -103,29 +114,110 @@ public class DailyAvailabilityPreview extends SherlockFragmentActivity {
 		textRepeat.setText(repeat);
 
 		TextView locationView = (TextView) findViewById(R.id.labelLocation);
+
+		Log.d(CommonUtilities.TAG, "Location values are this " + location);
+
+		regionAvailabilityArray = getResources().getStringArray(
+				R.array.region_availability);
+
+		String locationRegion = "";
+		List<String> items = Arrays.asList(location.split("\\s*,\\s*"));
+
+		for (String item : items) {
+			for (int i = 0; i < regionAvailabilityArray.length; i++) {
+				if (item.length() > 0) {
+					try{
+						int itemInt = Integer.parseInt(item);
+						if (itemInt == i) {
+							locationRegion += regionAvailabilityArray[Integer
+									.parseInt(item)] + ",";
+						}
+					} catch(Exception e) {
+						// Nothing to do here
+					}
+				}
+			}
+		}
+
+		// Remove last comma if any
+		if (locationRegion.length() > 0) {
+			locationRegion = locationRegion.substring(0,
+					locationRegion.length() - 1);
+		}
 		locationView.setText(getResources().getString(
 				R.string.location_preference)
-				+ " : " + location);
-
-		Log.d(CommonUtilities.TAG, "Daily availability preview");
+				+ ": " + locationRegion);
 
 		final TextView buttonEdit = (TextView) findViewById(R.id.buttonEdit);
 		buttonEdit.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-				Intent i = new Intent(context, CreateAvailability.class);
-				i.putExtra("pt_id", pt_id);
-				i.putExtra("avail_id", avail_id);
-				i.putExtra("start", start);
-				i.putExtra("end", end);
-				i.putExtra("repeat", repeat);
-				i.putExtra("location", location);
-				i.putExtra("price", price);
-				i.putExtra("update", true);
-				i.putExtra(CommonUtilities.AVAILABILITY_SELECTED, calStart
-						.getTime().toString());
+				if (status != null) {
 
-				startActivityForResult(i, RC_PREV_AVAILABILITY_EDIT);
+					Calendar expiredAt = Calendar.getInstance();
+					Date todayDate = new Date();
+
+					if (expired_at != null && !expired_at.equals("null")) {
+						expiredAt = generateCalendar(expired_at);
+					}
+
+					// If MA and expired greater than today
+					if ((status.equals(CommonUtilities.AVAILABILITY_STATUS_MA)
+							&& expired_at != null && todayDate
+							.compareTo(expiredAt.getTime()) < 0)
+							|| status
+									.equals(CommonUtilities.AVAILABILITY_STATUS_PA)) {
+
+						// Use the Builder class for convenient dialog
+						// construction
+						AlertDialog.Builder builder = new AlertDialog.Builder(
+								context);
+						builder.setMessage(R.string.job_offer_gone_warning)
+								.setPositiveButton(R.string.ok,
+										new DialogInterface.OnClickListener() {
+											public void onClick(
+													DialogInterface dialog,
+													int id) {
+												Intent i = new Intent(
+														context,
+														CreateAvailability.class);
+												i.putExtra("pt_id", pt_id);
+												i.putExtra("avail_id", avail_id);
+												i.putExtra("start", start);
+												i.putExtra("end", end);
+												i.putExtra("repeat", repeat);
+												i.putExtra("location", location);
+												i.putExtra("price", price);
+												i.putExtra("update", true);
+												i.putExtra(
+														CommonUtilities.AVAILABILITY_SELECTED,
+														CommonUtilities.AVAILABILTY_DATETIME
+																.format(calStart
+																		.getTime()));
+												startActivityForResult(i,
+														RC_PREV_AVAILABILITY_EDIT);
+											}
+										});
+						// Create the AlertDialog object and return it
+						Dialog dialog = builder.create();
+						dialog.show();
+					} else {
+						Intent i = new Intent(context, CreateAvailability.class);
+						i.putExtra("pt_id", pt_id);
+						i.putExtra("avail_id", avail_id);
+						i.putExtra("start", start);
+						i.putExtra("end", end);
+						i.putExtra("repeat", repeat);
+						i.putExtra("location", location);
+						i.putExtra("price", price);
+						i.putExtra("update", true);
+						i.putExtra(CommonUtilities.AVAILABILITY_SELECTED,
+								CommonUtilities.AVAILABILTY_DATETIME.format(calStart
+										.getTime()));
+						startActivityForResult(i, RC_PREV_AVAILABILITY_EDIT);
+					}
+				}
+
 			}
 		});
 
@@ -216,12 +308,10 @@ public class DailyAvailabilityPreview extends SherlockFragmentActivity {
 									getString(R.string.delete_availability_success),
 									Toast.LENGTH_SHORT).show();
 
-							Intent intent = new Intent(
-									CommonUtilities.CREATE_AVAILABILITY_BROADCAST);
-							// You can also include some extra data.
-							intent.putExtra(CommonUtilities.CREATE_AVAILABILITY_BROADCAST, "true");
-							LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-							
+							Intent i = new Intent(
+									CommonUtilities.BROADCAST_SCHEDULE_RECEIVER);
+							sendBroadcast(i);
+
 							Intent result = new Intent();
 							setResult(RESULT_OK, result);
 							finish();
@@ -270,6 +360,11 @@ public class DailyAvailabilityPreview extends SherlockFragmentActivity {
 								context,
 								getString(R.string.freeze_availability_success),
 								Toast.LENGTH_SHORT).show();
+
+						Intent i = new Intent(
+								CommonUtilities.BROADCAST_SCHEDULE_RECEIVER);
+						sendBroadcast(i);
+
 						Intent result = new Intent();
 						setResult(RESULT_OK, result);
 						finish();
@@ -323,6 +418,11 @@ public class DailyAvailabilityPreview extends SherlockFragmentActivity {
 								context,
 								getString(R.string.unfreeze_availability_success),
 								Toast.LENGTH_SHORT).show();
+
+						Intent i = new Intent(
+								CommonUtilities.BROADCAST_SCHEDULE_RECEIVER);
+						sendBroadcast(i);
+
 						Intent result = new Intent();
 						setResult(RESULT_OK, result);
 						finish();
