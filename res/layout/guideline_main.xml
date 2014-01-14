@@ -1,0 +1,46 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linierLayout"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/bg_gudeline">
+    <android.support.v4.view.ViewPager
+        android:id="@+id/pager"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+    <com.viewpagerindicator.CirclePageIndicator
+        android:id="@+id/indicator"
+        android:padding="5dp"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"/>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:background="@null"
+        android:gravity="bottom"
+        android:orientation="horizontal" >
+
+        <Button 
+            android:id="@+id/guide_btn_prev"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".5"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:padding="8dp"
+            android:background="@drawable/bg_selector_btn_guideline"
+            />
+        <Button 
+            android:id="@+id/guide_btn_next"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".5"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:padding="8dp"
+            android:background="@drawable/bg_selector_btn_guideline"/>
+    </LinearLayout>
+</LinearLayout>

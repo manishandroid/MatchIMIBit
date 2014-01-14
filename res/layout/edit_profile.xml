@@ -1,0 +1,1109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scroll"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/profile_label_basic_information"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/blue_sky"
+                android:padding="10dp"
+                android:text="@string/edit_profile_label_basic_information"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:id="@+id/profile_reg_add_photos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:text="@string/registration_profile_addprofilephoto" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:baselineAligned="false"
+                android:orientation="horizontal" >
+
+                <FrameLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content" >
+
+                    <ImageView
+                        android:id="@+id/buttonPicture"
+                        style="?android:attr/buttonStyle"
+                        android:layout_width="fill_parent"
+                        android:layout_height="100dp"
+                        android:contentDescription="@string/profile_picture"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/icon" />
+
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        android:text="@string/profile_picture" />
+                </FrameLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:background="@color/lightcolor" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp" >
+
+            <TextView
+                android:id="@+id/profile_reg_fullname"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/registration_profile_fullname" />
+
+            <EditText
+                android:id="@+id/field_edit_fullname"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/profile_reg_fullname"
+                android:imeOptions="actionDone"
+                android:inputType="textPersonName" >
+            </EditText>
+        </RelativeLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/lightcolor" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp" >
+
+            <TextView
+                android:id="@+id/profile_reg_gender"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/registration_profile_gender" />
+
+            <RadioGroup
+                android:id="@+id/gender_group"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/profile_reg_gender"
+                android:orientation="horizontal" />
+        </RelativeLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/lightcolor" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/profile_reg_date_of_birth"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/registration_profile_date_of_birth" />
+
+            <TextView
+                android:id="@+id/field_edit_date_of_birth"
+                style="@android:style/Widget.EditText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/profile_reg_date_of_birth"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:gravity="left" />
+        </RelativeLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/lightcolor" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/labelPhone"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/registration_profile_phone_number" />
+
+            <EditText
+                android:id="@+id/editPhoneNumber"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/labelPhone"
+                android:imeOptions="actionDone"
+                android:inputType="phone" />
+        </RelativeLayout>
+
+        <!--
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/lightcolor" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/labelAddress"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/address" />
+
+            <EditText
+                android:id="@+id/editAddress"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/labelAddress"
+                android:imeOptions="actionDone"
+                android:inputType="textPostalAddress" />
+        </RelativeLayout>
+         
+        
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/lightcolor" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/labelPostalCode"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/postal_code" />
+
+            <EditText
+                android:id="@+id/editPostalCode"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/labelPostalCode"
+                android:imeOptions="actionDone"
+                android:inputType="number" />
+        </RelativeLayout>-->
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/lightcolor" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/profile_reg_nric_type"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/registration_profile_nrictype" />
+
+            <TextView
+                android:id="@+id/field_edit_nric_type"
+                style="@android:style/Widget.EditText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/profile_reg_nric_type"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:gravity="left" />
+        </RelativeLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/lightcolor" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/profile_reg_add_photos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:paddingLeft="10dp"
+                android:text="@string/registration_profile_addnricphotos" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:baselineAligned="false"
+                android:orientation="horizontal" >
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" >
+
+                    <ImageView
+                        android:id="@+id/profile_reg_addfront_button"
+                        style="?android:attr/buttonStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:contentDescription="@string/none_string"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/icon" />
+
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        android:text="@string/registration_profile_addfrontphotos" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" >
+
+                    <ImageView
+                        android:id="@+id/profile_reg_addback_button"
+                        style="?android:attr/buttonStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:contentDescription="@string/none_string"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/icon" />
+
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        android:text="@string/registration_profile_addbackphotos" />
+                </FrameLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/lightcolor" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp" >
+
+            <TextView
+                android:id="@+id/profile_ask_student"
+                android:layout_height="wrap_content"
+                android:layout_width="160dp"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/edit_profile_ask_student" />
+
+            <RadioGroup
+                android:id="@+id/student_group"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/profile_ask_student"
+                android:orientation="horizontal" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/expiry_date_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" >
+
+            <TextView
+                android:id="@+id/labelExpireDate"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/expire_date" />
+
+            <TextView
+                android:id="@+id/editExpireDate"
+                style="@android:style/Widget.EditText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/labelExpireDate"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:gravity="left" />
+        </RelativeLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/lightcolor" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" 
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/labelNricNumber"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/edit_profile_nric_number" />
+
+            <EditText
+                android:id="@+id/editNricNumber"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/labelNricNumber"
+                android:capitalize="characters"
+                android:imeOptions="actionDone"
+                android:inputType="textCapSentences" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/layStudent"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/labelSchool"
+                    android:layout_width="110dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:paddingLeft="10dp"
+                    android:text="@string/school" />
+
+                <TextView
+                    android:id="@+id/textSchool"
+                    style="@android:style/Widget.EditText"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="10dp"
+                    android:layout_toRightOf="@id/labelSchool"
+                    android:focusable="true"
+                    android:focusableInTouchMode="false"
+                    android:gravity="left" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" >
+
+                <TextView
+                    android:id="@+id/labelCardNum"
+                    android:layout_width="110dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:paddingLeft="10dp"
+                    android:text="@string/card_number" />
+
+                <EditText
+                    android:id="@+id/editCardNumber"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="10dp"
+                    android:layout_toRightOf="@id/labelCardNum"
+                    android:imeOptions="actionDone"
+                    android:inputType="number" />
+            </RelativeLayout>
+
+            <LinearLayout
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:orientation="vertical" >
+	
+	            <TextView
+	                android:id="@+id/profile_reg_add_student_photos"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:layout_marginTop="10dp"
+	                android:paddingLeft="10dp"
+	                android:gravity="center"
+	                android:layout_gravity="center"
+	                android:text="@string/edit_profile_id_photos" />
+	
+	            <LinearLayout
+	                android:layout_width="fill_parent"
+	                android:layout_height="wrap_content"
+	                android:baselineAligned="false"
+	                android:orientation="horizontal" >
+	
+	                <FrameLayout
+	                    android:layout_width="0dp"
+	                    android:layout_height="wrap_content"
+	                    android:layout_weight="1" >
+	
+	                    <ImageView
+	                        android:id="@+id/card_student_front_button"
+	                        style="?android:attr/buttonStyle"
+	                        android:layout_width="match_parent"
+	                        android:layout_height="100dp"
+	                        android:contentDescription="@string/none_string"
+	                        android:scaleType="centerInside"
+	                        android:src="@drawable/icon" />
+	
+	                    <TextView
+	                        android:layout_width="fill_parent"
+	                        android:layout_height="match_parent"
+	                        android:gravity="center"
+	                        android:padding="8dp"
+	                        android:text="@string/registration_profile_addfrontphotos" />
+	                </FrameLayout>
+	
+	                <FrameLayout
+	                    android:layout_width="0dp"
+	                    android:layout_height="wrap_content"
+	                    android:layout_weight="1" >
+	
+	                    <ImageView
+	                        android:id="@+id/card_student_back_button"
+	                        style="?android:attr/buttonStyle"
+	                        android:layout_width="match_parent"
+	                        android:layout_height="100dp"
+	                        android:contentDescription="@string/none_string"
+	                        android:scaleType="centerInside"
+	                        android:src="@drawable/icon" />
+	
+	                    <TextView
+	                        android:layout_width="fill_parent"
+	                        android:layout_height="match_parent"
+	                        android:gravity="center"
+	                        android:padding="8dp"
+	                        android:text="@string/registration_profile_addbackphotos" />
+	                </FrameLayout>
+	            </LinearLayout>
+	        </LinearLayout>
+	        
+        </LinearLayout>
+       
+       <View
+          android:layout_width="fill_parent"
+          android:layout_height="1dip"
+          android:layout_marginBottom="5dp"
+          android:layout_marginTop="5dp"
+          android:background="@color/lightcolor"
+          android:visibility="gone"  />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" >
+
+            <TextView
+                android:id="@+id/profile_reg_skills"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/registration_profile_skills" />
+
+            <TextView
+                android:id="@+id/field_edit_skills"
+                style="@android:style/Widget.EditText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/profile_reg_skills"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:gravity="left" />
+        </RelativeLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/lightcolor"
+            android:visibility="gone"  />
+
+        <RelativeLayout
+            android:id="@+id/profile_reg_workexperience_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/profile_reg_workexperience"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/registration_profile_work_experience" />
+
+            <!--
+                 <EditText
+                android:id="@+id/editExperience"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/profile_reg_workexperience"
+                android:inputType="phone" />
+            -->
+
+            <TextView
+                android:id="@+id/field_edit_work_experience"
+                style="@android:style/Widget.EditText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/profile_reg_workexperience"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:gravity="left" />
+        </RelativeLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/lightcolor"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/profile_label_emergency_contact"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/blue_sky"
+            android:padding="10dp"
+            android:text="@string/edit_profile_label_emergency_contact"
+            android:textColor="@color/white" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/labelEcName"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/ec_name" />
+
+            <EditText
+                android:id="@+id/editEcName"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/labelEcName"
+                android:imeOptions="actionDone"
+                android:inputType="textPersonName" />
+        </RelativeLayout>
+
+        <!--
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/lightcolor" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/labelEcEmail"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/ec_email" />
+
+            <EditText
+                android:id="@+id/editEcEmail"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/labelEcEmail"
+                android:imeOptions="actionDone"
+                android:inputType="textEmailAddress" />
+
+        </RelativeLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/lightcolor" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/labelEcPostCode"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/ec_post_code" />
+
+            <EditText
+                android:id="@+id/editEcPostCode"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/labelEcPostCode"
+                android:imeOptions="actionDone"
+                android:inputType="number" />
+
+        </RelativeLayout>
+                
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/lightcolor" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/labelEcAddress"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/ec_address" />
+
+            <EditText
+                android:id="@+id/editEcAddress"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/labelEcAddress"
+                android:imeOptions="actionDone"
+                android:inputType="textPostalAddress" />
+
+        </RelativeLayout>-->
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/lightcolor" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/labelEcPhone"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/ec_phone" />
+
+            <EditText
+                android:id="@+id/editEcPhone"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/labelEcPhone"
+                android:imeOptions="actionDone"
+                android:inputType="phone" />
+        </RelativeLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/lightcolor" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/labelEcRelation"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/ec_relation" />
+
+            <TextView
+                android:id="@+id/field_edit_ECRelation"
+                style="@android:style/Widget.EditText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/labelEcRelation"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:gravity="left" />
+
+            <!--
+                 <EditText
+                android:id="@+id/editEcRelation"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/labelEcRelation"
+                android:imeOptions="actionDone"
+                android:inputType="text" />
+            -->
+
+        </RelativeLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/lightcolor" />
+
+        <TextView
+            android:id="@+id/profile_label_bank"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/blue_sky"
+            android:padding="10dp"
+            android:text="@string/edit_profile_label_bank_account"
+            android:textColor="@color/white" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/labelBankName"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/bank_name" />
+
+            <EditText
+                android:id="@+id/editBankName"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/labelBankName"
+                android:imeOptions="actionDone"
+                android:inputType="text" />
+        </RelativeLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/lightcolor" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/labelBankBranch"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/branch_name" />
+
+            <EditText
+                android:id="@+id/editBranch"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/labelBankBranch"
+                android:imeOptions="actionDone"
+                android:inputType="text" />
+        </RelativeLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/lightcolor" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/labelBankAccName"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/acc_name" />
+
+            <EditText
+                android:id="@+id/editBankAccName"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/labelBankAccName"
+                android:imeOptions="actionDone"
+                android:inputType="text" />
+        </RelativeLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/lightcolor" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/labelBankAccNum"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/acc_number" />
+
+            <EditText
+                android:id="@+id/editAccNumber"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_toRightOf="@id/labelBankAccNum"
+                android:imeOptions="actionDone"
+                android:inputType="number" />
+        </RelativeLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:background="@color/lightcolor" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/profile_reg_add_bank_statement"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:text="@string/edit_profile_bank_statement" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:baselineAligned="false"
+                android:orientation="horizontal" >
+
+                <FrameLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content" >
+
+                    <ImageView
+                        android:id="@+id/buttonBankStatement"
+                        style="?android:attr/buttonStyle"
+                        android:layout_width="fill_parent"
+                        android:layout_height="100dp"
+                        android:contentDescription="@string/profile_bank_statement"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/icon" />
+
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        android:text="@string/profile_bank_statement" />
+                </FrameLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="5dp"
+            android:background="@color/lightcolor" />
+
+        <TextView
+            android:id="@+id/profile_label_visume"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/blue_sky"
+            android:padding="10dp"
+            android:text="@string/edit_profile_label_video_resume"
+            android:textColor="@color/white" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <!--
+                 <TextView
+                android:id="@+id/profile_add_video_resume"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/edit_profile_visume" />
+            -->
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:baselineAligned="false"
+                android:orientation="horizontal" >
+
+                <FrameLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content" >
+
+                    <ImageView
+                        android:id="@+id/buttonVisume"
+                        style="?android:attr/buttonStyle"
+                        android:layout_width="fill_parent"
+                        android:layout_height="100dp"
+                        android:contentDescription="@string/profile_visume"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/icon" />
+
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        android:text="@string/profile_visume" />
+                </FrameLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/field_edit_submit_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:background="@color/gray"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:text="@string/registration_submit"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+</ScrollView>

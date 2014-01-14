@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Matchimi</string>
+    <string name="guideline">Guideline</string>
+    <string name="guide_txt_btn_prev">previous</string>
+    <string name="guide_txt_btn_next">next</string>
+    <string name="guide_txt_btn_start">start</string>
+    <string name="guide_profile_title_1">Fill Compulsory Fields</string>
+    <string name="guide_profile_title_2">Fill in your personal detail along with a clear photo of the and back of your IC</string>
+    <string name="guide_job_title_1">Jobs</string>
+    <string name="guide_job_title_2">Wait for your match, view job detail, and accept job offers.</string>
+    <string name="guide_add_title_1">Add Available Timelots</string>
+    <string name="guide_add_title_2">Indicate your availabel (repeated) date, time, and preferred locations.</string>
+    <string name="guide_calendar_title_1">Calendar View of Schedule</string>
+    <string name="guide_calendar_title_2">Manage your available timelots and jobs</string>
+    <string name="facebook_app_id">1417927991768409</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="price_hour">$13/hr</string>
+    <string name="date_working">Sat 24th, May</string>
+    <string name="time_working">4pm - 11pm</string>
+    <string name="address_working">Jumbo</string>
+    <string name="place_working">Clark Quay</string>
+    <string name="menu_jobs">job offers</string>
+    <string name="menu_schedule">my schedule</string>
+    <string name="menu_profile">profile</string>
+    <string name="next">></string>
+    <string name="close">Close</string>
+    <string name="reply">Reply</string>
+    <string name="server_problem">Server long response. Please try again.</string>
+    <string name="sending_message">Sending message ...</string>
+    <string name="sending_message_success">Your message was sent succesfully</string>
+    <string name="sending_message_failed">Failed to send message. Please try again</string>
+    <string name="registration_header">Get Started</string>
+    <string name="registration_description">Create a new profile or login to an existing profile below</string>
+    <string name="registration_facebook">Use facebook</string>
+    <string name="registration_email">Or, use your email</string>
+    <string name="registration_input_email">Email</string>
+    <string name="registration_input_password">Password</string>
+    <string name="registration_forgot_password">Forgot Password</string>
+    <string name="registration_submit">Submit</string>
+    <string name="registration_profile_fullname">*Full Name</string>
+    <string name="registration_profile_family_name">Full name</string>
+    <string name="registration_profile_given_name">Given name</string>
+    <string name="registration_profile_date_of_birth">*Date of Birth</string>
+    <string name="registration_profile_gender">*Gender</string>
+    <string name="registration_profile_nrictype">*NRIC Type</string>
+    <string name="registration_profile_school">*School</string>
+    <string name="registration_profile_add_nric_photos">*NRIC Type</string>
+    <string name="registration_profile_addprofilephoto">Profile picture</string>
+    <string name="registration_profile_skills">*Job Functions</string>
+    <string name="registration_profile_work_experience">*Work Experience</string>
+    <string name="registration_profile_addnricphotos">*Add NRIC Photos</string>
+    <string name="registration_profile_addfrontphotos">FRONT</string>
+    <string name="registration_profile_addbackphotos">BACK</string>
+    <string name="registration_profile_phone_number">*Contact No.</string>
+    <string name="registration_profile_failed">Failed create profile. Please try again.</string>
+    <string name="registration_profile_title">Registration</string>
+    <string name="registration_profile_progress">Creating your profile ...</string>
+    <string name="registration_birthday_restriction">Minimum required age is 14 years old</string>
+    <string name="registration_birthday_restriction_title">Date Birth Restriction</string>
+    <string name="registration_failed">Failed. Your email may already registered"</string>
+    <string name="resend_email_validation_success">Email validation has been sent.\nPlease check your email inbox.</string>
+    <string name="resend_email_validation_failed">Email validation failed. Please try again</string>
+    <string name="registration_already_exist">Your email already registered. Please use login</string>
+    <string name="please_wait">Please wait ...</string>
+    <string name="job_menu">Job</string>
+    <string name="profile_header">Profile</string>
+    <string name="profile_complete_question">Please complete your profile before accepting first job</string>
+    <string name="profile_blocked_companies">Blocked Companies</string>
+    <string name="profile_feedback">Feedback</string>
+    <string name="cancel">Cancel</string>
+    <string name="cancelled">Cancelled</string>
+    <string name="permission_not_granted">Unable to perform selected action because permissions were not granted.</string>
+    <string name="ok">OK</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="hello_user">Hello %1$s!</string>
+    <string name="success">Success</string>
+    <string name="successfully_posted_post">Successfully posted \'%1$s\'.\nPost ID: %2$s</string>
+    <string name="error">Error</string>
+    <string name="album_name">Matchimi</string>
+    <string name="none_string"></string>
+    <string name="details">Details</string>
+    <string name="requirements">Requirements</string>
+    <string name="mandatory">Mandatory</string>
+    <string name="optional">Optional</string>
+    <string name="review_reqs">Please review and accept the requirements below</string>
+    <string name="review_reject_offer">If you dont want to get offers from this employer again, please check the box below. Otherwise leave in unchecked.\n\n(You can start accepting offer from this employer again if you remove them from your blocked merchants list in your profile).</string>
+    <string name="dont_show_offer">Dont show offers from</string>
+    <string name="anymore">anymore</string>
+    <string name="mandatory_reqs">Mandatory Requirements:</string>
+    <string name="optional_reqs">Optional Requirements:</string>
+    <string name="accept_submit">Accept &amp; Submit</string>
+    <string name="cancel_job_reason">Reasons</string>
+    <string name="confirm_submit">Confirm &amp; Submit</string>
+    <string name="reject_offer">Reject Offer</string>
+    <string name="accept_offer">Accept Offer</string>
+    <string name="job_accept_offer_progress">Accepting job ...</string>
+    <string name="job_accept_offer_success">Job has been accepted successfuly</string>
+    <string name="job_accept_offer_failed">Failed to accept job. Please try again</string>
+    <string name="job_reject_offer_success">Offer has been rejected successfuly</string>
+    <string name="job_reject_offer_failed">Failed to reject offer. Please try again</string>
+    <string name="job_reject_progress">Rejecting job ...</string>
+    <string name="cancel_offer">Cancel Job</string>
+    <string name="cancel_availability">Cancel Job</string>
+    <string name="cancel_note">Please note that canceling your availability for an accepted offer, is not taken well by employers.\n\nThis will demote your ranking for some time in the Matchimi system and others will be given preference over you when matching job offers.</string>
+    <string name="cancel_reason">Reason for cancellation</string>
+    <string name="cancel_my_availabliity">Cancel my job</string>
+    <string name="create_availability">Create Availability</string>
+    <string name="job_add_availability">Have more free time, add slot!</string>
+    <string name="ill_keep_appoinment">I will keep this appointment</string>
+    <string name="pas_job_info">Past job info</string>
+    <string name="menu_history">Job History</string>
+    <string name="menu_availability">Availability</string>
+    <string name="menu_setting">Settings</string>
+    <string name="menu_help">Help</string>
+    <string name="preferred_jobs">Preferred Jobs</string>
+    <string name="loading_preferred_jobs">Loading preferred jobs ...</string>
+    <string name="preferred_jobs_loading">Submiting your preferred jobs ...</string>
+    <string name="menu_share">Share</string>
+    <string name="menu_logout">Logout</string>
+    <string name="menu_submit">Submit</string>
+    <string name="set">Set</string>
+    <string name="availability_info">Once you add your availability, we will use this info to match you to offers from employers all over the island. You will get notified of these offers so you can accept them.</string>
+    <string name="start_date">Start Date</string>
+    <string name="end_date">End Date</string>
+    <string name="start_time">Start Time</string>
+    <string name="end_time">End Time</string>
+    <string name="repeat">Repeat</string>
+    <string name="location_preference">Location Preference</string>
+    <string name="ask_salary">Ask Salary</string>
+    <string name="availability_set_time">Set Time</string>
+    <string name="availability_detail">Detail Availability</string>
+    <string name="availability_adding_succesfully">Your availability has been added succesfully</string>
+    <string name="availability_adding_failed">Failed to create availability. Please try again</string>
+    <string name="availability_end_overlap">The selected time overlap with start time</string>
+    <string name="availability_end_equal">End time must be not same with start time</string>
+    <string name="availability_adding_overlap">Availability has been overlapped with existing</string>
+    
+    <string name="availability_error_passed">Selected time already passed.\nPlease choose a new date</string>
+    <string name="availability_end_date_error">Selected date must be after start date</string>
+    <string name="availability_end_time_error">Selected time must be after start time</string>
+        
+    <string name="edit_availability">Edit Availability</string>
+    <string name="edit_availability_progress">Updating availability ...</string>
+    <string name="edit_availability_failed">Failed to edit availability. Please try again</string>
+    <string name="edit_availability_success">Availability updated succesfully</string>
+    <string name="availability_select_date_validation">Please select your start date first</string>
+    <string name="availability_select_time_start_validation">Please select your availability date</string>
+    <string name="availability_select_time_end_validation">Please select your start time</string>
+    <string name="availability_datetime_validation">Availability date and time.</string>
+    
+    <string name="delete_availability">Delete Availability</string>
+    <string name="delete_availability_success">Availability has been deleted succesfully</string>
+    <string name="delete_availability_failed">Failed to delete availability. Please try again</string>
+    <string name="delete_availability_question">Are you sure want to delete this availability &#63;</string>
+    <string name="delete_availability_progress">Deleting availability ...</string>
+    <string name="add_availability">Edit Availability</string>
+    <string name="freeze_availability">Freeze Availability</string>
+    <string name="freeze_availability_progress">Freezing availability ...</string>
+    <string name="freeze_availability_success">Availability has been freezed succesfully</string>
+    <string name="freeze_availability_failed">Failed to freeze availability. Please try again</string>
+    <string name="freeze_status">frozen</string>
+    <string name="freeze_availability_question">Are you sure want to freeze this availability &#63;</string>
+    <string name="unfreeze_availability">Unfreeze Availability</string>
+    <string name="freeze_title">Freeze</string>
+    <string name="unfreeze_title">Unfreeze</string>
+    <string name="unfreeze_availability_progress">Unfreezing availability ...</string>
+    <string name="unfreeze_availability_success">Availability has been unfreezed succesfully</string>
+    <string name="unfreeze_availability_failed">Failed to unfreeze availability. Please try again</string>
+    <string name="job_cancel_success">Job has been cancelled succesfully</string>
+    <string name="job_cancel_failed">Failed to cancel job. Please try again</string>
+    <string name="job_cancel_progress">Canceling job...</string>
+    <string name="add_availability_progress">Creating availability...</string>
+    <string name="login">Login</string>
+    <string name="login_failed">Login failed. Please check your email &amp; password.</string>
+    <string name="register">Register</string>
+    <string name="register_progress">Registering ... </string>
+    <string name="login_fb">Please login using your facebook account</string>
+    <string name="register_fb">Create a new profile or use your facebook account</string>
+    <string name="total_work">Total worked:</string>
+    <string name="total_earning">Total Earnings:</string>
+    <string name="cancel_offer_receive">Do you want to receive offer again from the same outlet &#63;</string>
+    <string name="notify_user_verification">Please activate your account by click verification link in your email inbox</string>
+    <string name="verifying">Verifying ...</string>
+    <string name="settings_freeze">Freeze job offer</string>
+    <string name="settings_freeze_description">Disable all your availabilities</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_description">Change application theme</string>
+    <string name="settings_theme_select">Select theme</string>
+    <string name="settings_title">Settings</string>
+    <string name="resend_link">Resend Link</string>
+    <string name="failed_load_data">Failed to load. Please try again</string>
+    <string name="something_wrong">Something wrong. Please try again</string>
+    <string name="edit_profile">Edit Profile</string>
+    
+    <string name="edit_profile_visume">Video Resume</string>
+    <string name="edit_profile_bank_statement">Bank Information\n(Account No. and Name)</string>
+    
+    <string name="edit_profile_label_basic_information">Basic Information</string>
+    <string name="edit_profile_label_emergency_contact">Emergency Contact</string>
+    <string name="edit_profile_label_bank_account">Bank Account Information</string>
+    <string name="edit_profile_label_video_resume">Video Resume</string>
+    <string name="edit_profile_fullname">*Full Name</string>
+    <string name="edit_profile_gender">*Gender</string>
+    <string name="edit_profile_dob">*Date of Birth</string>
+    <string name="edit_profile_nric">*NRIC Type</string>
+    <string name="edit_profile_ask_student">*Are you a student ?</string>
+  	<string name="edit_profile_nric_number">*IC Number</string>
+    <string name="edit_profile_id_photos">*Add Student ID Photos</string>
+    
+    <string name="address">Address</string>
+    <string name="profile_picture">Profile Picture</string>
+    <string name="profile_visume">Profile Video Resume</string>
+    <string name="profile_bank_statement">Profile Bank Statement</string>
+    <string name="postal_code">Postal Code</string>
+    <string name="expire_date">Expire Date</string>
+    <string name="school">School</string>
+    <string name="card_number">Card Number</string>
+    <string name="card_picture">Card Picture</string>
+    <string name="no_internet">Network error. Please check your internet connection</string>
+    <string name="file_corrupt">File is corrupt. Please use another image</string>
+    <string name="ec_name">*Name</string>
+    <string name="ec_email">Emergency Contact Email</string>
+    <string name="ec_phone">*Contact No.</string>
+    <string name="ec_address">Emergency Contact Address</string>
+    <string name="ec_post_code">Emergency Contact Postal Code</string>
+    <string name="ec_relation">*Relationship</string>
+    <string name="bank_name">Name of Bank</string>
+    <string name="acc_type">Bank Acc Type</string>
+    <string name="acc_name">Account Name</string>    
+    <string name="acc_number">Account Number</string>
+    <string name="branch_name">Branch</string>
+    <string name="expired_date">Expired Date</string>
+    <string name="expired_date_err">Your card already expired. Please renew your card</string>
+    <string name="edit_profile_error">Failed to update profile. Please try again</string>
+    <string name="edit_profile_success">Your profile has been updated successfully</string>
+    <string name="edit_get_profile_error">Failed to get profile. Please try again</string>
+    <string name="uploading">Uploading ... </string>
+    <string name="blocked_companies_loading">Loading companies...</string>
+    <string name="feedbacks_loading">Loading feedbacks...</string>
+    <string name="loading_profile">Loading profile...</string>
+    <string name="updating_profile">Updating profile...</string>
+    <string name="updating_friends">Connecting your friends...</string>
+    <string name="server_error">Problem with server data. Please try again</string>
+    <string name="loading_data">Loading data ...</string>
+     <string name="preparing_data">Preparing data ...</string>
+    <string name="history_loading">Loading job histories ...</string>
+    <string name="select_image_from">Select image from</string>
+    <string name="reset_password_success">Your password has been reset succesfully.\nPlease check your email.</string>
+    <string name="reset_password_failed">Failed to reset password. Please try again.</string>
+    <string name="reset_password_progress">Resetting your password ...</string>
+    <string name="login_forgot_password_title">Forgot password</string>
+    <string name="login_forgot_password_message">Enter your email address to reset password</string>
+    <string name="hint_email_address">Email address</string>
+    <string name="reset">Reset</string>
+    <string name="delete">Delete</string>
+    <string name="login_email_not_valid">Email address is not valid</string>
+    <string name="available_job">Available Jobs</string>
+    <string name="message">Messages</string>
+    <string name="newest">Newest</string>
+    <string name="unread">Unread</string>
+    <string name="from">From</string>
+    <string name="date">Date</string>
+    <string name="time">Time</string>
+    <string name="your_friend">Your friends</string>
+    <string name="rate_this_job">Rate this job</string>
+    <string name="rate_loading">Sending rate ...</string>
+    <string name="all_friends">All</string>
+    <string name="add_friends">Add</string>
+    <string name="unfriend">Un-friend</string>
+    <string name="request_unfriends">Requesting un-friend..</string>
+    <string name="request_friend">Requesting friend..</string>
+    <string name="menu_friends">Friends</string>
+    <string name="failed_try_again">Failed, please try again !</string>
+    <string name="friends_name">Friends name</string>
+    <string name="no_network_error">no network provider signal</string>
+    <string name="map_availability_area">Your availability job area</string>
+    <string name="download_avatar">Downloading avatar...</string>
+    <string name="tab_location">Location</string>
+    <string name="required">required</string>
+    <string name="invalid_email_address">Invalid email address</string>
+    <string name="you_are_rated">You are rated</string>
+    <string name="phone_number">Phone Number</string>
+
+    <string-array name="repeat_value">
+        <item>None</item>
+        <item>Weekly</item>
+        <item>Monthly</item>
+    </string-array>
+    <string-array name="theme_value">
+        <item>Light</item>
+        <item>Dark</item>
+    </string-array>
+    <string-array name="workexperience_array">
+        <item>Less than 3 months</item>
+        <item>Between 3 and 12 months</item>
+        <item>More than 12 months</item>
+    </string-array>
+    <string-array name="workexperience_id_array">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="ecrelationship_array">
+        <item>Family Relative</item>
+        <item>Friend</item>
+        <item>Colleague</item>
+    </string-array>
+    <string-array name="mediaupload_array">
+        <item>Gallery</item>
+        <item>Camera</item>
+    </string-array>
+    <string-array name="cancelreason_array">
+        <item>Don\'t like the employer</item>
+        <item>Don\'t like the job function</item>
+        <item>Don\'t like the location</item>
+        <item>Don\'t like the salary</item>
+        <item>Don\'t want to receive the same offer from the employer</item>
+    </string-array>
+
+    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="day_name_format">EEE</string>
+    <string name="invalid_date">Selected date must be after today</string>
+    <!-- <string name="invalid_date">Date must be between %1$s and %2$s.</string> -->
+    <string name="month_name_format">MMMM yyyy</string>
+    <string name="datetime_simple_format">yyyy-MM-dd HH:mm:ss</string>
+    <string name="add_bulk_availability">Add bulk availability</string>
+    <string name="add_daily_availability">Add daily availability</string>
+    <string name="submit_bulk_availability">Submit</string>
+    <string name="cancel_bulk_availability">Cancel</string>
+    <string name="availability_repeat">Repeat</string>
+    <string name="availability_weeks">Weeks</string>
+    <string name="schedule_total_hours">Total hours clocked this month : </string>
+    <string name="schedule_total_income">Total income this month : </string>
+    <string name="availability_end_12_hours">You not allowed working more that 12 hours</string>
+    <string name="faceboook_email_failed">Your email not verified by Facebook.\nPlease check your facebook Account Settings. </string>
+    <string name="schedule_tab_my_schedule">My Job</string>
+    <string name="schedule_tab_my_availability">My Availability</string>
+    <string name="schedule_indicate">Indicate your availability so we can schedule a job for you</string>
+    <string name="schedule_add_availability">Add Availability</string>
+    <string name="image_not_found"><h1>Not Found</h1></string>
+    <string name="create_availability_from">Available From</string>
+    <string name="availability_start_repeat_date">Start Repeat Date</string>
+    <string name="availability_end_repeat_date">End Repeat Date</string>
+    <string name="notifications">Notifications</string>
+    <string name="notifications_ping">Ping</string>
+    <string name="send_button">Send</string>
+    <string name="write_message">Write...</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="error_config">Please set the %1$s constant and recompile the app.</string>
+    <string name="already_registered">Device is already registered on server.</string>
+    <string name="gcm_registered">From GCM: device successfully registered!</string>
+    <string name="gcm_unregistered">From GCM: device successfully unregistered!</string>
+    <string name="gcm_message">From GCM: you got message!</string>
+    <string name="gcm_error">From GCM: error (%1$s).</string>
+    <string name="gcm_recoverable_error">From GCM: recoverable error (%1$s).</string>
+    <string name="gcm_deleted">From GCM: server deleted %1$d pending messages!</string>
+    <string name="server_registering">Trying (attempt %1$d/%2$d) to register device on Chat Server.</string>
+    <string name="server_messaging">Trying (attempt %1$d/%2$d) send message to Chat Server.</string>
+    <string name="server_messaging_error">Could not send message %1$d attempts.</string>
+    <string name="server_message">Success send message</string>
+    <string name="server_registered">From Chat Server: successfully added device!</string>
+    <string name="server_unregistered">From Chat Server: successfully removed device!</string>
+    <string name="server_register_error">Could not register device on Chat Server after %1$d attempts.</string>
+    <string name="server_unregister_error">Could not unregister device on Chat Server (%1$s).</string>
+    <string name="options_register">Register</string>
+    <string name="options_unregister">Unregister</string>
+    <string name="options_clear">Clear</string>
+    <string name="options_exit">Exit</string>
+    <string name="username">Username</string>
+    <string name="repeat_start_end_date_incomplete">Please complete start and end repeat date</string>
+    <string name="notification_register">Register notifications</string>
+    <string name="rate_your_employer">Rate your employer</string>
+    <string name="rate_your_employer_dialog">Drag finger accross to rate your employer</string>
+    <string name="job_offer_gone_warning">Your job offers will be gone by modifying this availability</string>
+    <string name="loading_repeat_days">Loading repeat days ...</string>
+    <string name="loading_location">Loading locations ...</string>
+    <string name="you_are_rated">You are rated : </string>
+    <string name="preferred_jobs">Preferred Jobs</string>
+    <string name="preferred_hotel">Hotel</string>
+    <string name="preferred_fandb">F&amp;B</string>
+    <string name="preferred_sales">Sales/Retail/Events</string>    
+    <string name="preferred_factory">Factory/Warehouse</string>
+	<string name="store_pass">android</string>     
+	<string name="account_not_existed">Your password is incorrect</string>
+	<string name="edit_profile_dependent_passholder">*Are you a dependent pass holder</string>
+    <string-array name="repeat_week_array">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+    </string-array>
+    <string-array name="repeat_week">
+        <item>Monday</item>
+        <item>Tuesday</item>
+        <item>Wednesday</item>
+        <item>Thursday</item>
+        <item>Friday</item>
+        <item>Saturday</item>
+        <item>Sunday</item>
+    </string-array>
+    <string-array name="repeat_week_short">
+        <item>Mon</item>
+        <item>Tue</item>
+        <item>Wed</item>
+        <item>Thu</item>
+        <item>Fri</item>
+        <item>Sat</item>
+        <item>Sun</item>
+    </string-array>
+    
+    <string-array name="nric_type">
+        <item>Singapore citizen</item>
+        <item>Singapore PR</item>
+        <item>Others</item>
+    </string-array>
+    
+    <string-array name="preferred_jobs">
+        <item>Banquet Staff</item>
+        <item>Bellboy</item>
+        <item>Kitchen Crew</item>
+        <item>Room Service</item>
+        <item>Reception/Cust Service</item>
+        
+        <item>Waiter/Waitress</item>
+        <item>Kitchen Crew</item>
+        <item>Cashier</item>
+        <item>Delivery/Rider</item>
+
+        <item>Sales Assistant</item>
+        <item>Cashier</item>
+
+        <item>Packer</item>
+        <item>Logistic Staff</item>
+        <item>Production</item>
+        <item>Admin Staff</item>
+    </string-array>
+    
+    <string-array name="rating_employer">
+        <item><b>Excelent</b> (eager to work again)</item>
+        <item><b>Good</b> (willing to work again)</item>
+        <item><b>Average</b> (okay to work again)</item>
+        <item><b>Bad</b> (do not want to work again)</item>
+    </string-array>
+    
+    <string-array name="rating_employer_label">
+        <item>Excellent</item>
+        <item>Good</item>
+        <item>Average</item>
+        <item>Bad</item>
+    </string-array>
+
+</resources>

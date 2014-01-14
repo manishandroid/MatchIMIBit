@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrollView"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@android:color/transparent"
+    android:paddingLeft="4dp"
+    android:paddingRight="4dp"
+    android:scrollbars="none" >
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/textPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:gravity="top"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="10dp"
+            android:text="@string/app_name" />
+
+        <LinearLayout
+            android:id="@+id/jobs_schedule_place"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignRight="@+id/textPrice"
+            android:orientation="vertical"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="10dp" >
+
+            <TextView
+                android:id="@+id/textDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:text="@string/none_string"
+                android:textColor="#2D668E" >
+            </TextView>
+
+            <TextView
+                android:id="@+id/textPlace"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="right"
+                android:text="@string/none_string"
+                android:textColor="#8E9090" >
+            </TextView>
+        </LinearLayout>
+
+        <com.matchimi.utils.TextProgressBar
+            android:layout_below="@+id/jobs_schedule_place"
+            android:id="@+id/progressBarWithText"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"            
+            android:progressDrawable="@drawable/job_percentage_green"
+            android:max="100"
+            android:maxHeight="30dp"
+            android:minHeight="30dp" />
+
+        <TextView
+            android:id="@+id/textDescription"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/progressBarWithText"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="10dp"
+            android:text="@string/none_string" />
+
+        <FrameLayout
+            android:id="@+id/frame_layout"
+            android:layout_width="match_parent"
+            android:layout_height="240dp"
+            android:layout_below="@+id/textDescription"
+            android:background="@android:color/transparent"
+            android:paddingTop="10dp" >
+
+            <fragment
+                android:id="@+id/map"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                class="com.google.android.gms.maps.SupportMapFragment" />
+
+            <View
+                android:id="@+id/trans_img"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/labelRequirement"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/frame_layout"
+            android:background="#CCCCCC"
+            android:padding="6dp"
+            android:text="@string/mandatory_reqs" />
+
+        <TextView
+            android:id="@+id/textRequirement"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/labelRequirement"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="10dp"
+            android:text="@string/none_string" />
+
+        <TextView
+            android:id="@+id/labelOptional"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textRequirement"
+            android:layout_marginTop="10dp"
+            android:background="#CCCCCC"
+            android:padding="6dp"
+            android:text="@string/optional_reqs" />
+
+        <TextView
+            android:id="@+id/textOptional"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/labelOptional"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="10dp"
+            android:text="@string/none_string" />
+
+        <include
+            android:id="@+id/layAdditional"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textOptional"
+            layout="@layout/additional_layout" />
+        
+        <include
+            android:id="@+id/inboxLayout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/layAdditional"
+            layout="@layout/job_detail_inbox_layout" />
+        
+        <include
+            android:id="@+id/friendsLayout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/inboxLayout"
+            layout="@layout/job_detail_friends_layout" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/friendsLayout"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/buttonCancel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/button_reject_offer"
+                android:gravity="center"
+                android:padding="12dp"
+                android:text="@string/cancel_offer"
+                android:textColor="@android:color/white" />
+
+            <TextView
+                android:id="@+id/buttonReject"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/button_reject_offer"
+                android:gravity="center"
+                android:padding="12dp"
+                android:text="@string/reject_offer"
+                android:textColor="@android:color/white" />
+
+            <TextView
+                android:id="@+id/buttonAccept"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/button_accept_offer"
+                android:gravity="center"
+                android:padding="12dp"
+                android:text="@string/accept_offer"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+    </RelativeLayout>
+
+</ScrollView>

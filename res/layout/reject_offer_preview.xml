@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:padding="4dp" >
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_above="@+id/buttonConfirmSubmit"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        android:scrollbars="none" >
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="8dp"
+            android:paddingTop="12dp" >
+
+            <TextView
+                android:id="@+id/labelReview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/review_reject_offer" />
+
+            <LinearLayout
+                android:id="@+id/layButton"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/bg_button_reject"
+                android:orientation="horizontal"
+                android:paddingBottom="1dp"
+                android:paddingTop="1dp" >
+
+                <CheckBox
+                    android:id="@+id/checkOffer"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/white"
+                    android:gravity="center_vertical"
+                    android:paddingBottom="16dp"
+                    android:paddingLeft="40dp"
+                    android:paddingTop="16dp"
+                    android:text="@string/dont_show_offer"
+                    android:textColor="@android:color/background_dark" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <TextView
+        android:id="@+id/buttonConfirmSubmit"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/button_accept_offer"
+        android:gravity="center"
+        android:padding="12dp"
+        android:text="@string/confirm_submit"
+        android:textColor="@android:color/white" />
+
+</RelativeLayout>

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" >
+
+    <TextView
+        android:id="@+id/labelMessage"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="#CCCCCC"
+        android:padding="6dp"
+        android:text="@string/message" />
+
+    <LinearLayout
+        android:id="@+id/layMessage"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/labelMessage"
+        android:layout_margin="5dp"
+        android:background="@drawable/bg_button_tab"
+        android:orientation="horizontal"
+        android:padding="1dp" >
+
+        <TextView
+            android:id="@+id/buttonNewest"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@android:color/white"
+            android:gravity="center"
+            android:padding="14dp"
+            android:text="@string/newest" />
+
+        <TextView
+            android:id="@+id/buttonUnread"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@android:color/white"
+            android:gravity="center"
+            android:padding="14dp"
+            android:text="@string/unread" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layLabelMessage"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/layMessage"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:paddingLeft="14dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:text="@string/from" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center_vertical"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:text="@string/date" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center_vertical"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:paddingRight="14dp"
+            android:text="@string/time" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/listMessageX"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/layLabelMessage"
+        android:orientation="vertical" >
+	        
+	    <LinearLayout
+	        android:id="@+id/listMessage"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:orientation="vertical" />
+	
+	    <LinearLayout
+	        android:id="@+id/layMessageContent"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_marginTop="10dp"
+	        android:orientation="vertical" >
+		
+		    <LinearLayout
+		        android:id="@+id/layMessageSelected"
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content"
+		        android:orientation="horizontal" >
+		
+		        <TextView
+		            android:id="@+id/selectedTittle"
+		            android:layout_width="0dp"
+		            android:layout_height="wrap_content"
+		            android:layout_weight="1"
+		            android:gravity="center_vertical"
+		            android:paddingLeft="14dp"
+		            android:paddingTop="4dp"
+		            android:paddingBottom="4dp"
+		            android:text="@string/from" />
+		
+		        <TextView
+		            android:id="@+id/selectedDate"
+		            android:layout_width="0dp"
+		            android:layout_height="wrap_content"
+		            android:layout_weight="0.5"
+		            android:gravity="center_vertical"
+		            android:paddingTop="4dp"
+		            android:paddingBottom="4dp"
+		            android:text="@string/date" />
+		
+		        <TextView
+		            android:id="@+id/selectedTime"
+		            android:layout_width="0dp"
+		            android:layout_height="wrap_content"
+		            android:layout_weight="0.5"
+		            android:gravity="center_vertical"
+		            android:paddingTop="4dp"
+		            android:paddingBottom="4dp"
+		            android:paddingRight="14dp"
+		            android:text="@string/time" />
+		    </LinearLayout>
+	
+	        <TextView
+	            android:id="@+id/textMessageContent"
+	            android:layout_width="fill_parent"
+	            android:layout_height="wrap_content"
+	            android:gravity="center_vertical"
+	            android:padding="14dp"
+	            android:text="@string/message" />
+	
+	        <Button
+	            android:id="@+id/buttonOk"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="center_horizontal"
+	            android:layout_marginBottom="18dp"
+	            android:paddingBottom="5dp"
+	            android:paddingLeft="16dp"
+	            android:paddingRight="16dp"
+	            android:paddingTop="5dp"
+	            android:text="@string/ok" />
+	    </LinearLayout>
+    </LinearLayout>
+    
+    <TextView
+        android:id="@+id/labelRate"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/listMessageX"
+        android:layout_marginTop="10dp"
+        android:background="#CCCCCC"
+        android:padding="6dp"
+        android:text="@string/rate_this_job" 
+        android:visibility="gone"/>
+
+    <RatingBar
+        android:id="@+id/rateJob"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/labelRate"
+        android:padding="5dp" 
+        android:visibility="gone"/>
+
+</RelativeLayout>

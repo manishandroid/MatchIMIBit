@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <LinearLayout
+        android:id="@+id/layoutTotalInfo"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingBottom="20dp"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        android:paddingTop="20dp" >
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/total_work"
+                android:textColor="@color/heavygray" />
+
+            <TextView
+                android:id="@+id/totalHours"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/none_string"
+                android:textStyle="bold"
+                android:textAppearance="@android:style/TextAppearance.Medium"
+                android:textColor="@color/heavygray" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/total_earning"
+                android:textColor="@color/heavygray" />
+
+            <TextView
+                android:id="@+id/totalEarning"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/none_string"
+                android:textAppearance="@android:style/TextAppearance.Medium"
+                android:textStyle="bold"                
+                android:textColor="@color/heavygray" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/labelPastJob"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/layoutTotalInfo"
+        android:background="#CCCCCC"
+        android:padding="8dp"
+        android:text="@string/pas_job_info"
+        android:textColor="@android:color/white" />
+
+    <ListView
+        android:id="@+id/joblistview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/labelPastJob"
+        android:layout_marginTop="12dp"
+        android:cacheColorHint="@android:color/transparent"
+        android:divider="#F5F5F5"
+        android:dividerHeight="1dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:scrollbars="none" />
+
+</RelativeLayout>

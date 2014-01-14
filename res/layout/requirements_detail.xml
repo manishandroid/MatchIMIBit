@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:paddingLeft="4dp"
+    android:paddingRight="4dp"
+    android:scrollbars="none" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/labelReview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="10dp"
+            android:text="@string/review_reqs"
+            android:textColor="#AAAFAF" />
+
+        <TextView
+            android:id="@+id/labelMandatory"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="#CCCCCC"
+            android:padding="6dp"
+            android:text="@string/mandatory" />
+
+        <LinearLayout
+            android:id="@+id/layoutMandatory"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="10dp" />
+
+        <TextView
+            android:id="@+id/labelOptional"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="#CCCCCC"
+            android:padding="6dp"
+            android:text="@string/optional" />
+
+        <TextView
+            android:id="@+id/textOptional"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="10dp"
+            android:text="@string/none_string" />
+
+        <TextView
+            android:id="@+id/buttonAcceptSubmit"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_accept_offer"
+            android:gravity="center"
+            android:padding="12dp"
+            android:text="@string/accept_submit"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
+
+</ScrollView>

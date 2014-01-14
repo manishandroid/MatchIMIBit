@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" >
+
+    <RelativeLayout
+        android:id="@+id/layTop"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textHeader"
+        android:layout_marginBottom="190dp"
+        android:paddingBottom="10dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="6dp" >
+
+        <TextView
+            android:id="@+id/textDatePrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:gravity="top"
+            android:text="@string/app_name" >
+        </TextView>
+
+        <TextView
+            android:id="@+id/textPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/textDatePrice"
+            android:gravity="top"
+            android:text="@string/app_name" >
+        </TextView>
+
+        <LinearLayout
+            android:id="@+id/jobs_schedule_place"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignRight="@+id/textPrice"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:text="@string/date_working"
+                android:textColor="#2D668E" >
+            </TextView>
+
+            <TextView
+                android:id="@+id/textPlace"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="right"
+                android:text="@string/place_working"
+                android:textColor="#8E9090" >
+            </TextView>
+
+            <TextView
+                android:id="@+id/rateEmployer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="@color/blue_sky"
+                android:gravity="center"
+                android:padding="5dp"
+                android:text="@string/rate_your_employer"
+                android:textColor="@color/white"
+                android:textSize="12dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/youAreRatedWrap"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_below="@+id/jobs_schedule_place"
+	        android:layout_alignParentBottom="true"
+	        android:layout_marginTop="-15dp"
+            android:layout_gravity="left">
+
+            <TextView
+                android:id="@+id/youAreRated"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/you_are_rated" >
+            </TextView>
+
+            <RatingBar
+                android:id="@+id/gradeRateJob"
+                style="?android:attr/ratingBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_below="@id/jobs_schedule_place"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/lightcolor" />
+    </RelativeLayout>
+
+</RelativeLayout>

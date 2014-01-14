@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:scrollbars="none" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+        
+        <TextView
+           android:id="@+id/createAvailabilityFrom"
+           android:layout_width="fill_parent"
+           android:layout_height="wrap_content"
+           android:layout_marginBottom="6dp"
+           android:background="@color/blue_sky"
+           android:textColor="@color/white"
+           android:textSize="14dp"
+           android:padding="5dp"
+           android:text="@string/create_availability_from"
+           android:visibility="gone"/>
+
+        <RelativeLayout
+            android:id="@+id/layDate"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:padding="2dp" >
+
+            <TextView
+                android:id="@+id/labelDateStart"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/button_white"
+                android:paddingBottom="12dp"
+                android:paddingLeft="16dp"
+                android:paddingTop="12dp"
+                android:text="@string/start_date"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/labelDateEnd"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/labelDateStart"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/button_white"
+                android:paddingBottom="12dp"
+                android:paddingLeft="16dp"
+                android:paddingTop="12dp"
+                android:text="@string/end_date"
+                android:textStyle="bold" />
+            
+		 <TextView
+                android:id="@+id/labelTimeStart"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/button_white"
+                android:layout_below="@+id/labelDateEnd"
+                android:paddingBottom="12dp"
+                android:paddingLeft="16dp"
+                android:paddingTop="12dp"
+                android:text="@string/start_time"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/labelTimeEnd"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/labelTimeStart"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/button_white"
+                android:paddingBottom="12dp"
+                android:paddingLeft="16dp"
+                android:paddingTop="12dp"
+                android:text="@string/end_time"
+                android:textStyle="bold" />
+            
+            <TextView
+                android:id="@+id/labelRepeat"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/labelTimeEnd"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/button_white"
+                android:paddingBottom="12dp"
+                android:paddingLeft="16dp"
+                android:paddingTop="12dp"
+                android:text="@string/repeat"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/labelSalary"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/labelRepeat"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/button_white"
+                android:paddingBottom="12dp"
+                android:paddingLeft="16dp"
+                android:paddingTop="12dp"
+                android:text="@string/ask_salary"
+                android:visibility="gone"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/layLocation"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/labelSalary"
+                android:background="@drawable/button_white"
+                android:orientation="vertical"
+                android:paddingLeft="2dp"
+                android:paddingRight="2dp" >
+
+                <TextView
+                    android:id="@+id/labelLocation"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/button_white"
+                    android:paddingLeft="14dp"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="16dp"
+                    android:text="@string/location_preference"
+                    android:textStyle="bold" />
+
+                <FrameLayout
+                    android:id="@+id/frame_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="240dp"
+                    android:visibility="gone"
+                    android:background="@android:color/transparent" >
+
+                    <fragment
+                        android:id="@+id/map"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        class="com.google.android.gms.maps.SupportMapFragment"/>
+
+                    <View
+                        android:id="@+id/trans_img"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@android:color/transparent" />
+                </FrameLayout>
+            </LinearLayout>
+        </RelativeLayout>
+    </LinearLayout>
+
+</ScrollView>
