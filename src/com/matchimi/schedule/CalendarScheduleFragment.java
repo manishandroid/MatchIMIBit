@@ -35,6 +35,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -48,6 +49,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -214,7 +216,29 @@ public class CalendarScheduleFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+//		if((getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_SMALL) 
+//				== Configuration.SCREENLAYOUT_SIZE_SMALL){
+//			view = inflater.inflate(R.layout.caldroid_schedule_ldpi, container, false);
+//			
+//		}else if((getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_NORMAL) 
+//				== Configuration.SCREENLAYOUT_SIZE_NORMAL){
+//			Display displayparm= getActivity().getWindowManager().getDefaultDisplay();
+////			int width= displayparm.getWidth();
+//			int Height= displayparm.getHeight();
+//			Log.d(CommonUtilities.TAG, "Screen height is " + Height);
+//			
+//			if(Height > 500) {
+//				view = inflater.inflate(R.layout.caldroid_schedule, container, false);				
+//			} else {
+//				view = inflater.inflate(R.layout.caldroid_schedule_ldpi, container, false);
+//			}
+//			
+//		}else{
+//			view = inflater.inflate(R.layout.caldroid_schedule, container, false);
+//		}
+		
 		view = inflater.inflate(R.layout.caldroid_schedule, container, false);
+		
 		historyJobView = inflater.inflate(R.layout.history_jobs, container,
 				false);
 
@@ -615,7 +639,7 @@ public class CalendarScheduleFragment extends Fragment {
 							SimpleDateFormat formatterDate = new SimpleDateFormat(
 									"EE d, MMM", Locale.getDefault());
 							SimpleDateFormat formatterTime = new SimpleDateFormat(
-									"hh a", Locale.getDefault());
+									"hh:mm a", Locale.getDefault());
 							for (int i = 0; i < items.length(); i++) {
 								/* get all json items, and put it on list */
 								try {
@@ -670,9 +694,17 @@ public class CalendarScheduleFragment extends Fragment {
 													+ "</font></big></big></big></big>");											
 										}
 										
-										listPastScheduleWorkTime.add(jsonParser
-												.getString(objs, 
-														CommonUtilities.JSON_KEY_NET_WORK_TIME));
+										String workTime = jsonParser.getString(objs, 
+												CommonUtilities.JSON_KEY_NET_WORK_TIME);
+										int workInteger = 0;
+										
+										try {
+											workInteger = Integer.parseInt(workTime);
+										} catch(Exception e) {
+											
+										}
+										
+										listPastScheduleWorkTime.add(String.valueOf(workInteger));
 
 										String grade = jsonParser.getString(objs, "pt_grade");
 										
@@ -683,14 +715,17 @@ public class CalendarScheduleFragment extends Fragment {
 										listPastSchedulePTGrade.add(
 												Integer.parseInt(grade));
 
-										String startDate = jsonParser
+										String startPastDate = jsonParser
 												.getString(objs,
 														"start_date_time");
-										String endDate = jsonParser.getString(
+										String endPastDate = jsonParser.getString(
 												objs, "end_date_time");
+										
+										Log.d(CommonUtilities.TAG, "start and end " + startPastDate 
+												+ " " + endPastDate);
 
-										Calendar calPastStart = generateCalendar(startDate);
-										Calendar calPastEnd = generateCalendar(endDate);
+										Calendar calPastStart = generateCalendar(startPastDate);
+										Calendar calPastEnd = generateCalendar(endPastDate);
 
 										String convertStartDate = CommonUtilities.AVAILABILTY_DATETIME
 												.format(calPastStart.getTime());
@@ -771,17 +806,22 @@ public class CalendarScheduleFragment extends Fragment {
 				TextView totalEarningView = (TextView) view
 						.findViewById(R.id.scheduleTotalEarning);
 
-				if (totalHoursView != null) {
-					totalHoursView.setText(getResources().getString(
-							R.string.schedule_total_hours)
-							+ " " + totalHours + " hours");
-				}
+				try {
+					if (totalHoursView != null) {
+						totalHoursView.setText(getResources().getString(
+								R.string.schedule_total_hours)
+								+ " " + totalHours + " hours");
+					}
 
-				if (totalEarningView != null) {
-					totalEarningView.setText(getResources().getString(
-							R.string.schedule_total_income)
-							+ " $" + totalEarning);
+					if (totalEarningView != null) {
+						totalEarningView.setText(getResources().getString(
+								R.string.schedule_total_income)
+								+ " $" + totalEarning);
+						
+					}
 					
+				} catch(Exception e) {
+					Log.e(CommonUtilities.TAG, "Fragment detached!");
 				}
 				
 				Calendar selectCal = Calendar.getInstance();
@@ -1013,26 +1053,30 @@ public class CalendarScheduleFragment extends Fragment {
 		// Add selected schedule
 		TextView labelIndicate = new TextView(context);
 
-		if (labelIndicate != null && getResources() != null) {
-			android.widget.LinearLayout.LayoutParams params = new android.widget.LinearLayout.LayoutParams(
-					android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
-					android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+		try {
+			if (labelIndicate != null && getActivity() != null && getActivity().getResources() != null) {
+				android.widget.LinearLayout.LayoutParams params = new android.widget.LinearLayout.LayoutParams(
+						android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+						android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
 
-			labelIndicate.setText(getResources().getString(
-					R.string.schedule_indicate));
-			labelIndicate.setTextAppearance(context,
-					android.R.style.TextAppearance_DeviceDefault_Small);
-			labelIndicate.setTextColor(Color.WHITE);
-			labelIndicate.setPadding(convertDpToPixel(5), convertDpToPixel(5),
-					convertDpToPixel(5), convertDpToPixel(5));
+				labelIndicate.setText(getResources().getString(
+						R.string.schedule_indicate));
+				labelIndicate.setTextAppearance(context,
+						android.R.style.TextAppearance_DeviceDefault_Small);
+				labelIndicate.setTextColor(Color.WHITE);
+				labelIndicate.setPadding(convertDpToPixel(5), convertDpToPixel(5),
+						convertDpToPixel(5), convertDpToPixel(5));
 
-			labelIndicate.setBackgroundColor(getResources().getColor(
-					R.color.blue_sky));
-			labelIndicate.setLayoutParams(params);
-			jobLayout.addView(labelIndicate);
+				labelIndicate.setBackgroundColor(getResources().getColor(
+						R.color.blue_sky));
+				labelIndicate.setLayoutParams(params);
+				jobLayout.addView(labelIndicate);
 
-			Button addAvailButton = addingGeneralButtonAddAvailability();
-			jobLayout.addView(addAvailButton);
+				Button addAvailButton = addingGeneralButtonAddAvailability();
+				jobLayout.addView(addAvailButton);
+			}			
+		} catch (Exception e) {
+			
 		}
 	}
 
@@ -1516,7 +1560,7 @@ public class CalendarScheduleFragment extends Fragment {
 			TextView buttonRate = (TextView) dynamicView.findViewById(R.id.rateEmployer);
 			if(listPastSchedulePTGrade.get(position) > 0) {
 				String rated = ratingArray[4-listPastSchedulePTGrade.get(position)];
-				buttonRate.setText("You are rated: " + rated);				
+				buttonRate.setText(getString(R.string.you_are_rated) + ": " + rated);				
 				
 			} else {
 				buttonRate.setOnClickListener(ratingOnClick(buttonRate, position));
@@ -1709,11 +1753,11 @@ public class CalendarScheduleFragment extends Fragment {
 
 					if (jsonStr.trim().equalsIgnoreCase("1")) {
 						// TODO Auto-generated method stub
-						buttonRate.setText("You are rated: " + rated);
+						buttonRate.setText(getString(R.string.you_are_rated) + ": " + rated);
 
 					} else if (jsonStr.trim().equalsIgnoreCase("0")) {
 						// TODO Auto-generated method stub
-						buttonRate.setText("You are rated: " + rated);
+						buttonRate.setText(getString(R.string.you_are_rated) + ": " + rated);
 
 					} else if (jsonStr.trim().length() > 0 && !jsonStr.trim().equalsIgnoreCase("0")) {
 						NetworkUtils.connectionHandler(context, jsonStr, "");
@@ -2141,9 +2185,17 @@ public class CalendarScheduleFragment extends Fragment {
 	@Override
 	public void onStop() {
 		Log.e(TAG, "onStop !!!");
-		scheduleHandler.removeCallbacks(scheduleRunnable);
-		availabilityHandler.removeCallbacks(availabilityRunnable);
-		pastScheduleHandler.removeCallbacks(pastScheduleRunnable);
+		if(scheduleHandler != null) {
+			scheduleHandler.removeCallbacks(scheduleRunnable);
+		}
+		
+		if(availabilityHandler != null) {
+			availabilityHandler.removeCallbacks(availabilityRunnable);
+		}
+		
+		if(pastScheduleHandler != null) {
+			pastScheduleHandler.removeCallbacks(pastScheduleRunnable);
+		}
 		
 		super.onStop();
 	}
@@ -2231,9 +2283,17 @@ public class CalendarScheduleFragment extends Fragment {
 	public void onPause() {
 		// TODO Auto-generated method stub
 		Log.e(TAG, "onPause !!!");
-		scheduleHandler.removeCallbacks(scheduleRunnable);
-		availabilityHandler.removeCallbacks(availabilityRunnable);
-		pastScheduleHandler.removeCallbacks(pastScheduleRunnable);
+		if(scheduleHandler != null) {
+			scheduleHandler.removeCallbacks(scheduleRunnable);			
+		}
+
+		if(availabilityHandler != null) {
+			availabilityHandler.removeCallbacks(availabilityRunnable);			
+		}
+
+		if(pastScheduleHandler != null) {
+			pastScheduleHandler.removeCallbacks(pastScheduleRunnable);			
+		}
 		
 		super.onPause();
 	}

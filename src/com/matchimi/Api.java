@@ -51,6 +51,6 @@ public final class Api {
 	public static final String FILE_VISUME = "visume_";
 	public static final String FILE_BANK_STATEMENT = "bankstatement_";
 	public static final String VISUME = "visume";
-	public static final int VIDEO_LIMIT = 60;
+	public static final int VIDEO_LIMIT = 10;
 }
 

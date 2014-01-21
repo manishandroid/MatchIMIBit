@@ -5,14 +5,15 @@
     android:gravity="center_horizontal"
     android:orientation="horizontal" >
 
-    <NumberPicker
+    <net.simonvt.numberpicker.NumberPicker
         android:id="@+id/numberPicker1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-    <NumberPicker
+    <net.simonvt.numberpicker.NumberPicker
         android:id="@+id/numberPicker2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
+
     
 </LinearLayout>

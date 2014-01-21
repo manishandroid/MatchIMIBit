@@ -48,67 +48,67 @@ public final class ServerUtilities {
 	 * 
 	 * @return whether the registration succeeded or not.
 	 */
-	static boolean register(final Context context, final String regId) {
-		Log.i(CommonUtilities.TAG, "Registering device (regId = " + regId + ")");
-
-		String serverUrl = CommonUtilities.GCM_SERVER_URL + "/register";
-		Map<String, String> params = new HashMap<String, String>();
-		params.put("regId", regId);
-		
-		long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
-		// Once GCM returns a registration id, we need to register it in the
-		// demo server. As the server might be down, we will retry it a couple
-		// times.
-		for (int i = 1; i <= MAX_ATTEMPTS; i++) {
-			Log.d(CommonUtilities.TAG, "Attempt #" + i + " to register");
-			try {
-				CommonUtilities.displayMessage(context, context.getString(
-						R.string.server_registering, i, MAX_ATTEMPTS));
-				post(serverUrl, params);
-				GCMRegistrar.setRegisteredOnServer(context, true);
-				String message = context.getString(R.string.server_registered);
-				CommonUtilities.displayMessage(context, message);
-				return true;
-			} catch (IOException e) {
-				// Here we are simplifying and retrying on any error; in a real
-				// application, it should retry only on unrecoverable errors
-				// (like HTTP error code 503).
-				Log.e(CommonUtilities.TAG,
-						"Failed to register on attempt " + i, e);
-				if (i == MAX_ATTEMPTS) {
-					break;
-				}
-				try {
-					Log.d(CommonUtilities.TAG, "Sleeping for " + backoff
-							+ " ms before retry");
-					Thread.sleep(backoff);
-				} catch (InterruptedException e1) {
-					// Activity finished before we complete - exit.
-					Log.d(CommonUtilities.TAG,
-							"Thread interrupted: abort remaining retries!");
-					Thread.currentThread().interrupt();
-					return false;
-				}
-				// increase backoff exponentially
-				backoff *= 2;
-			}
-		}
-		String message = context.getString(R.string.server_register_error,
-				MAX_ATTEMPTS);
-		CommonUtilities.displayMessage(context, message);
-		return false;
-	}
+//	public static boolean register(final Context context, final String regId) {
+//		Log.i(CommonUtilities.TAG, "Registering device (regId = " + regId + ")");
+//
+//		String serverUrl = CommonUtilities.GCM_SERVER_URL + "register";
+//		Map<String, String> params = new HashMap<String, String>();
+//		params.put("regId", regId);
+//		
+//		long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
+//		// Once GCM returns a registration id, we need to register it in the
+//		// demo server. As the server might be down, we will retry it a couple
+//		// times.
+//		for (int i = 1; i <= MAX_ATTEMPTS; i++) {
+//			Log.d(CommonUtilities.TAG, "Attempt #" + i + " to register");
+//			try {
+//				CommonUtilities.displayMessage(context, context.getString(
+//						R.string.server_registering, i, MAX_ATTEMPTS));
+//				post(serverUrl, params);
+//				GCMRegistrar.setRegisteredOnServer(context, true);
+//				String message = context.getString(R.string.server_registered);
+//				CommonUtilities.displayMessage(context, message);
+//				return true;
+//			} catch (IOException e) {
+//				// Here we are simplifying and retrying on any error; in a real
+//				// application, it should retry only on unrecoverable errors
+//				// (like HTTP error code 503).
+//				Log.e(CommonUtilities.TAG,
+//						"Failed to register on attempt " + i, e);
+//				if (i == MAX_ATTEMPTS) {
+//					break;
+//				}
+//				try {
+//					Log.d(CommonUtilities.TAG, "Sleeping for " + backoff
+//							+ " ms before retry");
+//					Thread.sleep(backoff);
+//				} catch (InterruptedException e1) {
+//					// Activity finished before we complete - exit.
+//					Log.d(CommonUtilities.TAG,
+//							"Thread interrupted: abort remaining retries!");
+//					Thread.currentThread().interrupt();
+//					return false;
+//				}
+//				// increase backoff exponentially
+//				backoff *= 2;
+//			}
+//		}
+//		String message = context.getString(R.string.server_register_error,
+//				MAX_ATTEMPTS);
+//		CommonUtilities.displayMessage(context, message);
+//		return false;
+//	}
 	
 	/**
 	 * Register this account/device pair within the server.
 	 * 
 	 * @return whether the registration succeeded or not.
 	 */
-	static boolean registerPartimer(final Context context, final String regId, final String pt_id) {
+	public static boolean registerPartimer(final Context context, final String regId, final String pt_id) {
 		Log.i(CommonUtilities.TAG, "Registering device (regId = " + regId + ")" +
 									" With PT_ID " + pt_id);
 
-		String serverUrl = CommonUtilities.GCM_SERVER_URL + "/register";
+		String serverUrl = CommonUtilities.GCM_SERVER_URL + "register";
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("regId", regId);
 		params.put("pt_id", pt_id);
@@ -118,7 +118,8 @@ public final class ServerUtilities {
 		// demo server. As the server might be down, we will retry it a couple
 		// times.
 		for (int i = 1; i <= MAX_ATTEMPTS; i++) {
-			Log.d(CommonUtilities.TAG, "Attempt #" + i + " to register");
+			Log.d(CommonUtilities.TAG, "Attempt #" + i + " to register partimer " + pt_id + " with regID " + regId);
+			
 			try {
 				CommonUtilities.displayMessage(context, context.getString(
 						R.string.server_registering, i, MAX_ATTEMPTS));
@@ -162,11 +163,11 @@ public final class ServerUtilities {
 	 * 
 	 * @return whether the registration succeeded or not.
 	 */
-	static boolean messaging(final Context context, String userName,
+	public static boolean messaging(final Context context, String userName,
 			String userMessage) {
 		Log.v(CommonUtilities.TAG, "START MESSAGE" + userMessage);
 
-		String serverUrl = CommonUtilities.GCM_SERVER_URL + "/messaging";
+		String serverUrl = CommonUtilities.GCM_SERVER_URL + "messaging";
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("message", userMessage);
 		params.put("username", userName);
@@ -221,10 +222,10 @@ public final class ServerUtilities {
 	/**
 	 * Unregister this account/device pair within the server.
 	 */
-	static void unregister(final Context context, final String regId) {
+	public static void unregister(final Context context, final String regId) {
 		Log.i(CommonUtilities.TAG, "unregistering device (regId = " + regId
 				+ ")");
-		String serverUrl = CommonUtilities.GCM_SERVER_URL + "/unregister";
+		String serverUrl = CommonUtilities.GCM_SERVER_URL + "unregister";
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("regId", regId);
 		try {

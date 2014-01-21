@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+	<RelativeLayout
+	    xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content" >
+	    <TextView
+		    android:id="@+id/ongoing_Price"
+		    android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:gravity="top"
+			android:paddingBottom="10dp"
+			android:paddingLeft="10dp"
+			android:paddingRight="10dp"
+			android:paddingTop="10dp"
+			android:layout_alignParentLeft="true"/>	
+		<LinearLayout
+		    android:id="@+id/ongoing_item_linear"
+		     android:layout_width="wrap_content"
+		     android:layout_height="wrap_content"
+		     android:layout_alignParentRight="true"
+		     android:layout_alignRight="@+id/textJobPrice"
+		     android:orientation="vertical"
+		     android:paddingBottom="10dp"
+		     android:paddingLeft="10dp"
+		     android:paddingRight="10dp"
+		     android:paddingTop="10dp" >
+			<TextView
+			    android:id="@+id/ongoing_TimeLeft"
+			    android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+			    android:gravity="right"
+			    android:textColor="#20b7ab"/>
+			<TextView 
+			    android:id="@+id/ongoing_Position"
+			    android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="8dp"
+			    android:gravity="right"
+			    android:textColor="#8E9090"/>
+			<TextView
+			    android:id="@+id/ongoing_Company"
+			    android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+			    android:layout_marginTop="4dp"
+			    android:gravity="right"
+			    android:textColor="#8E9090" />
+	    </LinearLayout>
+	</RelativeLayout>

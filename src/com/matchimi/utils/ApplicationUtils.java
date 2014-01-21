@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
+import com.matchimi.CommonUtilities;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -18,11 +20,9 @@ import android.view.Display;
 
 public class ApplicationUtils {
 
-	public static final String ROOT_DIR = ".matchimi";
-
 	public static String getAppRootDir() {
 		File rootDir = Environment.getExternalStorageDirectory();
-		File rootFile = new File(rootDir, ROOT_DIR);
+		File rootFile = new File(rootDir, CommonUtilities.ROOT_DIR);
 		if (!rootFile.exists() || !rootFile.isDirectory()) {
 			rootFile.mkdir();
 		}

@@ -154,6 +154,7 @@ public class LocationPreferenceActivity extends SherlockFragmentActivity {
 		locationAPIData = settings.getString(CommonUtilities.API_CACHE_LOCATIONS, null);
 		
 		if(locationAPIData == null) {
+			Log.d(CommonUtilities.TAG, "Location is null");
 			loadLocations();
 		} else {
 			generateView();

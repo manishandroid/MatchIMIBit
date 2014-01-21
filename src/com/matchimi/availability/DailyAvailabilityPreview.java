@@ -266,15 +266,18 @@ public class DailyAvailabilityPreview extends SherlockFragmentActivity {
 						new DialogInterface.OnClickListener() {
 							@Override
 							public void onClick(DialogInterface arg0, int arg1) {
-								if(ravail_id == null || ravail_id.equals("null")) {
-									Log.d(CommonUtilities.TAG, "Avail ID " + avail_id + " ");
+								// We decide to use single availability for edit and edit 
+								doDeleteAvailability(true);									
 
-									doDeleteAvailability(true);									
-								} else {
-									Log.d(CommonUtilities.TAG, "Ravail ID " + ravail_id + " ");
-									
-									doDeleteAvailability(false);									
-								}
+//								if(ravail_id == null || ravail_id.equals("null")) {
+//									Log.d(CommonUtilities.TAG, "Avail ID " + avail_id + " ");
+//
+//									doDeleteAvailability(true);									
+//								} else {
+//									Log.d(CommonUtilities.TAG, "Ravail ID " + ravail_id + " ");
+//									
+//									doDeleteAvailability(false);									
+//								}
 							}
 						});
 

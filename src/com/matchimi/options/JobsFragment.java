@@ -251,6 +251,7 @@ public class JobsFragment extends Fragment {
 		final String url = CommonUtilities.SERVERURL + 
 				CommonUtilities.API_GET_CURRENT_JOB_OFFERS + "?" +
 				CommonUtilities.PARAM_PT_ID + "=" + pt_id;
+		Log.d(CommonUtilities.TAG, "Job offer URL " + url);
 		
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
@@ -408,7 +409,7 @@ public class JobsFragment extends Fragment {
 											listTimeLeft.add(timeLeft);	
 										}
 										
-//										Log.d(TAG, "Percentage " + progressPercentage);
+//										Log.d(CommonUtilities.TAG, "Percentage " + progressPercentage);
 										
 										listProgressBar.add((int) progressPercentage);
 										
@@ -1064,7 +1065,7 @@ public class JobsFragment extends Fragment {
 		// TODO Auto-generated method stub
 		Log.e(TAG, "onResume !!!");
 		try {
-			getActivity().registerReceiver(jobsReceiver, new IntentFilter("jobs.receiver"));
+			getActivity().registerReceiver(jobsReceiver, new IntentFilter(CommonUtilities.BROADCAST_JOBS_RECEIVER));
 		} catch (IllegalArgumentException e) {
 			
 		}

@@ -16,7 +16,11 @@ import java.util.Map;
 
 import javax.xml.datatype.Duration;
 
+import net.simonvt.numberpicker.NumberPicker;
+
 import org.joda.time.DateTime;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
@@ -46,7 +50,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.NumberPicker;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -65,6 +69,7 @@ import com.matchimi.CommonUtilities;
 import com.matchimi.R;
 import com.matchimi.availability.HomeAvailabilityActivity;
 import com.matchimi.availability.LocationPreferenceActivity;
+import com.matchimi.availability.LocationPreferenceRegionAdapter;
 import com.matchimi.availability.RepeatAvailabilityActivity;
 import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
@@ -85,8 +90,12 @@ public class CreateAvailability extends SherlockFragmentActivity {
 
 	private String pt_id = null;
 	private String location = null;
-	private String location_array = null;
-	private Map<String, String> mapLocations = new HashMap<String, String>();
+
+	private String locationAPIData;
+	private String repeatedAPIData;
+	
+	private Map<Integer, String> mapLocations = new HashMap<Integer, String>();
+	private Map<Integer, String> mapDays = new HashMap<Integer, String>();
 	private String price = null;
 	private String avail_id = null;
 	private String repeat_days;
@@ -99,9 +108,6 @@ public class CreateAvailability extends SherlockFragmentActivity {
 
 	private boolean update = false;
 	private boolean locationLoaded = false;
-
-	private String[] repeatString = null;
-	private List<CharSequence> listRepeatWeeksShort;	
 	
 	private List<Integer> selectedRepeat = null;
 
@@ -184,20 +190,17 @@ public class CreateAvailability extends SherlockFragmentActivity {
 			price = b.getString("price");
 			avail_id = b.getString("avail_id");
 			ravail_id = b.getString("ravail_id");
+			
 			if(ravail_id != null && ravail_id.equals("null")) {
 				ravail_id = null;
 			}
+			
 			repeat = b.getString("repeat");
 			repeat_days = b.getString("repeat_text");
 			repeat_days_integer = repeat;
 			location = b.getString("location");
 			
-			location_array = b.getString("location_array");
-			if(location_array != null && location_array.length() > 0) {
-				mapLocations = MapUtils.stringToMap(location_array);
-			}
-			
-			Log.d(CommonUtilities.TAG, "Repeat " + repeat + ", " + repeat_days + ", " + repeat_days_integer + ", " + ravail_id);
+//			Log.d(CommonUtilities.TAG, "Repeat " + repeat + ", " + repeat_days + ", " + repeat_days_integer + ", " + ravail_id);
 			
 		} else {
 			ab.setTitle(getString(R.string.create_availability));
@@ -212,37 +215,47 @@ public class CreateAvailability extends SherlockFragmentActivity {
 				startActivityForResult(i, CommonUtilities.CREATEAVAILABILITY_RC_REPEAT);
 			}
 		});
-
-
-		repeatString = context.getResources().getStringArray(R.array.repeat_week);		
-		CharSequence[] repeatShortArray = getResources().getStringArray(R.array.repeat_week_short);
-		listRepeatWeeksShort = Arrays.asList(repeatShortArray);
+		
+		// Loading location default values from cache
+		locationAPIData = settings.getString(CommonUtilities.API_CACHE_LOCATIONS, null);
+		repeatedAPIData = settings.getString(CommonUtilities.API_CACHE_DAYS, null);
+		
+		generateLocationData();
+		generateRepeatData();
 
 		dateStart = (TextView) findViewById(R.id.labelDateStart);
-		dateStart.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-				// If user not select particular date on calendar, give them 
-				showDateDialog(true);					
-			}
-		});
+		if(!update) {
+			dateStart.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View arg0) {
+					// If user not select particular date on calendar, give them 
+					showDateDialog(true);					
+				}
+			});			
+		} else {
+			dateStart.setTextColor(getResources().getColor(R.color.gray));
+		}
 
 		dateEnd = (TextView) findViewById(R.id.labelDateEnd);
-		dateEnd.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-				
-					// If user already select start date, allow to edit end date
-					if (availabilityDateStart != null) {
-						showDateDialog(false);
-					} else {
-						Toast.makeText(
-								context,
-								getString(R.string.availability_select_date_validation),
-								Toast.LENGTH_SHORT).show();
-					}					
-			}
-		});			
+		if(!update) {
+			dateEnd.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View arg0) {
+					
+						// If user already select start date, allow to edit end date
+						if (availabilityDateStart != null) {
+							showDateDialog(false);
+						} else {
+							Toast.makeText(
+									context,
+									getString(R.string.availability_select_date_validation),
+									Toast.LENGTH_SHORT).show();
+						}					
+				}
+			});			
+		} else {
+			dateEnd.setTextColor(getResources().getColor(R.color.gray));
+		}
 		
 		timeStart = (TextView) findViewById(R.id.labelTimeStart);
 		timeStart.setOnClickListener(new OnClickListener() {
@@ -303,6 +316,93 @@ public class CreateAvailability extends SherlockFragmentActivity {
 ////			loadLocation();
 //		}
 	}
+	
+	/**
+	 * Generate locations data
+	 */
+	private void generateLocationData() {
+		jsonParser = new JSONParser();
+		
+		try {
+			JSONArray items = new JSONArray(locationAPIData);
+
+			if (items != null && items.length() > 0) {							
+				for (int i = 0; i < items.length(); i++) {
+					/* get all json items, and put it on list */
+					try {
+						JSONObject objs = items.getJSONObject(i);
+//									objs = objs.getJSONObject(CommonUtilities.JSON_KEY_LOCATIONS);
+						
+						if (objs != null) {
+							Log.d(CommonUtilities.TAG, "Location data " + objs.toString());
+							
+							String locationName = jsonParser.getString(objs,
+									CommonUtilities.JSON_KEY_LOCATION_NAME);
+							
+							int locationID = Integer.parseInt(jsonParser.getString(objs,
+									CommonUtilities.JSON_KEY_LOCATION_ID));
+							mapLocations.put(locationID, locationName);
+						}
+					} catch (JSONException e) {
+						Log.e("Parse Json Object",
+								">> " + e.getMessage());
+					}
+				}
+				
+			} else {
+				Log.e("Parse Json Object", ">> Array is null");
+			}
+			
+		} catch (JSONException e1) {
+			NetworkUtils.connectionHandler(context, jsonStr,
+					e1.getMessage());
+
+			Log.e(CommonUtilities.TAG, "Load location " + jsonStr
+					+ " >> " + e1.getMessage());
+		}
+	}
+	
+	/**
+	 * Generate locations data
+	 */
+	private void generateRepeatData() {
+		jsonParser = new JSONParser();
+		
+		try {
+			JSONArray items = new JSONArray(repeatedAPIData);
+			Log.d(TAG, "Item length is " + items.length());
+
+			if (items != null && items.length() > 0) {							
+				for (int i = 0; i < items.length(); i++) {
+					/* get all json items, and put it on list */
+					try {
+						JSONObject objs = items.getJSONObject(i);
+						
+						if (objs != null) {
+							String dayName = jsonParser.getString(objs,
+									CommonUtilities.JSON_KEY_REPEAT_DAY);
+							int dayID = Integer.parseInt(jsonParser.getString(objs,
+									CommonUtilities.JSON_KEY_REPEAT_DAY_ID));
+							Log.d(TAG, "Days is " + dayName);
+							mapDays.put(dayID, dayName);
+						}
+					} catch (JSONException e) {
+						Log.e("Parse Json Object",
+								">> " + e.getMessage());
+					}
+				}
+				
+			} else {
+				Log.e("Parse Json Object", ">> Array is null");
+			}
+		} catch (JSONException e1) {
+			NetworkUtils.connectionHandler(context, jsonStr,
+					e1.getMessage());
+
+			Log.e(CommonUtilities.TAG, "Load schedule " + jsonStr
+					+ " >> " + e1.getMessage());
+		}
+	}
 
 	@SuppressLint("ValidFragment")
 	public class EditNameDialog extends DialogFragment {
@@ -315,7 +415,6 @@ public class CreateAvailability extends SherlockFragmentActivity {
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
 			View view = inflater.inflate(R.layout.maps_layout, container);
-
 			getDialog().setTitle("Location");
 
 			return view;
@@ -365,7 +464,7 @@ public class CreateAvailability extends SherlockFragmentActivity {
 			}
 		}
 		
-		// Check if user change start date without update time, auto update datetime
+		// Check if user change end date without update end time, auto update datetime
 		if(availabilityTimeEnd != null && availabilityDateEnd != null) {
 			Log.d(CommonUtilities.TAG, "Comparing " + availabilityTimeEnd.toDate() + " " + availabilityDateEnd);
 			
@@ -394,17 +493,24 @@ public class CreateAvailability extends SherlockFragmentActivity {
 		}
 		
 		if(availabilityDateStart != null && availabilityDateEnd != null) {
-			if(!checkAvailabilitySameDay()) {
-				Log.d(CommonUtilities.TAG, "Compare two date : " + availabilityDateStart.toString() + " " + availabilityDateEnd.toString());
-				labelRepeat.setVisibility(View.VISIBLE);
-			} else if(checkAvailabilitySameDay() && ravail_id == null) {
-				labelRepeat.setVisibility(View.GONE);
-				repeat_days_integer = null;
-			} else if(checkAvailabilitySameDay() && ravail_id != null) {
-				Log.d(CommonUtilities.TAG, "KOKO " + availabilityDateStart.toString() + " " + availabilityDateEnd.toString());
-				
+			// Don't show repeat for edit and view availability
+			labelRepeat.setVisibility(View.GONE);
+			
+			if(!update && !checkAvailabilitySameDay()) {
 				labelRepeat.setVisibility(View.VISIBLE);
 			}
+			
+//			if(!checkAvailabilitySameDay()) {
+//				Log.d(CommonUtilities.TAG, "Compare two date : " + availabilityDateStart.toString() + " " + availabilityDateEnd.toString());
+//				labelRepeat.setVisibility(View.VISIBLE);
+//			} else if(checkAvailabilitySameDay() && ravail_id == null) {
+//				labelRepeat.setVisibility(View.GONE);
+//				repeat_days_integer = null;
+//			} else if(checkAvailabilitySameDay() && ravail_id != null) {
+//				Log.d(CommonUtilities.TAG, "KOKO " + availabilityDateStart.toString() + " " + availabilityDateEnd.toString());
+//				
+//				labelRepeat.setVisibility(View.VISIBLE);
+//			}
 		}
 		
 		if(location != null && location.length() > 0) {
@@ -414,9 +520,10 @@ public class CreateAvailability extends SherlockFragmentActivity {
 			List<String> items = Arrays.asList(location.split("\\s*,\\s*"));
 
 			for (String item : items) {
-				for (Map.Entry<String, String> entry : mapLocations.entrySet()) {
+				for (Map.Entry<Integer, String> entry : mapLocations.entrySet()) {
 					if (item.length() > 0) {
-						if(item.equals(entry.getKey())) {
+						Integer itemNumber = Integer.parseInt(item);
+						if(itemNumber == entry.getKey()) {
 							locationRegion += entry.getValue() + ", ";
 						}
 					}
@@ -598,17 +705,26 @@ public class CreateAvailability extends SherlockFragmentActivity {
 		
 		if(availabilityMode) {
 			if(availabilityTimeStart != null) {
+				String getMinutes = String.valueOf(availabilityTimeStart.getMinuteOfHour());
+				if(getMinutes.equals("0")) {
+					getMinutes = "00";
+				}
+				
 				np1.setValue(availabilityTimeStart.getHourOfDay());
-				np2.setValue(Arrays.asList(nums2).indexOf(""+availabilityTimeStart.getMinuteOfHour()));
+				np2.setValue(Arrays.asList(nums2).indexOf(getMinutes));
 			}
 		} else {
 			
 			if(availabilityTimeEnd != null) {
 				np1.setValue(availabilityTimeEnd.getHourOfDay());
-				int indexNum2 = Arrays.asList(nums2).indexOf(""+availabilityTimeEnd.getMinuteOfHour());
 				
-				np2.setValue(indexNum2);
-				Log.d(CommonUtilities.TAG, "set default data " + availabilityTimeEnd.getMinuteOfHour() + " " + indexNum2);
+				String getMinutes = String.valueOf(availabilityTimeEnd.getMinuteOfHour());
+				if(getMinutes.equals("0")) {
+					getMinutes = "00";
+				}
+				
+				np2.setValue(Arrays.asList(nums2).indexOf(getMinutes));
+				
 				
 			} else {
 				
@@ -634,7 +750,7 @@ public class CreateAvailability extends SherlockFragmentActivity {
 						int selectMinute = Integer.parseInt(nums2[np2.getValue()]);
 						
 						// If user select start time availability
-						if(availabilityMode) {					
+						if(availabilityMode) {		
 							Calendar dateCal = Calendar.getInstance();
 							dateCal.setTime(availabilityDateStart);
 							
@@ -647,6 +763,13 @@ public class CreateAvailability extends SherlockFragmentActivity {
 							// Reset end time if start time in advance
 							if(availabilityTimeEnd != null && availabilityTimeEnd.isBefore(availabilityTimeStart)) {
 								availabilityTimeEnd = null;
+							} else if(availabilityTimeEnd != null) {
+								Integer startTimeTemp = availabilityTimeStart.getHourOfDay() * 60 + availabilityTimeStart.getMinuteOfHour();
+								Integer endTimeTemp = availabilityTimeEnd.getHourOfDay() * 60 + availabilityTimeEnd.getMinuteOfHour();
+								
+								if(startTimeTemp > endTimeTemp) {
+									availabilityTimeEnd = null;
+								}
 							}
 							
 						} else {
@@ -665,7 +788,14 @@ public class CreateAvailability extends SherlockFragmentActivity {
 							} else if(availabilityTimeStart.isAfter(temporaryEndTime)) {
 								alertDateTimeOverlap(false, false);
 							} else {
-								availabilityTimeEnd = temporaryEndTime;
+								Integer startTimeTemp = availabilityTimeStart.getHourOfDay() * 60 + availabilityTimeStart.getMinuteOfHour();
+								Integer endTimeTemp = temporaryEndTime.getHourOfDay() * 60 + temporaryEndTime.getMinuteOfHour();
+								
+								if(startTimeTemp > endTimeTemp) {
+									alertDateTimeOverlap(false, false);	
+								} else {
+									availabilityTimeEnd = temporaryEndTime;
+								}
 							}
 								
 						}
@@ -732,6 +862,7 @@ public class CreateAvailability extends SherlockFragmentActivity {
 	 */
 	protected void doAddAvailability() {
 		final String url;					
+		
 		if(repeat_days_integer != null) {
 			url = SERVERURL + API_CREATE_REPEATED_AVAILABILITY;			
 		} else {
@@ -865,6 +996,10 @@ public class CreateAvailability extends SherlockFragmentActivity {
 	 */
 	protected void doEditAvailability() {
 		final String url;
+		
+		// We only use single availability API
+		repeat_days_integer = null;
+		ravail_id = null;
 		
 		if(repeat_days_integer != null || ravail_id != null) {
 			url = SERVERURL + CommonUtilities.API_EDIT_REPEATED_AVAILABILITY;
@@ -1130,7 +1265,6 @@ public class CreateAvailability extends SherlockFragmentActivity {
 
 //				loadMap(location);
 			} else if (requestCode == CommonUtilities.CREATEAVAILABILITY_RC_MAPS_ACTIVITY) {
-				
 				String listLocation = data.getExtras().getString(CommonUtilities.CREATEAVAILABILITY_MAP_REGION);
 				location = data.getExtras().getString(CommonUtilities.CREATEAVAILABILITY_MAP_REGION_ID);				
 				labelLocation.setText(getResources().getString(R.string.location_preference) + ": " + listLocation);

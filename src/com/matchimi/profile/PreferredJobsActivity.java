@@ -90,7 +90,10 @@ public class PreferredJobsActivity extends SherlockFragmentActivity {
 	private String jsonStr = null;
 	private ProgressDialog progress;
 	private Integer jobsID = 0;
-	private String[] preferedJobsList;
+	private String jobFunction = null;
+	
+	private List<String> jobFunctionList = new ArrayList<String>();
+	private List<Integer> jobFunctionListID = new ArrayList<Integer>();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -104,24 +107,9 @@ public class PreferredJobsActivity extends SherlockFragmentActivity {
 		}
 
 		pt_id = settings.getString(USER_PTID, null);
+		context = this;
 
 		setContentView(R.layout.preferred_jobs);
-		
-		Bundle b = getIntent().getExtras();
-		if (b != null) {
-			repeat_days = b.getString(CommonUtilities.CREATEAVAILABILITY_REPEAT_DAYS);
-			
-			if(repeat_days != null && repeat_days.length() > 0) {
-				List<String> items = Arrays.asList(location.split("\\s*,\\s*"));
-				selectedJobs = new ArrayList<String>();
-				
-				for (String item : items) {
-					selectedJobs.add(item);
-				}
-			}
-		}
-
-		context = this;
 
 		Button buttonSet = (Button) findViewById(R.id.preferredSetButton);
 		buttonSet.setOnClickListener(new View.OnClickListener() {
@@ -141,11 +129,147 @@ public class PreferredJobsActivity extends SherlockFragmentActivity {
 			}
 		});
 		
-		preferedJobsList = getResources().getStringArray(R.array.preferred_jobs);
-		
-		loadData();
+		jobFunction = settings.getString(CommonUtilities.API_CACHE_JOB_FUNCTIONS, null);		
+		loadJobFunction();
 		
 	}
+	
+	/**
+	 * Loading list of job functions
+	 */
+	private void loadJobFunction() {
+		jsonParser = new JSONParser();
+		
+		if (jobFunction != null) {
+			try {
+				JSONArray items = new JSONArray(jobFunction);
+
+				if (items != null && items.length() > 0) {
+					for (int i = 0; i < items.length(); i++) {
+						/* get all json items, and put it on list */
+						try {
+							JSONObject objs = items.getJSONObject(i);
+
+							if (objs != null) {
+								String jobFunctionName = jsonParser.getString(objs,
+															CommonUtilities.PARAM_PREFERRED_JOBS_NAME);
+								int jobFunctionID = Integer.parseInt(jsonParser.getString(objs,
+															CommonUtilities.PARAM_PREFERRED_JOBS_FUNCTION));
+								
+								Log.d(TAG, "Selected job name " + jobFunctionName + " with ID " + jobFunctionID);
+								
+								jobFunctionList.add(jobFunctionName);
+								jobFunctionListID.add(jobFunctionID);								
+							}
+							
+						} catch (JSONException e) {
+							Log.e("Parse Json Object", ">> " + e.getMessage());
+						}
+					}
+
+				} else if (items != null && items.length() == 0) {
+					Log.e("Parse Json Object", ">> Array is empty");
+				} else {
+					Log.e("Parse Json Object", ">> Array is null");
+				}
+
+				loadData();
+
+			} catch (JSONException e1) {
+				NetworkUtils.connectionHandler(context, jsonStr,
+						e1.getMessage());
+
+				Log.e(CommonUtilities.TAG, "Load schedule " + jsonStr + " >> "
+						+ e1.getMessage());
+			}
+		} else {
+			Toast.makeText(context.getApplicationContext(),
+					getString(R.string.server_error), Toast.LENGTH_SHORT)
+					.show();
+		}
+
+	}
+	
+	/**
+	 * Loading user preferred job functions
+	 */
+	private void loadData() {
+		final String url = CommonUtilities.SERVERURL + CommonUtilities.API_GET_PREFERRED_JOB_FUNCTIONS
+				+ "?" + CommonUtilities.PARAM_PT_ID + "=" + pt_id;
+
+		final Handler mHandlerFeed = new Handler();
+		final Runnable mUpdateResultsFeed = new Runnable() {
+			public void run() {
+				responseString = null;
+
+				if (jsonStr != null) {					
+					try {
+						JSONArray items = new JSONArray(jsonStr);
+						Log.d(TAG, "Item length is " + items.length());
+
+						if (items != null && items.length() > 0) {						
+							for (int i = 0; i < items.length(); i++) {
+								/* get all json items, and put it on list */
+								try {
+									JSONObject objs = items.getJSONObject(i);
+									objs = objs.getJSONObject(CommonUtilities.PARAM_PREFERRED_JOBS);
+									
+									if (objs != null) {
+										String jobFunctionName = jsonParser.getString(objs,
+												CommonUtilities.PARAM_PREFERRED_JOBS_NAME);
+										int jobFunctionID = Integer.parseInt(jsonParser.getString(objs,
+												CommonUtilities.PARAM_PREFERRED_JOBS_FUNCTION));
+										selectedJobsInteger.add(jobFunctionID);
+									}
+								} catch (JSONException e) {
+									Log.e("Parse Json Object",
+											">> " + e.getMessage());
+								}
+							}
+							
+							Log.d(CommonUtilities.TAG, "Load data and get : " + selectedJobsInteger.toString());
+							
+						} else if(items != null && items.length() == 0) {
+							
+							for(int i=0; i<jobFunctionListID.size();i++) {
+								selectedJobsInteger.add(jobFunctionListID.get(i));
+							}
+							
+						} else {
+							Log.e("Parse Json Object", ">> Array is null");
+						}
+						
+					} catch (JSONException e1) {
+						NetworkUtils.connectionHandler(context, jsonStr, e1.getMessage());
+						Log.e(CommonUtilities.TAG, "Load schedule " + jsonStr + " >> " + e1.getMessage());
+					}
+				} else {
+					Toast.makeText(context.getApplicationContext(),
+							getString(R.string.server_error),
+							Toast.LENGTH_SHORT).show();
+				}
+				
+				loadPreferredJobs();
+			}
+		};
+
+		progress = ProgressDialog.show(context, getString(R.string.loading_data), 
+				getString(R.string.loading_preferred_jobs),
+				true, false);
+		
+		new Thread() {
+			public void run() {
+				jsonParser = new JSONParser();
+				jsonStr = jsonParser.getHttpResultUrlGet(url);
+				
+				if (progress != null && progress.isShowing()) {
+					progress.dismiss();
+					mHandlerFeed.post(mUpdateResultsFeed);
+				}
+				
+			}
+		}.start();
+	}	
 	
 	private void loadPreferredJobs() {
 		
@@ -154,8 +278,8 @@ public class PreferredJobsActivity extends SherlockFragmentActivity {
 		String fanLabel = getResources().getString(R.string.preferred_fandb);
 		String factoryLabel = getResources().getString(R.string.preferred_factory);
 		
-		for(int i=0; i<preferedJobsList.length;i++) {
-			mapPreferredJob.put(i, preferedJobsList[i]);
+		for(int i=0; i<jobFunctionListID.size();i++) {
+			mapPreferredJob.put(jobFunctionListID.get(i), jobFunctionList.get(i));
 		}
 		
 		LinearLayout listRepeatView = (LinearLayout) findViewById(R.id.preferedJobsList);
@@ -164,6 +288,7 @@ public class PreferredJobsActivity extends SherlockFragmentActivity {
 		LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	
 		for (Map.Entry<Integer, String> entry : mapPreferredJob.entrySet()) {
+
 			if(entry.getKey() == 0) {
 				setLabel(listRepeatView, hotelLabel);
 			} else if(entry.getKey() == 5) {
@@ -178,26 +303,18 @@ public class PreferredJobsActivity extends SherlockFragmentActivity {
 			TextView jobText = (TextView) dynamicView.findViewById(R.id.preferredJobsName);
 			jobText.setText(entry.getValue());
 
-			CheckBox checkboxJob = (CheckBox) dynamicView.findViewById(R.id.preferredJobsCheckbox);			
-			dynamicView.setOnClickListener(repeatDayOnClick(dynamicView, entry.getKey()));
+			CheckBox checkboxJob = (CheckBox) dynamicView.findViewById(R.id.preferredJobsCheckbox);
+			checkboxJob.setOnClickListener(repeatJobOnClick(checkboxJob, entry.getKey()));
+//			dynamicView.setOnClickListener(repeatJobOnClick(dynamicView, entry.getKey()));
 			listRepeatView.addView(dynamicView);
 			
-			// check if selected repeat match
-			if(selectedJobs.size() > 0) {
-				for(String dayRepeat : selectedJobs) {
-					if(dayRepeat.equals(entry.getValue())) {
-						selectedJobsInteger.add(entry.getKey());
-						dynamicView.performClick();
-					}
-				}
-			}
-			
 			if(selectedJobsInteger.size() == 0) {
-				checkboxJob.setChecked(true);
+				checkboxJob.performClick();
+				
 			} else if(selectedJobsInteger.size() > 0) {
 				for(int k = 0; k < selectedJobsInteger.size(); k++) {
 					if(entry.getKey() == selectedJobsInteger.get(k)) {
-						checkboxJob.setChecked(true);
+						checkboxJob.performClick();
 					}
 				}
 			}
@@ -240,24 +357,27 @@ public class PreferredJobsActivity extends SherlockFragmentActivity {
 		return pixels;
 	}
 	
-	private View.OnClickListener repeatDayOnClick(final View view, final int position) {
+	private View.OnClickListener repeatJobOnClick(final View view, final int position) {
 		return new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				CheckBox dayCheckbox = (CheckBox) v.findViewById(R.id.preferredJobsCheckbox);
 				Log.d(CommonUtilities.TAG, "Clicked position " + position + " with status " + dayCheckbox.isChecked());
+//				dayCheckbox.toggle();
 				
-				dayCheckbox.toggle();
-				
-				if(dayCheckbox.isChecked()) {
-					selectedJobsInteger.add(new Integer(position));
-				} else {
-					selectedJobsInteger.remove(new Integer(position));
-					Log.d(CommonUtilities.TAG, "Remove position " + position);
+				if(!dayCheckbox.isChecked()) {
+					if(selectedJobsInteger.contains(position)) {
+						selectedJobsInteger.remove(new Integer(position));
+						Log.d(CommonUtilities.TAG, "Remove position " + position);
+					}
+				} else if(dayCheckbox.isChecked()) {
+					if(!selectedJobsInteger.contains(position)) {
+						selectedJobsInteger.add(new Integer(position));
+					}
 				}
 								
 				// TODO
-				Log.d(TAG, "SelectedJobs now " + selectedJobsInteger.toString());
+				Log.d(TAG, "Current selectedjobs : " + selectedJobsInteger.toString());
 			}
 		};
 	}
@@ -324,90 +444,6 @@ public class PreferredJobsActivity extends SherlockFragmentActivity {
 					progress.dismiss();
 					mHandlerFeed.post(mUpdateResultsFeed);
 				}
-			}
-		}.start();
-	}
-	
-	/**
-	 * Loading days
-	 */
-	private void loadData() {
-		final String url = CommonUtilities.SERVERURL + CommonUtilities.API_GET_PREFERRED_JOB_FUNCTIONS
-				+ "?" + CommonUtilities.PARAM_PT_ID + "=" + pt_id;
-		final Handler mHandlerFeed = new Handler();
-		final Runnable mUpdateResultsFeed = new Runnable() {
-			public void run() {
-				responseString = null;
-
-				if (jsonStr != null) {
-					Log.d(CommonUtilities.TAG, "RESULT >>> " + jsonStr);
-					
-					try {
-						JSONArray items = new JSONArray(jsonStr);
-						Log.d(TAG, "Item length is " + items.length());
-
-						if (items != null && items.length() > 0) {						
-							for (int i = 0; i < items.length(); i++) {
-								/* get all json items, and put it on list */
-								try {
-									JSONObject objs = items.getJSONObject(i);
-									objs = objs.getJSONObject(CommonUtilities.PARAM_PREFERRED_JOBS);
-									
-									if (objs != null) {
-										String jobFunctionName = jsonParser.getString(objs,
-												CommonUtilities.PARAM_PREFERRED_JOBS_NAME);
-										int jobFunctionID = Integer.parseInt(jsonParser.getString(objs,
-												CommonUtilities.PARAM_PREFERRED_JOBS_FUNCTION));
-										Log.d(TAG, "Job name " + jobFunctionName + " with ID " + jobFunctionID);
-										selectedJobsInteger.add(jobFunctionID);
-									}
-								} catch (JSONException e) {
-									Log.e("Parse Json Object",
-											">> " + e.getMessage());
-								}
-							}
-							
-							Log.d(CommonUtilities.TAG, "Result " + selectedJobsInteger.toString());
-							
-						} else if(items != null && items.length() == 0) {
-							for(int i=0; i<preferedJobsList.length;i++) {
-								selectedJobsInteger.add(i);
-							}
-						} else {
-							Log.e("Parse Json Object", ">> Array is null");
-						}
-						
-						loadPreferredJobs();
-						
-					} catch (JSONException e1) {
-						NetworkUtils.connectionHandler(context, jsonStr,
-								e1.getMessage());
-
-						Log.e(CommonUtilities.TAG, "Load schedule " + jsonStr
-								+ " >> " + e1.getMessage());
-					}
-				} else {
-					Toast.makeText(context.getApplicationContext(),
-							getString(R.string.server_error),
-							Toast.LENGTH_SHORT).show();
-				}
-			}
-		};
-
-		progress = ProgressDialog.show(context, getString(R.string.loading_data), 
-				getString(R.string.loading_preferred_jobs),
-				true, false);
-		
-		new Thread() {
-			public void run() {
-				jsonParser = new JSONParser();
-				jsonStr = jsonParser.getHttpResultUrlGet(url);
-				
-				if (progress != null && progress.isShowing()) {
-					progress.dismiss();
-					mHandlerFeed.post(mUpdateResultsFeed);
-				}
-				
 			}
 		}.start();
 	}

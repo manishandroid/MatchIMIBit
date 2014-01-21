@@ -17,11 +17,16 @@
                 <item
                     android:id="@+id/menu_notifications"
                     android:title="@string/notifications"
-                    android:visible="true"/>
+                    android:visible="false"/>
                 <item
                     android:id="@+id/menu_availability"
                     android:title="@string/menu_availability"
                     android:visible="false"/>
+                <item
+                    android:id="@+id/menu_ongoing_jobs"
+                    android:title="@string/menu_ongoing"
+                    android:visible="false"/>
+                
                 <item
                     android:id="@+id/menu_history"
                     android:title="@string/menu_history"
@@ -43,9 +48,14 @@
                     android:actionProviderClass="com.actionbarsherlock.widget.ShareActionProvider"
                     android:title="@string/menu_share"
                     android:visible="false"/>
+                <item 
+                    android:id="@+id/menu_ongoing_job"
+                    android:title="@string/txt_ongoing_job"
+                    android:visible="false"></item>
                 <item
                     android:id="@+id/menu_logout"
                     android:title="@string/menu_logout"/>
+                
             </group>
         </menu>
     </item>

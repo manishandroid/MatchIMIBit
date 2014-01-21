@@ -1,4 +1,4 @@
-	package com.matchimi;
+package com.matchimi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -180,7 +180,13 @@ public class NotificationActivity extends SherlockFragmentActivity {
             registerTask.cancel(true);
         }
         unregisterReceiver(mHandleStatusReceiver);
-        GCMRegistrar.onDestroy(this);
+        
+        try {
+            GCMRegistrar.onDestroy(this);
+        } catch(Exception e) {
+        	
+        }
+        
         super.onDestroy();
     }
 

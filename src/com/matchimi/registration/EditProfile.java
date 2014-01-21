@@ -480,6 +480,28 @@ public class EditProfile extends SherlockActivity {
 				isUserCompleteInput = false;
 			}
 			
+			// Set bank data
+			tmp = bankNameView.getText().toString().trim();
+			if(tmp.length() > 0) {
+				profileInfo.setBank_name(tmp);
+			}
+			
+			// Set bank data
+			tmp = bankAccountNumberView.getText().toString().trim();
+			if(tmp.length() > 0) {
+				profileInfo.setBank_account_no(tmp);
+			}
+			
+			tmp = bankBranchNameView.getText().toString().trim();
+			if(tmp.length() > 0) {
+				profileInfo.setBank_branch_name(tmp);
+			}
+			
+			tmp = bankAccountNameView.getText().toString().trim();
+			if(tmp.length() > 0) {
+				profileInfo.setBank_account_name(tmp);
+			}
+			
 			doCreateProfile();
 			
 		} else {
@@ -1391,7 +1413,7 @@ public class EditProfile extends SherlockActivity {
 		case TAKE_IMG_PROFILE:
 			selectedFileName = CommonUtilities.FILE_IMAGE_PROFILE + ".jpg";
 			uploadImage = CommonUtilities.IMAGE_ROOT + selectedFileName;
-			uploadURL += CommonUtilities.API_UPLOAD_PROFILE_PICTURE;
+			uploadURL += CommonUtilities.API_UPLOAD_PROFILE_PICTURE_BY_PT_ID;
 			break;
 		
 		case TAKE_IMG_STUDENT_FRONT:
@@ -1515,9 +1537,26 @@ public class EditProfile extends SherlockActivity {
 				if (resultCode == RESULT_OK) {
 					Uri selectedImageUri = data.getData();
 		            String selectedImagePath = getPath(selectedImageUri);
-		            ApplicationUtils.copyFile(selectedImagePath, uploadImage);	            
-		
-		            uploadVideoToServer(uploadImage, uploadURL, selectedPhotoId);
+		            
+		            File videoUpload = new File(selectedImagePath);
+		            
+		            // Get length of file in bytes
+		            long fileSizeInBytes = videoUpload.length();
+		            // Convert the bytes to Kilobytes (1 KB = 1024 Bytes)
+		            long fileSizeInKB = fileSizeInBytes / 1024;
+		            // Convert the KB to MegaBytes (1 MB = 1024 KBytes)
+		            long fileSizeInMB = fileSizeInKB / 1024;
+		            
+		            if(fileSizeInMB > 4) {
+		            	int duration = Toast.LENGTH_LONG;
+
+		            	Toast toast = Toast.makeText(context, getResources().getString(R.string.video_upload_oversize), duration);
+		            	toast.show();
+		            	
+		            } else {
+			            ApplicationUtils.copyFile(selectedImagePath, uploadImage);	            
+			            uploadVideoToServer(uploadImage, uploadURL, selectedPhotoId);		            	
+		            }
 				}
 				break;
 			} // ACTION_SELECT_VIDEO
@@ -1774,15 +1813,21 @@ public class EditProfile extends SherlockActivity {
 					Log.e(CommonUtilities.TAG, "Error uploading image " + " >> " + e.getMessage());
 				}
 				
+				Log.d(CommonUtilities.TAG, "Fine " + pt_id);
+				
 				try {
 					ByteArrayOutputStream bos = new ByteArrayOutputStream();
 					bm.compress(CompressFormat.JPEG, 75, bos);
 					
 					byte[] data = bos.toByteArray();
 					
+					Log.d(CommonUtilities.TAG, "Blum " + pt_id);
+					
 					// Replacing image in local storage
 					FileOutputStream fos = new FileOutputStream(file);
 					fos.write(data);
+					
+					Log.d(CommonUtilities.TAG, "OK " + pt_id);
 
 					HttpClient httpClient = new DefaultHttpClient();
 					HttpPost postRequest = new HttpPost(url);
@@ -1794,6 +1839,8 @@ public class EditProfile extends SherlockActivity {
 					reqEntity.addPart("filename", new StringBody(filename));
 					reqEntity.addPart("pt_id", new StringBody(pt_id));
 					
+					Log.d(CommonUtilities.TAG, "Upload " + filename + " | " + pt_id);
+					
 					postRequest.setEntity(reqEntity);
 					HttpResponse response = httpClient.execute(postRequest);
 					BufferedReader reader = new BufferedReader(
@@ -1801,9 +1848,10 @@ public class EditProfile extends SherlockActivity {
 									response.getEntity().getContent(), "UTF-8"));
 					String sResponse;
 					StringBuilder s = new StringBuilder();
-
+					
 					while ((sResponse = reader.readLine()) != null) {
 						s = s.append(sResponse);
+						Log.d(CommonUtilities.TAG, "Upload " + sResponse);
 					}
 					
 					Log.d(TAG, "Upload result: " + s.toString());
@@ -1848,7 +1896,9 @@ public class EditProfile extends SherlockActivity {
 					Log.e(CommonUtilities.TAG, "Error uploading image " + " >> " + e.getMessage());
 				
 				} catch (Exception e) {
-					Log.e(CommonUtilities.TAG, "Error uploading image" + e.getMessage());
+					Log.d(CommonUtilities.TAG, "Get profile " + profileInfo.getProfile_pic());
+					
+					Log.e(CommonUtilities.TAG, "Error uploading image : " + e.getMessage());
 				}
 
 				if (progress != null && progress.isShowing()) {

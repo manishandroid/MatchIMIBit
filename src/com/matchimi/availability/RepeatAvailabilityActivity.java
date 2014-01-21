@@ -207,7 +207,7 @@ public class RepeatAvailabilityActivity extends SherlockFragmentActivity {
 				Log.d(TAG, "Position " + position);
 				
 				CheckBox dayCheckbox = (CheckBox) view.findViewById(R.id.dayCheckbox);
-				dayCheckbox.toggle();
+//				dayCheckbox.toggle();
 				
 				if(!dayCheckbox.isChecked()) {
 					if(selectedRepeatInteger.contains(position)) {
@@ -263,7 +263,10 @@ public class RepeatAvailabilityActivity extends SherlockFragmentActivity {
 					TextView textDate = (TextView) dynamicView.findViewById(R.id.textDayName);
 					textDate.setText(entry.getValue());
 					
-					dynamicView.setOnClickListener(repeatDayOnClick(dynamicView, entry.getKey()));
+					CheckBox checkboxDay = (CheckBox) dynamicView.findViewById(R.id.dayCheckbox);
+					checkboxDay.setOnClickListener(repeatDayOnClick(checkboxDay, entry.getKey()));
+					
+//					dynamicView.setOnClickListener(repeatDayOnClick(dynamicView, entry.getKey()));
 					listRepeatView.addView(dynamicView);
 					
 					// check if selected repeat match
@@ -271,7 +274,7 @@ public class RepeatAvailabilityActivity extends SherlockFragmentActivity {
 						for(String dayRepeat : selectedRepeat) {
 							if(dayRepeat.equals(entry.getValue())) {
 								selectedRepeatInteger.add(entry.getKey());
-								dynamicView.performClick();
+								checkboxDay.performClick();
 							}
 						}
 					}

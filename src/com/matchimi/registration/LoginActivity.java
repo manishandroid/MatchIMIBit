@@ -3,6 +3,7 @@ import static com.matchimi.CommonUtilities.COMMON_FACEBOOK_ID;
 import static com.matchimi.CommonUtilities.COMMON_PASSWORD;
 import static com.matchimi.CommonUtilities.LOGIN;
 import static com.matchimi.CommonUtilities.PREFS_NAME;
+import static com.matchimi.CommonUtilities.SENDER_ID;
 import static com.matchimi.CommonUtilities.SERVERURL;
 import static com.matchimi.CommonUtilities.TAG;
 import static com.matchimi.CommonUtilities.USER_NRIC_NUMBER;
@@ -10,6 +11,8 @@ import static com.matchimi.CommonUtilities.USER_NRIC_TYPE;
 import static com.matchimi.CommonUtilities.USER_NRIC_TYPE_ID;
 import static com.matchimi.CommonUtilities.USER_PROFILE_PICTURE;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,7 +31,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.text.InputType;
 import android.util.Log;
@@ -46,9 +51,13 @@ import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.model.GraphUser;
 import com.facebook.widget.LoginButton;
+import com.google.android.gcm.GCMRegistrar;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.matchimi.CommonUtilities;
+import com.matchimi.DatabaseStorage;
 import com.matchimi.HomeActivity;
 import com.matchimi.R;
+import com.matchimi.ServerUtilities;
 import com.matchimi.ValidationUtilities;
 import com.matchimi.utils.JSONParser;
 import com.matchimi.utils.NetworkUtils;
@@ -78,6 +87,11 @@ public class LoginActivity extends Activity {
 	private String facebookFriends = "";
 	private SharedPreferences settings;
 	
+	private String registrationID;
+	private DatabaseStorage db;
+	AsyncTask<Void, Void, Void> registerTask;
+	GoogleCloudMessaging gcm;
+	
 	private Session.StatusCallback callback = new Session.StatusCallback() {
 		@Override
 		public void call(Session session, SessionState state,
@@ -102,6 +116,22 @@ public class LoginActivity extends Activity {
 
 		final EditText emailText = (EditText) findViewById(R.id.registration_email);
 		final EditText passwordText = (EditText) findViewById(R.id.registration_password);
+		
+		// Register user devices with GCM server
+		// Checking server configuration
+		checkNotNull(CommonUtilities.GCM_SERVER_URL, "SERVER_URL");
+		checkNotNull(CommonUtilities.SENDER_ID, "SENDER_ID");
+
+		// Make sure the device has the proper dependencies.
+		GCMRegistrar.checkDevice(this);
+
+		// Make sure the manifest was properly set - comment out this line
+		// while developing the app, then uncomment it when it's ready.
+		GCMRegistrar.checkManifest(this);
+
+		db = new DatabaseStorage();
+		registrationID = GCMRegistrar.getRegistrationId(context);
+		gcm = GoogleCloudMessaging.getInstance(this);
 
 		submitButton = (Button) findViewById(R.id.submit_button);
 		submitButton.setOnClickListener(new OnClickListener() {
@@ -547,7 +577,9 @@ public class LoginActivity extends Activity {
 							
 							// Check all fields in user 
 							Boolean checkUserComplete = ValidationUtilities.checkProfileComplete(partTimer);
-							editor.putBoolean(CommonUtilities.USER_PROFILE_COMPLETE, checkUserComplete);							
+							editor.putBoolean(CommonUtilities.USER_PROFILE_COMPLETE, checkUserComplete);			
+							editor.commit();
+							
 							Log.d(CommonUtilities.TAG, "Check user complete status : " + checkUserComplete);
 							
 							extraBundle.putString(CommonUtilities.USER_PTID, pt_id);
@@ -591,6 +623,21 @@ public class LoginActivity extends Activity {
 								isSubmitFriends = true;
 							}
 							
+							if (registrationID.length() == 0) {
+								Log.d(CommonUtilities.TAG, "Register background executed");
+					        } else {
+					        	Log.d(CommonUtilities.TAG, "User devices already registered " + registrationID);
+					        }
+							
+							registerBackground();
+
+							File rootDir = Environment.getExternalStorageDirectory();
+							File rootFile = new File(rootDir, CommonUtilities.ROOT_DIR);
+							
+							if (!rootFile.exists() || !rootFile.isDirectory()) {
+								rootFile.mkdir();
+							}
+							
 							if(isFacebook && isSubmitFriends) {
 								if(friendsDate != null) {
 									submitFriendFacebook(false);																
@@ -600,6 +647,7 @@ public class LoginActivity extends Activity {
 							} else {
 
 								if (settings.getBoolean(CommonUtilities.REGISTERED, false)) {
+									editor = settings.edit();
 									editor.putBoolean(CommonUtilities.LOGIN, true);
 									editor.commit();
 									
@@ -608,12 +656,12 @@ public class LoginActivity extends Activity {
 								} else {
 									// Check if user already completed basic profile
 									if(userBasicComplete) {
+										editor = settings.edit();
 										editor.putBoolean(CommonUtilities.LOGIN, true);
 										editor.commit();
 										goHome(extraBundle);
 										
 									} else {
-										editor.commit();
 										goRegistrationProfile(extraBundle);	
 									}
 								}
@@ -713,5 +761,99 @@ public class LoginActivity extends Activity {
 		startActivity(i);
 		finish();
 	}
+	
+	/**
+    * Registers the application with GCM servers asynchronously.
+    * <p>
+    * Stores the registration id, app versionCode, and expiration time in the application's
+    * shared preferences.
+    */
+   private void registerBackground() {
+       new AsyncTask<Void, Void, String>() {
+           @Override
+           protected String doInBackground(Void... params) {
+               String msg = "";
+               try {
+                   if (gcm == null) {
+                       gcm = GoogleCloudMessaging.getInstance(context);
+                   }
+                   
+                   Log.d(CommonUtilities.TAG, "Register sender ID in Registration Activity");
+                   
+                   registrationID = gcm.register(SENDER_ID);
+                   msg = "";
 
+                   // You should send the registration ID to your server over HTTP, so it
+                   // can use GCM/HTTP or CCS to send messages to your app.
+
+                   // For this demo: we don't need to send it because the device will send
+                   // upstream messages to a server that echo back the message using the
+                   // 'from' address in the message.
+                   registerDevices();
+
+                   // Save the regid - no need to register again.
+               } catch (IOException ex) {
+                   msg = "Error register Backround : " + ex.getMessage();
+               }
+               return msg;
+           }
+
+           @Override
+           protected void onPostExecute(String msg) {
+              Log.d(CommonUtilities.TAG, msg + "\n");
+           }
+       }.execute(null, null, null);
+   }
+    
+	/**
+	 * Register user android devices key to server
+	 */
+	private void registerDevices() {
+		Log.d(CommonUtilities.TAG, "Registration ID " + registrationID + " and PT_ID : " + pt_id + " to API SERVER");
+
+		// Try to register again, but not in the UI thread.
+		// It's also necessary to cancel the thread onDestroy(),
+		// hence the use of AsyncTask instead of a raw thread.
+		registerTask = new AsyncTask<Void, Void, Void>() {
+
+			@Override
+			protected Void doInBackground(Void... params) {
+				boolean registered = ServerUtilities.registerPartimer(
+						context, registrationID, pt_id);
+				// At this point all attempts to register with the app
+				// server failed, so we need to unregister the device
+				// from GCM - the app will try to register again when
+				// it is restarted. Note that GCM will send an
+				// unregistered callback upon completion, but
+				// GCMIntentService.onUnregistered() will ignore it.
+				if (!registered) {
+					GCMRegistrar.unregister(context);
+				}
+
+				return null;
+			}
+
+			@Override
+			protected void onPostExecute(Void result) {
+				registerTask = null;
+			}
+		};
+
+		registerTask.execute(null, null, null);
+	}
+	
+	private void checkNotNull(Object reference, String name) {
+		if (reference == null) {
+			throw new NullPointerException(getString(R.string.error_config,
+					name));
+		}
+	}
+
+	public void popUp(String message) {
+		// Skips registration.
+		int duration = Toast.LENGTH_SHORT;
+
+		Toast toast = Toast.makeText(this, message, duration);
+		toast.show();
+	}
 }

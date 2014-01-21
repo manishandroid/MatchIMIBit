@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.matchimi"
-    android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionCode="3"
+    android:versionName="2.2" >
 
     <uses-sdk
         android:minSdkVersion="10"
         android:targetSdkVersion="17" />
 
+    <supports-screens
+		android:smallScreens="true"
+		android:normalScreens="true"
+		android:largeScreens= "true"
+		android:anyDensity="true"/>
+    
     <permission
         android:name="com.matchimi.permission.MAPS_RECEIVE"
         android:protectionLevel="signature" />
@@ -62,7 +68,7 @@
         android:icon="@drawable/icons"
         android:label="@string/app_name"
         android:largeHeap="true"
-        android:theme="@style/Theme.Sherlock.Light" >
+        android:theme="@style/SampleTheme.Light" >
         
         <uses-library android:name="com.google.android.maps" />
 
@@ -253,6 +259,18 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:windowSoftInputMode="adjustResize|stateHidden">
         </activity>
+        <activity android:name="com.matchimi.ongoingjobs.OngoingJobsActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden">
+        </activity>
+        <activity android:name="com.matchimi.ongoingjobs.OngoingJobsLocationActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden">
+        </activity>
+        <activity android:name="com.matchimi.ongoingjobs.OngoingJobsAdapter"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize|stateHidden">
+        </activity>
         
         <!--
           BroadcastReceiver that will receive intents from GCM
@@ -274,8 +292,9 @@
                 <category android:name="com.matchimi" />
             </intent-filter>
         </receiver>
+       
         
-       <!-- Register the Alarm Receiver -->
+	<!-- Register the Alarm Receiver -->
        <!--  <receiver android:name="com.matchimi.MatchimiAlarmReceiver"/>  -->
 
         <!--

@@ -20,6 +20,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
@@ -31,6 +32,7 @@ import com.actionbarsherlock.view.SubMenu;
 import com.actionbarsherlock.widget.ShareActionProvider;
 import com.matchimi.availability.HomeAvailabilityActivity;
 import com.matchimi.NotificationActivity;
+import com.matchimi.ongoingjobs.OngoingJobsActivity;
 import com.matchimi.options.FriendsActivity;
 import com.matchimi.options.HistoryDetail;
 import com.matchimi.options.JobsFragment;
@@ -237,31 +239,31 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 		super.onConfigurationChanged(newConfig);
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getSupportMenuInflater().inflate(R.menu.main, menu);
-
-		// Set file with share history to the provider and set the share intent.
-		MenuItem actionItem = menu.findItem(R.id.menu_share);
-		ShareActionProvider actionProvider = (ShareActionProvider) actionItem
-				.getActionProvider();
-		actionProvider
-				.setShareHistoryFileName(ShareActionProvider.DEFAULT_SHARE_HISTORY_FILE_NAME);
-		actionProvider.setShareIntent(createAllShareIntent());
-
-		MenuItem actionNav = menu.findItem(R.id.menu_more);
-		MenuItem reload = menu.findItem(R.id.menu_reload);
-		if (settings.getInt(CommonUtilities.SETTING_THEME,
-				CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
-			actionNav.setIcon(R.drawable.abs__ic_menu_moreoverflow_normal_holo_light);
-			reload.setIcon(R.drawable.navigation_refresh);
-		} else {
-			actionNav.setIcon(R.drawable.abs__ic_menu_moreoverflow_normal_holo_dark);
-			reload.setIcon(R.drawable.navigation_refresh_dark);
-		}
-		
-		return super.onCreateOptionsMenu(menu);
-	}
+//	@Override
+//	public boolean onCreateOptionsMenu(Menu menu) {
+//		getSupportMenuInflater().inflate(R.menu.main, menu);
+//
+//		// Set file with share history to the provider and set the share intent.
+//		MenuItem actionItem = menu.findItem(R.id.menu_share);
+//		ShareActionProvider actionProvider = (ShareActionProvider) actionItem
+//				.getActionProvider();
+//		actionProvider
+//				.setShareHistoryFileName(ShareActionProvider.DEFAULT_SHARE_HISTORY_FILE_NAME);
+//		actionProvider.setShareIntent(createAllShareIntent());
+//
+//		MenuItem actionNav = menu.findItem(R.id.menu_more);
+//		MenuItem reload = menu.findItem(R.id.menu_reload);
+//		if (settings.getInt(CommonUtilities.SETTING_THEME,
+//				CommonUtilities.THEME_LIGHT) == CommonUtilities.THEME_LIGHT) {
+//			actionNav.setIcon(R.drawable.abs__ic_menu_moreoverflow_normal_holo_light);
+//			reload.setIcon(R.drawable.navigation_refresh);
+//		} else {
+//			actionNav.setIcon(R.drawable.abs__ic_menu_moreoverflow_normal_holo_dark);
+//			reload.setIcon(R.drawable.navigation_refresh_dark);
+//		}
+//		
+//		return super.onCreateOptionsMenu(menu);
+//	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -281,6 +283,10 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 					i = new Intent(getApplicationContext(), HistoryDetail.class);
 					startActivity(i);
 					break;
+				case R.id.menu_ongoing_jobs:
+					i = new Intent(getApplicationContext(), HistoryDetail.class);
+					startActivity(i);
+					break;
 				case R.id.menu_friends:
 					i = new Intent(getApplicationContext(), FriendsActivity.class);
 					startActivity(i);
@@ -294,19 +300,24 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 							HomeAvailabilityActivity.class);
 					startActivityForResult(i, JobsFragment.RC_JOB_DETAIL);
 					break;
-				case R.id.menu_logout:	
+				case R.id.menu_ongoing_job:
 					i = new Intent(getApplicationContext(),
-							LoginActivity.class);
-					
-					SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);					
-					SharedPreferences.Editor editor = settings.edit();
-					editor.putBoolean(LOGIN, false);
-					editor.putBoolean(CommonUtilities.IS_FIRSTTIME, true);
-					editor.commit();
-					
-					startActivityForResult(i, JobsFragment.RC_JOB_DETAIL);
-					finish();
+							OngoingJobsActivity.class);
+					startActivity(i);
 					break;
+				case R.id.menu_logout:	
+//					i = new Intent(getApplicationContext(),
+//							LoginActivity.class);
+//					
+//					SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);					
+//					SharedPreferences.Editor editor = settings.edit();
+//					editor.putBoolean(LOGIN, false);
+//					editor.putBoolean(CommonUtilities.IS_FIRSTTIME, true);
+//					editor.commit();
+//					
+//					startActivityForResult(i, JobsFragment.RC_JOB_DETAIL);
+//					finish();
+//					break;
 				case R.id.menu_setting:
 					i = new Intent(getApplicationContext(),
 							SettingsActivity.class);
@@ -316,7 +327,7 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 					Intent iBroadcast = null;
 					switch (mViewPager.getCurrentItem()) {
 					case 0:
-						iBroadcast = new Intent("jobs.receiver");
+						iBroadcast = new Intent(CommonUtilities.BROADCAST_JOBS_RECEIVER);
 						break;
 					case 1:
 						iBroadcast = new Intent("schedule.receiver");

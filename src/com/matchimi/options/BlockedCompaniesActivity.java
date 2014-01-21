@@ -114,8 +114,13 @@ public class BlockedCompaniesActivity extends SherlockActivity {
 										CommonUtilities.PARAM_BLOCKED_COMPANIES_ADDRESS));
 //								listGrade.add(jsonParser.getString(objs,
 //										CommonUtilities.PARAM_BLOCKED_COMPANIES_GRADE_ID));
-								listName.add(jsonParser.getString(objs,
-										CommonUtilities.PARAM_BLOCKED_COMPANIES_NAME));
+								
+								String branchName = jsonParser.getString(objs,
+										CommonUtilities.PARAM_BLOCKED_BRANCH_NAME);
+								String companyName = jsonParser.getString(objs,
+										CommonUtilities.PARAM_BLOCKED_COMPANIES_NAME);
+								
+								listName.add(branchName + ", " + companyName);
 								
 								String information = "";
 								String postal_code = jsonParser.getString(objs,

@@ -17,14 +17,18 @@ public final class CommonUtilities {
 //	public static final String SERVERURL = "http://54.254.221.30/";
 //	public static final String SERVERURL_SECURE = "http://54.254.221.30/";
 	
-//	public static final String SERVERURL = "http://api.dev.matchimi.com/";
-//	public static final String SERVERURL_SECURE = "https://api.dev.matchimi.com/";
 	public static final String BUGSENSE_KEY = "657a6840";
 	
 	public static final String SERVERURL = "http://api.staging.matchimi.com/";
 	public static final String SERVERURL_SECURE = "https://api.staging.matchimi.com/";
+	public static final String GCM_SERVER_URL = "http://api.staging.matchimi.com/";
 
-	//	public static final String SERVERURL = "http://api.matchimi.com/";
+//	public static final String SERVERURL = "http://api.matchimi.com/";
+//	public static final String SERVERURL_SECURE = "http://api.matchimi.com/";	
+//	public static final String GCM_SERVER_URL = "http://api.matchimi.com/";
+	
+//  public static final String GCM_SERVER_URL = "http://pongmob.com:8080/gcm-demo/";
+	
 //	public static final String SERVERURL = "http://192.168.43.214:8000/";
 	
 	public static final String SERVER_PROBLEM = "serverproblem";
@@ -78,7 +82,6 @@ public final class CommonUtilities {
 	public static final int CAMERA_REQUEST = 686868;
 
 	public static final String API_ACCEPT_JOB_OFFER = "accept_job_offer";
-	public static final String API_UPLOAD_PROFILE_PICTURE = "upload_profile_pic";
 	public static final String API_UPLOAD_PROFILE_PICTURE_BY_PT_ID = "upload_profile_pic_by_pt_id";
 	
 //	public static final String API_UPLOAD_PROFILE_PICTURE = "posts/upload/";	
@@ -88,6 +91,7 @@ public final class CommonUtilities {
 	public static final String API_UPLOAD_STUDENT_FRONT_PHOTOS = "upload_sid_front_pic_by_pt_id";
 	public static final String API_UPLOAD_STUDENT_BACK_PHOTOS = "upload_sid_back_pic_by_pt_id";
 	public static final String API_UPLOAD_BANK_STATEMENT_BY_PT_ID = "upload_bank_statement_by_pt_id";
+	public static final String API_PART_TIMER_LOGGED_OUT = "part_timer_logged_out";
 	
 	public static final String API_CREATE_PARTTIMER_PROFILE = "create_part_timer_profile";
 	public static final String API_CREATE_AND_PART_TIMER_FB_LOGIN = "create_and_part_timer_fb_login";
@@ -276,7 +280,8 @@ public final class CommonUtilities {
 	public static final String PARAM_BLOCKED_COMPANIES_ADDRESS = "address";
 	public static final String PARAM_BLOCKED_COMPANIES_GRADE_ID = "company_grade_id";
 	public static final String PARAM_BLOCKED_COMPANIES_ID = "company_id";
-	public static final String PARAM_BLOCKED_COMPANIES_NAME = "branch_name";
+	public static final String PARAM_BLOCKED_BRANCH_NAME = "branch_name";
+	public static final String PARAM_BLOCKED_COMPANIES_NAME = "company_name";
 	public static final String PARAM_BLOCKED_COMPANIES_TYPE_ID = "company_type_id";
 	public static final String PARAM_BLOCKED_COMPANIES_CREATED = "created_at";
 	public static final String PARAM_BLOCKED_COMPANIES_EMAIL_1 = "email_1";
@@ -311,6 +316,7 @@ public final class CommonUtilities {
 	public static final String FILE_STUDENT_FRONT = "student_front";
 	public static final String FILE_STUDENT_BACK = "student_back";
 	public static final String IMAGE_ROOT = ApplicationUtils.getAppRootDir() + "/";
+	public static final String ROOT_DIR = ".matchimi";
 	
 	public static final String SETTING_THEME = "setting.theme";
 	public static final int THEME_LIGHT = 0;
@@ -380,6 +386,7 @@ public final class CommonUtilities {
 	
 	public static final String BROADCAST_LOAD_HISTORY = "schedule.history";
 	public static final String BROADCAST_SCHEDULE_RECEIVER = "schedule.receiver";
+	public static final String BROADCAST_JOBS_RECEIVER = "jobs.receiver";
 	public static final String LOCALBROADCAST_SCHEDULE_BACKPRESSED_RECEIVER = "localschedule.backpressed";
 	
 	public static final int CREATEAVAILABILITY_RC_MAPS_ACTIVITY = 51;
@@ -415,8 +422,6 @@ public final class CommonUtilities {
     /**
      * Base URL of the Demo Server (such as http://my_host:8080/gcm-demo)
      */
-//    public static final String GCM_SERVER_URL = "http://54.254.1.48";
-    public static final String GCM_SERVER_URL = "http://matchimi.buuukapps.com";
     
 
     /**

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -79,6 +80,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.matchimi.CommonUtilities;
+import com.matchimi.HomeActivity;
 import com.matchimi.R;
 import com.matchimi.ValidationUtilities;
 import com.matchimi.Variables;
@@ -108,6 +110,7 @@ public class JobDetails extends SherlockFragmentActivity {
 	
 	private String isVerified = "false";
 	private boolean isProfileComplete;
+	private boolean isNotification = false;
 	private String pt_id = "";
 
 	private List<MessageModel> listMessage = null;
@@ -123,6 +126,10 @@ public class JobDetails extends SherlockFragmentActivity {
 	private String rawOptional = "";
 	private String rawRequirement = "";
 	private String place = "";
+	private String price;		
+	private String expire;
+	private String description;		
+	private String date;
 	
 	private String friendsFacebookId = null;
 	private String friendsFacebookFirstName = null;
@@ -145,8 +152,8 @@ public class JobDetails extends SherlockFragmentActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		settings = getSharedPreferences(
-				PREFS_NAME, Context.MODE_PRIVATE);
+		settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+		
 		if (settings.getInt(SETTING_THEME, THEME_LIGHT) == THEME_LIGHT) {
 			setTheme(ApplicationUtils.getTheme(true));
 		} else {
@@ -165,12 +172,355 @@ public class JobDetails extends SherlockFragmentActivity {
 		ab.setDisplayHomeAsUpEnabled(true);
 		
 		Bundle b = getIntent().getExtras();
+		
+		// Check if request coming from GCM Notification or usual flow
+		if(b.containsKey("is_notification")) {
+			isNotification = true;
+			
+			// Reload job fragment
+			Intent i = new Intent(CommonUtilities.BROADCAST_SCHEDULE_RECEIVER);
+			sendBroadcast(i);
+			
+			showJobOfferFromNofiticationFlow(b);		
+		} else {
+			showJobOfferFromNormalFlow(b);
+		}
+
+	}
+	
+	private void showJobOfferFromNofiticationFlow(Bundle b) {
+		String data = b.getString("data");
+		parseData(data);
+		
+		if(friendsFacebookId != null) {
+			listScheduleFriendsFacebookID = ProcessDataUtils.convertStringToList(friendsFacebookId);
+		}
+		
+		if(friendsFacebookFirstName != null) {
+			listScheduleFriendsFacebookID = ProcessDataUtils.convertStringToList(friendsFacebookFirstName);
+		}
+				
+		if(friendsFacebookLastName != null) {
+			listScheduleFriendsLastName = ProcessDataUtils.convertStringToList(friendsFacebookLastName);
+		}
+		
+		if(friendsFacebookProfilePicture != null) {
+			listScheduleFriendsProfilePicture = ProcessDataUtils.convertStringToList(friendsFacebookProfilePicture);
+		}
+		
+		if(friendsFacebookPtID != null) {
+			listScheduleFriendsPtID = ProcessDataUtils.convertStringToList(friendsFacebookPtID);
+		}
+		
+		// Set value
+		TextView textPrice = (TextView) findViewById(R.id.textPrice);
+		textPrice.setText(Html.fromHtml(price));
+		TextView textDate = (TextView) findViewById(R.id.textDate);
+		textDate.setText(date);
+		TextView textPlace = (TextView) findViewById(R.id.textPlace);
+		textPlace.setText(place);
+		TextProgressBar textProgressBar = (TextProgressBar) findViewById(R.id.progressBarWithText);
+		
+		// Check if Job Offer or My Schedule is coming here
+		textProgressBar.setText(expire + " before this offer expires");			
+		
+		// The gesture threshold expressed in dip
+		float GESTURE_THRESHOLD_DIP = 13.0f;
+
+		// Convert the dips to pixels
+		float scale = context.getResources().getDisplayMetrics().density;
+		float mGestureThreshold = (int) (GESTURE_THRESHOLD_DIP * scale + 0.5f);		
+	    textProgressBar.setProgress(progressbar);
+	    textProgressBar.setTextSize(mGestureThreshold);
+	    
+	    if(colorstatus == true) {
+	    	textProgressBar.setProgressDrawable(getResources().getDrawable(R.drawable.job_percentage_detail_red));
+	    } else {
+	    	textProgressBar.setProgressDrawable(getResources().getDrawable(R.drawable.job_percentage_detail_green));	    	
+	    }
+	    
+		TextView textDescription = (TextView) findViewById(R.id.textDescription);
+		textDescription.setText(description);
+		
+		// Set value for requirements
+		TextView textRequirement = (TextView) findViewById(R.id.textRequirement);
+		
+		if(rawRequirement != null) {
+			listRequirement = ProcessDataUtils.convertStringToListWithSpace(rawRequirement);
+			
+			String requirementText = "";
+			
+			if(listRequirement.size() > 1) {
+				for(int i=0; i<listRequirement.size();i++) {
+					requirementText += "" + listRequirement.get(i) + "\n";
+				}				
+			} else {
+				requirementText += "" + listRequirement.get(0);				
+			}
+			
+			textRequirement.setText(requirementText);
+		}
+		
+		// Set value optional requirement
+		TextView textOptional = (TextView) findViewById(R.id.textOptional);
+		
+		if(rawOptional != null) {
+			listOptional = ProcessDataUtils.convertStringToListWithSpace(rawOptional);
+
+			String optionalText = "";
+			
+			if(listRequirement.size() > 1) {
+				for(int i=0; i<listOptional.size();i++) {
+					optionalText += "" + listOptional.get(i) + "\n";
+				}				
+			} else {
+				optionalText += "" + listOptional.get(0);				
+			}
+			
+			textOptional.setText(optionalText);
+		}
+
+		TextView buttonAccept = (TextView) findViewById(R.id.buttonAccept);
+		buttonAccept.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+//				if(isVerified == "false") {
+//					ValidationUtilities.resendLinkDialog(JobDetails.this, pt_id);
+//				} else if (isProfileComplete == false) {
+				if (isProfileComplete == false) {
+					profileNotCompleteDialog();
+				} else {
+					allowAcceptJob();				
+				}
+			}
+		});
+
+		TextView buttonReject = (TextView) findViewById(R.id.buttonReject);
+		buttonReject.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				Intent i = new Intent(context, RejectPreview.class);
+				i.putExtra("company", place.substring(0, place.indexOf("\n")));
+				startActivityForResult(i, RC_REJECT);
+			}
+		});
+
+		TextView buttonCancel = (TextView) findViewById(R.id.buttonCancel);
+		buttonCancel.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				Intent i = new Intent(context, CancelPreview.class);
+				startActivityForResult(i, RC_CANCEL);
+			}
+		});
+		
+		map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
+				.getMap();
+
+		loadMap(location);
+		
+		RelativeLayout additionalLayout = (RelativeLayout)findViewById(R.id.layAdditional);
+		LinearLayout friendsLayout = (LinearLayout)findViewById(R.id.friendsLayout);
+		RelativeLayout inboxLayout = (RelativeLayout)findViewById(R.id.inboxLayout);
+		
+		loadFriends();
+		
+		buttonAccept.setVisibility(View.VISIBLE);
+		buttonReject.setVisibility(View.VISIBLE);
+		buttonCancel.setVisibility(View.GONE);
+		additionalLayout.setVisibility(View.GONE);
+		friendsLayout.setVisibility(View.VISIBLE);
+		inboxLayout.setVisibility(View.GONE);
+	}
+	
+	private void parseData(String data) {
+		jsonParser = new JSONParser();
+		
+		try {
+			JSONObject objs = new JSONObject(data);
+			objs = objs.getJSONObject("sub_slots");
+					
+			if (objs != null) {
+				avail_id = jsonParser.getString(objs, "avail_id");
+				String getPrice = ""
+						+ jsonParser.getDouble(objs,
+								"offered_salary");
+				if (Integer
+						.parseInt(getPrice.substring(getPrice
+								.indexOf(".") + 1)) == 0) {
+					getPrice = getPrice.substring(0,
+							getPrice.indexOf("."));
+				}
+								
+				price = "<font color='#A4A9AF'>$</font><big><big><big><big><font color='#276289'>"
+								+ getPrice
+								+ "</font></big></big></big></big><font color='#A4A9AF'>/hr</font>";
+				
+				description = jsonParser.getString(objs, "description");
+				location = jsonParser.getString(objs, "location");
+				
+				place = jsonParser.getString(objs, "company_name") + "\n" + jsonParser.getString(objs, "address");
+				
+				String startDate = jsonParser
+						.getString(objs,
+								"start_date_time");
+				String endDate = jsonParser.getString(
+						objs, "end_date_time");
+				Calendar calStart = ProcessDataUtils.generateCalendar(startDate);
+				Calendar calEnd = ProcessDataUtils.generateCalendar(endDate);
+				
+				String expiredAt = jsonParser.getString(objs,
+								"expired_at");
+				Calendar calExpiredAt = ProcessDataUtils.generateCalendar(expiredAt);
+				
+				Calendar calToday = Calendar.getInstance();
+				
+				int diffMnt = (int) ((calExpiredAt
+						.getTimeInMillis() - calToday
+						.getTimeInMillis()) / (1000 * 60));
+				
+				float progressPercentage =0;
+				
+				String timeLeft = "";										
+				Integer timeLeftDay = (diffMnt / (60 * 24));
+				
+				if (timeLeftDay > 0) {					
+					timeLeft = (timeLeftDay) + "";
+
+					if(timeLeftDay >= 2) {
+						timeLeft += " days ";
+						progressPercentage = 25;
+					} else {
+						timeLeft += " day ";
+						progressPercentage = 50;												
+					}
+					
+					diffMnt = diffMnt % (60 * 24);											
+					Integer hourLeft = diffMnt / 60;
+					
+					if(hourLeft > 0) {
+						if(hourLeft > 1) {
+							timeLeft += (hourLeft) + " hours left";
+						} else if(hourLeft == 1) {
+							timeLeft += (hourLeft) + " hour left";
+						} else {
+							timeLeft += " left";
+						}
+					} else {
+						timeLeft += " left";
+					}
+					
+					expire = timeLeft;
+
+				} else{
+					
+					int hourLeft =  (diffMnt / 60);
+					
+					if(hourLeft < 2 && hourLeft > 0) {
+						timeLeft = String.valueOf(hourLeft) + " hour ";
+					} else if (hourLeft >= 2) {
+						timeLeft = String.valueOf(hourLeft) + " hours ";												
+					}
+					
+					float additionalTimes =  0.5f * ((24f - (float) hourLeft) / 24f);
+					progressPercentage = (0.5f + additionalTimes) * 100;
+					
+					timeLeft += (diffMnt % 60) + " minutes left";
+					expire = timeLeft;	
+				}
+				
+//				Log.d(CommonUtilities.TAG, "Percentage " + progressPercentage);
+				
+				progressbar = (int) progressPercentage;
+				
+				// Calculate colors										
+				Boolean redStatus = false;
+				if(progressPercentage > 50) {
+					redStatus = true;
+				}
+				
+				colorstatus = redStatus;
+				
+				// Load requirement list
+				JSONArray listReqArray = new JSONArray(jsonParser
+						.getString(objs, "mandatory_requirements"));	
+				
+				List<String> listRequirementItem = new ArrayList<String>();
+				if (listReqArray != null && listReqArray.length() > 0) {
+					for (int h = 0; h < listReqArray.length(); h++) {
+						listRequirementItem.add(listReqArray.get(h).toString());	
+					}
+				}		
+				
+				rawRequirement = listRequirementItem.toString();
+				
+				Log.d(CommonUtilities.TAG, "Raw req " + rawRequirement);
+				
+				// Load requirement list
+				JSONArray listOptionalArray = new JSONArray(jsonParser
+						.getString(objs, "optional_requirements"));	
+
+				List<String> listOptionalItem = new ArrayList<String>();
+				if (listOptionalArray != null && listOptionalArray.length() > 0) {
+					for (int m = 0; m < listOptionalArray.length(); m++) {
+						listOptionalItem.add(listOptionalArray.get(m).toString());	
+					}
+				}
+				rawOptional = listOptionalItem.toString();
+				
+				// Load friend list
+				JSONArray friends = new JSONArray(jsonParser.getString(objs, "friends"));										
+
+				List<String> listScheduleFriendsFacebookIDItem = new ArrayList<String>();
+				List<String> listScheduleFriendsFirstNameItem = new ArrayList<String>();
+				List<String> listScheduleFriendsLastNameItem = new ArrayList<String>();
+				List<String> listScheduleFriendsProfilePictureItem = new ArrayList<String>();
+				List<String> listScheduleFriendsPtIDItem = new ArrayList<String>();										
+				
+				if (friends != null && friends.length() > 0) {
+					for (int k = 0; k < friends.length(); k++) {
+						JSONObject friendsObjs = friends.getJSONObject(k);
+						friendsObjs = friendsObjs.getJSONObject(CommonUtilities.JSON_KEY_PART_TIMER_FRIEND);
+																		
+						listScheduleFriendsFacebookIDItem.add(jsonParser
+								.getString(friendsObjs, CommonUtilities.JSON_KEY_FRIEND_FACEBOOK_ID));
+
+						listScheduleFriendsFirstNameItem.add(jsonParser
+								.getString(friendsObjs, CommonUtilities.JSON_KEY_FRIEND_FACEBOOK_FIRST_NAME));
+
+						listScheduleFriendsLastNameItem.add(jsonParser
+								.getString(friendsObjs, CommonUtilities.JSON_KEY_FRIEND_FACEBOOK_LAST_NAME));
+
+						listScheduleFriendsProfilePictureItem.add(jsonParser
+								.getString(friendsObjs, CommonUtilities.JSON_KEY_FRIEND_FACEBOOK_PROFILE_PICTURE));
+
+						listScheduleFriendsPtIDItem.add(jsonParser
+								.getString(friendsObjs, CommonUtilities.PARAM_PT_ID));
+					}
+				}
+				
+				friendsFacebookId = listScheduleFriendsFacebookIDItem.toString();
+				friendsFacebookFirstName = listScheduleFriendsFirstNameItem.toString();
+				friendsFacebookLastName= listScheduleFriendsLastNameItem.toString();	
+				friendsFacebookProfilePicture = listScheduleFriendsProfilePictureItem.toString();
+				friendsFacebookPtID = listScheduleFriendsPtIDItem.toString();
+			}
+			
+		} catch (JSONException e) {
+			Log.e("Parse Json Object",
+					">> " + e.getMessage());
+		}
+		
+	}
+	
+	
+	private void showJobOfferFromNormalFlow(Bundle b) {
 		avail_id = b.getString("avail_id");
-		String price = b.getString("price");
-		String date = b.getString("date");
+		price = b.getString("price");
+		date = b.getString("date");
 		place = b.getString("place");
-		String expire = b.getString("expire");
-		String description = b.getString("description");
+		expire = b.getString("expire");
+		description = b.getString("description");
 		
 		friendsFacebookId = b.getString(CommonUtilities.JSON_KEY_FRIEND_FACEBOOK_ID);
 //		Log.d(CommonUtilities.TAG, "Received " + friendsFacebookId);
@@ -251,7 +601,7 @@ public class JobDetails extends SherlockFragmentActivity {
 			
 			if(listRequirement.size() > 1) {
 				for(int i=0; i<listRequirement.size();i++) {
-					requirementText += "" + i+1 + " " + listRequirement.get(i) + "\n";
+					requirementText += "" + listRequirement.get(i) + "\n";
 				}				
 			} else {
 				requirementText += "" + listRequirement.get(0);				
@@ -271,7 +621,7 @@ public class JobDetails extends SherlockFragmentActivity {
 			
 			if(listRequirement.size() > 1) {
 				for(int i=0; i<listOptional.size();i++) {
-					optionalText += "" + i + " " + listOptional.get(i) + "\n";
+					optionalText += "" + listOptional.get(i) + "\n";
 				}				
 			} else {
 				optionalText += "" + listOptional.get(0);				
@@ -360,7 +710,6 @@ public class JobDetails extends SherlockFragmentActivity {
 			additionalLayout.setVisibility(View.GONE);
 			friendsLayout.setVisibility(View.GONE);
 			inboxLayout.setVisibility(View.GONE);
-			
 		}
 		
 //		TextView textExpire = (TextView) findViewById(R.id.textExpire);
@@ -371,7 +720,6 @@ public class JobDetails extends SherlockFragmentActivity {
 //		} else {
 //			textExpire.setText(expire);
 //		}
-
 	}
 
 	/**
@@ -772,10 +1120,21 @@ public class JobDetails extends SherlockFragmentActivity {
 			public void run() {
 				if (jsonStr != null) {
 					if (jsonStr.trim().equalsIgnoreCase("0")) {
+						Intent jobBroadcast = new Intent(CommonUtilities.BROADCAST_JOBS_RECEIVER);
+						sendBroadcast(jobBroadcast);
+
 						Toast.makeText(context, getString(R.string.job_reject_offer_success),
 								Toast.LENGTH_SHORT).show();
-						setResult(RESULT_OK);
-						finish();
+						
+						if(isNotification) {
+							Intent setIntent = new Intent(context, HomeActivity.class);
+							startActivity(setIntent);
+							finish();
+						} else {
+							setResult(RESULT_OK);
+							finish();
+						}
+
 					} else if(jsonStr.trim().equalsIgnoreCase("1")){
 						Toast.makeText(
 								context,
@@ -840,10 +1199,20 @@ public class JobDetails extends SherlockFragmentActivity {
 						Intent i = new Intent(CommonUtilities.BROADCAST_SCHEDULE_RECEIVER);
 						sendBroadcast(i);
 						
+						Intent jobBroadcast = new Intent(CommonUtilities.BROADCAST_JOBS_RECEIVER);
+						sendBroadcast(jobBroadcast);
+
 						Toast.makeText(context, getString(R.string.job_accept_offer_success),
 								Toast.LENGTH_SHORT).show();
-						setResult(RESULT_OK);
-						finish();
+
+						if(isNotification) {
+							Intent setIntent = new Intent(context, HomeActivity.class);
+							startActivity(setIntent);
+							finish();
+						} else {
+							setResult(RESULT_OK);
+							finish();
+						}
 
 					} else if(jsonStr.trim().equalsIgnoreCase("1")) {
 						Toast.makeText(
@@ -877,7 +1246,6 @@ public class JobDetails extends SherlockFragmentActivity {
 			}
 		}.start();
 	}
-
 
 	protected void loadMap(String location) {
 		if (location != null && !location.equalsIgnoreCase("null")
@@ -1468,7 +1836,6 @@ public class JobDetails extends SherlockFragmentActivity {
 			textDate.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
 			textTime.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
 		}
-		
 	}
 
 	protected void markMessageAsRead(final int selectedMessage) {
@@ -1488,6 +1855,17 @@ public class JobDetails extends SherlockFragmentActivity {
 		}.start();
 	}
 	
+	@Override
+	public void onBackPressed() {
+		// If page opened through notification, override back pressed
+		if(isNotification) {
+			Intent setIntent = new Intent(this, HomeActivity.class);
+			startActivity(setIntent);
+			finish();
+		}
+		
+		super.onBackPressed();
+	}
 
 	@Deprecated
 	private void showRating(final float currentRating) {

@@ -145,7 +145,7 @@ public class Utilities {
 			boolean isRenamed = false;
 			
 			try {
-				String url = CommonUtilities.SERVERURL + CommonUtilities.API_UPLOAD_PROFILE_PICTURE;
+				String url = CommonUtilities.SERVERURL + CommonUtilities.API_UPLOAD_PROFILE_PICTURE_BY_PT_ID;
 				String selectedFileName = CommonUtilities.FILE_IMAGE_PROFILE + ".jpg";
 				String filePath = CommonUtilities.IMAGE_ROOT + selectedFileName;
 				
@@ -169,6 +169,8 @@ public class Utilities {
 						HttpMultipartMode.BROWSER_COMPATIBLE);
 				reqEntity.addPart("file", bab);
 				reqEntity.addPart("filename", new StringBody(filename));
+				reqEntity.addPart("pt_id", new StringBody(pt_id));
+				
 				postRequest.setEntity(reqEntity);
 				HttpResponse response = httpClient.execute(postRequest);
 				BufferedReader reader = new BufferedReader(

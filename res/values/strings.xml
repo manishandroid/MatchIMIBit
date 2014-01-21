@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="txt_ongoing_job">Ongoing Jobs</string>
     <string name="app_name">Matchimi</string>
     <string name="guideline">Guideline</string>
     <string name="guide_txt_btn_prev">previous</string>
@@ -11,7 +12,7 @@
     <string name="guide_job_title_1">Jobs</string>
     <string name="guide_job_title_2">Wait for your match, view job detail, and accept job offers.</string>
     <string name="guide_add_title_1">Add Available Timelots</string>
-    <string name="guide_add_title_2">Indicate your availabel (repeated) date, time, and preferred locations.</string>
+    <string name="guide_add_title_2">Indicate your available (repeated) date, time, and preferred locations.</string>
     <string name="guide_calendar_title_1">Calendar View of Schedule</string>
     <string name="guide_calendar_title_2">Manage your available timelots and jobs</string>
     <string name="facebook_app_id">1417927991768409</string>
@@ -28,6 +29,7 @@
     <string name="next">></string>
     <string name="close">Close</string>
     <string name="reply">Reply</string>
+    <string name="menu_ongoing">Ongoing Jobs</string>
     <string name="server_problem">Server long response. Please try again.</string>
     <string name="sending_message">Sending message ...</string>
     <string name="sending_message_success">Your message was sent succesfully</string>
@@ -68,7 +70,7 @@
     <string name="job_menu">Job</string>
     <string name="profile_header">Profile</string>
     <string name="profile_complete_question">Please complete your profile before accepting first job</string>
-    <string name="profile_blocked_companies">Blocked Companies</string>
+    <string name="profile_blocked_companies">Blocked Employers</string>
     <string name="profile_feedback">Feedback</string>
     <string name="cancel">Cancel</string>
     <string name="cancelled">Cancelled</string>
@@ -117,7 +119,7 @@
     <string name="menu_setting">Settings</string>
     <string name="menu_help">Help</string>
     <string name="preferred_jobs">Preferred Jobs</string>
-    <string name="loading_preferred_jobs">Loading preferred jobs ...</string>
+    <string name="loading_preferred_jobs">Loading your preferred jobs ...</string>
     <string name="preferred_jobs_loading">Submiting your preferred jobs ...</string>
     <string name="menu_share">Share</string>
     <string name="menu_logout">Logout</string>
@@ -239,6 +241,7 @@
     <string name="edit_profile_success">Your profile has been updated successfully</string>
     <string name="edit_get_profile_error">Failed to get profile. Please try again</string>
     <string name="uploading">Uploading ... </string>
+    <string name="logout_loading">Logout ...</string>
     <string name="blocked_companies_loading">Loading companies...</string>
     <string name="feedbacks_loading">Loading feedbacks...</string>
     <string name="loading_profile">Loading profile...</string>
@@ -282,7 +285,7 @@
     <string name="tab_location">Location</string>
     <string name="required">required</string>
     <string name="invalid_email_address">Invalid email address</string>
-    <string name="you_are_rated">You are rated</string>
+    <string name="you_are_rated">You rated</string>
     <string name="phone_number">Phone Number</string>
 
     <string-array name="repeat_value">
@@ -379,7 +382,7 @@
     <string name="job_offer_gone_warning">Your job offers will be gone by modifying this availability</string>
     <string name="loading_repeat_days">Loading repeat days ...</string>
     <string name="loading_location">Loading locations ...</string>
-    <string name="you_are_rated">You are rated : </string>
+    
     <string name="preferred_jobs">Preferred Jobs</string>
     <string name="preferred_hotel">Hotel</string>
     <string name="preferred_fandb">F&amp;B</string>
@@ -388,6 +391,9 @@
 	<string name="store_pass">android</string>     
 	<string name="account_not_existed">Your password is incorrect</string>
 	<string name="edit_profile_dependent_passholder">*Are you a dependent pass holder</string>
+	<string name="video_upload_oversize">Please upload video less than 4 MB</string>
+	<string name="logged_error">Unable to logout. Please try again</string>
+	
     <string-array name="repeat_week_array">
         <item>0</item>
         <item>1</item>
@@ -442,8 +448,8 @@
 
         <item>Packer</item>
         <item>Logistic Staff</item>
-        <item>Production</item>
-        <item>Admin Staff</item>
+        <!-- <item>Production</item>
+        <item>Admin Staff</item> -->
     </string-array>
     
     <string-array name="rating_employer">

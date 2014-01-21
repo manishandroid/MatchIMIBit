@@ -1035,11 +1035,11 @@
             </LinearLayout>
         </LinearLayout>
 
-        <View
+        <!-- <View
             android:layout_width="fill_parent"
             android:layout_height="1dip"
             android:layout_marginBottom="5dp"
-            android:background="@color/lightcolor" />
+            android:background="@color/lightcolor" /> -->
 
         <TextView
             android:id="@+id/profile_label_visume"
@@ -1048,7 +1048,8 @@
             android:background="@color/blue_sky"
             android:padding="10dp"
             android:text="@string/edit_profile_label_video_resume"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:visibility="gone" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -1069,7 +1070,8 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:baselineAligned="false"
-                android:orientation="horizontal" >
+                android:orientation="horizontal"
+                android:visibility="gone" >
 
                 <FrameLayout
                     android:layout_width="fill_parent"

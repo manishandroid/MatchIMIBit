@@ -7,6 +7,16 @@
         <!-- <item name="actionBarStyle">@style/example_solid_ActionBar</item> -->
         <!-- <item name="android:actionBarStyle">@style/example_solid_ActionBar</item> -->
     </style>
+    
+    
+    <style name="SampleTheme" parent="@style/Theme.Sherlock.Light">
+        <item name="numberPickerStyle">@style/NPWidget.Holo.NumberPicker</item>
+    </style>
+
+    <style name="SampleTheme.Light" parent="@style/Theme.Sherlock.Light">
+        <item name="numberPickerStyle">@style/NPWidget.Holo.Light.NumberPicker</item>
+    </style>
+    
 
     <style name="example_solid_ActionBar" parent="@style/Widget.Sherlock.Light.ActionBar.Solid">
         <item name="background">@drawable/bg_ab</item>

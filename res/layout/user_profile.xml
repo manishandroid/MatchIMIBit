@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical" >
+    android:layout_height="match_parent" >
 
     <ProgressBar
         android:id="@+id/progress"
@@ -19,25 +17,28 @@
         android:scrollbars="none" >
 
         <LinearLayout
+            android:id="@+id/profile_fragment_main_wrapper"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical" >
 
             <RelativeLayout
+                android:id="@+id/profile_fragment_relative_wrapper"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" >
 
                 <ImageView
                     android:id="@+id/profile_avatar"
+                    style="?android:attr/buttonStyle"
                     android:layout_width="100dp"
                     android:layout_height="150dp"
                     android:layout_alignParentLeft="true"
-                    style="?android:attr/buttonStyle"
                     android:contentDescription="@string/profile_picture"
                     android:scaleType="fitCenter"
                     android:src="@drawable/icon" />
 
                 <LinearLayout
+                    android:id="@+id/profile_fragment_wrapper"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"
@@ -76,19 +77,18 @@
                         android:stepSize="1.0" />
 
                     <TextView
-		                android:id="@+id/editProfile"
-		                android:layout_width="wrap_content"
-		                android:layout_height="wrap_content"
-		                android:background="@color/blue_sky"
-		                android:layout_marginTop="4dp"
+                        android:id="@+id/editProfile"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:background="@color/blue_sky"
                         android:paddingBottom="5dp"
                         android:paddingLeft="10dp"
                         android:paddingRight="10dp"
                         android:paddingTop="5dp"
-		                android:text="@string/edit_profile"
-		                android:textColor="@color/white"
-		                android:textSize="14dp" />
-		                    
+                        android:text="@string/edit_profile"
+                        android:textColor="@color/white"
+                        android:textSize="14dp" />
                 </LinearLayout>
             </RelativeLayout>
 
@@ -97,13 +97,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/lightcolor"
+                android:clickable="true"
                 android:gravity="left|center_vertical"
                 android:paddingBottom="12dp"
                 android:paddingLeft="5dp"
                 android:paddingTop="12dp"
-                android:textSize="14dip"
-                android:clickable="true"
-                android:text="@string/profile_blocked_companies"/>
+                android:text="@string/profile_blocked_companies"
+                android:textSize="14dip" />
 
             <View
                 android:layout_width="fill_parent"
@@ -115,34 +115,52 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/lightcolor"
+                android:clickable="true"
                 android:gravity="left|center_vertical"
                 android:paddingBottom="12dp"
                 android:paddingLeft="5dp"
                 android:paddingTop="12dp"
-                android:textSize="14dip"
-                android:clickable="true"
-                android:text="@string/preferred_jobs" />
+                android:text="@string/preferred_jobs"
+                android:textSize="14dip" />
 
             <View
                 android:layout_width="fill_parent"
                 android:layout_height="1dip"
                 android:background="@color/lightgray" />
 
-            
             <Button
                 android:id="@+id/feedback_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/lightcolor"
+                android:clickable="true"
                 android:gravity="left|center_vertical"
                 android:paddingBottom="12dp"
                 android:paddingLeft="5dp"
                 android:paddingTop="12dp"
-                android:textSize="14dip"
-                android:clickable="true"
-                android:text="@string/profile_feedback"/>
-
+                android:text="@string/profile_feedback"
+                android:textSize="14dip" />
         </LinearLayout>
     </ScrollView>
+    
+    
+    <LinearLayout
+        android:id="@+id/profileLogoutLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center" >
 
-</LinearLayout>
+        <Button
+            android:id="@+id/buttonLogoutProfileMenu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@color/lightgray"
+            android:padding="12dp"
+            android:text="@string/menu_logout"
+            android:textColor="@color/darktitle" />
+    </LinearLayout>
+    
+
+</RelativeLayout>

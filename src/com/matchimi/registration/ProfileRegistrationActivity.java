@@ -760,7 +760,7 @@ public class ProfileRegistrationActivity extends Activity {
 				boolean isRenamed = false;
 				
 				try {
-					String url = CommonUtilities.SERVERURL + CommonUtilities.API_UPLOAD_PROFILE_PICTURE;
+					String url = CommonUtilities.SERVERURL + CommonUtilities.API_UPLOAD_PROFILE_PICTURE_BY_PT_ID;
 					String selectedFileName = CommonUtilities.FILE_IMAGE_PROFILE + ".jpg";
 					String filePath = CommonUtilities.IMAGE_ROOT + selectedFileName;					
 					Log.d(TAG, "Upload picture to " + url);
@@ -785,6 +785,8 @@ public class ProfileRegistrationActivity extends Activity {
 							HttpMultipartMode.BROWSER_COMPATIBLE);
 					reqEntity.addPart("file", bab);
 					reqEntity.addPart("filename", new StringBody(filename));
+					reqEntity.addPart("pt_id", new StringBody(pt_id));
+					
 					postRequest.setEntity(reqEntity);
 					HttpResponse response = httpClient.execute(postRequest);
 					BufferedReader reader = new BufferedReader(
