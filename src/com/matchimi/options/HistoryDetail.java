@@ -161,7 +161,7 @@ public class HistoryDetail extends SherlockActivity {
 							SimpleDateFormat formatterDate = new SimpleDateFormat(
 									"EE d, MMM", Locale.getDefault());
 							SimpleDateFormat formatterTime = new SimpleDateFormat(
-									"hh a", Locale.getDefault());
+									"hh:mm a", Locale.getDefault());
 							for (int i = 0; i < items.length(); i++) {
 								/* get all json items, and put it on list */
 								try {

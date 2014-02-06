@@ -60,15 +60,20 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.MenuItem;
 import com.matchimi.Api;
 import com.matchimi.CommonUtilities;
+import com.matchimi.HomeActivity;
 import com.matchimi.R;
+import com.matchimi.availability.HomeAvailabilityActivity;
 import com.matchimi.options.CreateAvailability;
 import com.matchimi.options.CreateAvailabilityBackup;
 import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.JSONParser;
 import com.matchimi.utils.NetworkUtils;
+import com.matchimi.utils.ProcessDataUtils;
 
 public class PreferredJobsActivity extends SherlockFragmentActivity {
 	private Context context;
@@ -105,6 +110,9 @@ public class PreferredJobsActivity extends SherlockFragmentActivity {
 		} else {
 			setTheme(ApplicationUtils.getTheme(false));
 		}
+		
+		ActionBar ab = getSupportActionBar();
+		ab.setDisplayHomeAsUpEnabled(true);
 
 		pt_id = settings.getString(USER_PTID, null);
 		context = this;
@@ -446,6 +454,19 @@ public class PreferredJobsActivity extends SherlockFragmentActivity {
 				}
 			}
 		}.start();
+	}
+	
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			Intent result = new Intent(getApplicationContext(), HomeActivity.class);
+			setResult(RESULT_CANCELED, result);
+			finish();
+			break;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 	
 }

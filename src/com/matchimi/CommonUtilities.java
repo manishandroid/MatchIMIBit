@@ -27,7 +27,7 @@ public final class CommonUtilities {
 //	public static final String SERVERURL_SECURE = "http://api.matchimi.com/";	
 //	public static final String GCM_SERVER_URL = "http://api.matchimi.com/";
 	
-//  public static final String GCM_SERVER_URL = "http://pongmob.com:8080/gcm-demo/";
+//	public static final String GCM_SERVER_URL = "http://pongmob.com:8080/gcm-demo/";
 	
 //	public static final String SERVERURL = "http://192.168.43.214:8000/";
 	
@@ -98,7 +98,7 @@ public final class CommonUtilities {
 	
 	public static final String API_CREATE_AND_PART_TIMER_PROFILE = "create_and_part_timer_profile";
 	public static final String API_CREATE_AND_PART_TIMER_REGISTRATION = "create_and_part_timer_registration_v2";
-	
+	public static final String API_UNBLOCK_COMPANY = "unblock_company_and_v2";
 	public static final String API_CREATE_PARTIMER_LOGIN = "create_part_timer_login";
 	public static final String API_CREATE_AND_PARTIMER_LOGIN = "create_and_part_timer_login";
 	public static final String API_CREATE_AND_AVAILABILITY = "create_and_availability";
@@ -142,6 +142,8 @@ public final class CommonUtilities {
 	
 	public static final String API_RESEND_VERIFICATION_EMAIL = "resend_verification_email";	
 	public static final String API_REJECT_JOB_OFFER = "reject_job_offer";
+	public static final String API_ACCEPT_ONGOING_JOB = "accept_ongoing_job";
+	public static final String API_REJECT_ONGOING_JOB = "reject_ongoing_job";
 	
 	public static final String API_GET_DAYS = "get_days";
 	public static final String API_GET_DAY_TIMES = "get_day_times";
@@ -165,6 +167,7 @@ public final class CommonUtilities {
 	public static final String API_UPDATE_PART_TIMER_FRIENDS_BY_PT_ID = "update_part_timer_friends_by_pt_id";
 	
 	public static final String API_EDIT_AND_PREFERRED_JOB_FUNCTION = "edit_and_preferred_job_functions_v2";
+	public static final String API_GET_AND_ONGOING_JOBS = "get_and_ongoing_jobs";
 	
 	public static final String API_SET_MESSAGE_READ = "mark_pt_message_as_read";
 	public static final String API_GET_MESSAGE = "get_messages_by_avail_id";
@@ -281,6 +284,7 @@ public final class CommonUtilities {
 	public static final String PARAM_BLOCKED_COMPANIES_GRADE_ID = "company_grade_id";
 	public static final String PARAM_BLOCKED_COMPANIES_ID = "company_id";
 	public static final String PARAM_BLOCKED_BRANCH_NAME = "branch_name";
+	public static final String PARAM_BLOCKED_BRANCH_ID = "branch_id";
 	public static final String PARAM_BLOCKED_COMPANIES_NAME = "company_name";
 	public static final String PARAM_BLOCKED_COMPANIES_TYPE_ID = "company_type_id";
 	public static final String PARAM_BLOCKED_COMPANIES_CREATED = "created_at";

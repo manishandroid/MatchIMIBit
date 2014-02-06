@@ -1,10 +1,6 @@
 package com.matchimi.ongoingjobs;
 
 import static com.matchimi.CommonUtilities.PREFS_NAME;
-import static com.matchimi.CommonUtilities.SETTING_THEME;
-import static com.matchimi.CommonUtilities.TAG;
-import static com.matchimi.CommonUtilities.THEME_LIGHT;
-import static com.matchimi.CommonUtilities.USER_PTID;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,45 +14,47 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.matchimi.CommonUtilities;
 import com.matchimi.HomeActivity;
 import com.matchimi.R;
-import com.matchimi.availability.HomeAvailabilityActivity;
+import com.matchimi.options.JobAdapter;
 import com.matchimi.options.JobDetails;
 import com.matchimi.options.MessageModel;
-import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.GPSTracker;
 import com.matchimi.utils.JSONParser;
-import com.matchimi.utils.LocationUtility;
-import com.matchimi.utils.NetworkUtils;
 import com.matchimi.utils.ProcessDataUtils;
 
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.InflateException;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
-import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.Toast;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
+import android.widget.AdapterView.OnItemClickListener;
 
-public class OngoingJobsActivity extends SherlockFragmentActivity {
-
+public class OngoingJobsFragment extends Fragment {
+	private String pt_id = null;
+	private View view;
 	private List<String> listJobFunctionName = null;
 	private List<String> listPriceRaw = null;
 
@@ -92,7 +90,6 @@ public class OngoingJobsActivity extends SherlockFragmentActivity {
 
 	private OngoingJobsAdapter adapter;
 	private ListView listview;
-	private String pt_id = null;
 
 	private String jsonStr = null;
 	private JSONParser jsonParser = null;
@@ -102,81 +99,92 @@ public class OngoingJobsActivity extends SherlockFragmentActivity {
 	private ProgressBar progressBar;
 	private int items = 0;
 	private Bundle bundle;
+	// GPSTracker class
+	private GPSTracker location;
 
-	private Boolean isLocationFound = false;
-	 // GPSTracker class
-    private GPSTracker location;
-     
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		SharedPreferences settings = getSharedPreferences(PREFS_NAME,
-				Context.MODE_PRIVATE);
-		if (settings.getInt(SETTING_THEME, THEME_LIGHT) == THEME_LIGHT) {
-			setTheme(ApplicationUtils.getTheme(true));
-		} else {
-			setTheme(ApplicationUtils.getTheme(false));
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+
+		if (view != null) {
+			ViewGroup parent = (ViewGroup) view.getParent();
+			if (parent != null)
+				parent.removeView(view);
 		}
 
+		try {
+			view = inflater.inflate(R.layout.ongoing_job_listview, container,
+					false);
+		} catch (InflateException e) {
+			/* map is already there, just return view as it is */
+		}
+
+		SharedPreferences settings = getActivity().getSharedPreferences(
+				PREFS_NAME, 0);
 		pt_id = settings.getString(CommonUtilities.USER_PTID, null);
-		Log.d(CommonUtilities.TAG, "User pt_id " + pt_id);
-		setContentView(R.layout.ongoing_job_listview);
+		context = getActivity();
 
-		context = this;
-
-		ActionBar ab = getSupportActionBar();
-		ab.setDisplayHomeAsUpEnabled(true);
-		ab.setTitle(getString(R.string.txt_ongoing_job));
-
-		adapter = new OngoingJobsAdapter(this);
-		listview = (ListView) findViewById(R.id.ongoing_job_listview);
+		adapter = new OngoingJobsAdapter(getActivity());
+		listview = (ListView) view.findViewById(R.id.ongoing_job_listview);
 		listview.setAdapter(adapter);
 		listview.setOnItemClickListener(listener);
 
-		progressBar = (ProgressBar) findViewById(R.id.ongoingProgress);
-		bundle = getIntent().getExtras();
+		progressBar = (ProgressBar) view.findViewById(R.id.ongoingProgress);
+		bundle = getActivity().getIntent().getExtras();
 
 		// create class object
-        location = new GPSTracker(OngoingJobsActivity.this);
+		location = new GPSTracker(getActivity());
 
-        // check if GPS enabled     
-        if(location.canGetLocation()){
-        	loadData();
-        } else {
-            // can't get location
-            // GPS or Network is not enabled
-            // Ask user to enable GPS/network in settings
-        	AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
-            
-            // Setting Dialog Title
-            alertDialog.setTitle("GPS is settings");
-      
-            // Setting Dialog Message
-            alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?");
-      
-            // On pressing Settings button
-            alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog,int which) {
-                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                    startActivityForResult(intent, RC_SETTINGS);
-                }
-            });
-      
-            // on pressing cancel button
-            alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-                }
-            });
-      
-            // Showing Alert Message
-            alertDialog.show();
-        }
+		// check if GPS enabled
+		if (location.canGetLocation()) {
+			loadData();
+		} else {
+			// can't get location
+			// GPS or Network is not enabled
+			// Ask user to enable GPS/network in settings
+			AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
 
-		if (bundle != null && bundle.getString("jsonStr").length() > 0) {
-			jsonStr = bundle.getString("jsonStr");
-			parseData();
+			// Setting Dialog Title
+			alertDialog.setTitle("GPS is settings");
+
+			// Setting Dialog Message
+			alertDialog
+					.setMessage("GPS is not enabled. Do you want to go to settings menu?");
+
+			// On pressing Settings button
+			alertDialog.setPositiveButton("Settings",
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							Intent intent = new Intent(
+									Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+							startActivityForResult(intent, RC_SETTINGS);
+						}
+					});
+
+			// on pressing cancel button
+			alertDialog.setNegativeButton("Cancel",
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.cancel();
+						}
+					});
+
+			// Showing Alert Message
+			alertDialog.show();
 		}
+
+//		if (bundle != null && bundle.getString("jsonStr").length() > 0) {
+//			jsonStr = bundle.getString("jsonStr");
+//			parseData();
+//		}
+
+		return view;
+	}
+
+	public static Bundle createBundle(String title) {
+		Bundle bundle = new Bundle();
+		bundle.putString(EXTRA_TITLE, title);
+		return bundle;
 	}
 
 	/**
@@ -220,7 +228,7 @@ public class OngoingJobsActivity extends SherlockFragmentActivity {
 
 		listAvailID = new ArrayList<String>();
 		listSubSlotID = new ArrayList<String>();
-		
+
 		listPrice = new ArrayList<String>();
 		listAddress = new ArrayList<String>();
 		listCompany = new ArrayList<String>();
@@ -250,7 +258,7 @@ public class OngoingJobsActivity extends SherlockFragmentActivity {
 				Locale.getDefault());
 
 		Log.d(CommonUtilities.TAG, "Parse data");
-		
+
 		try {
 			jsonArray = new JSONArray(jsonStr);
 			jsonParser = new JSONParser();
@@ -260,7 +268,8 @@ public class OngoingJobsActivity extends SherlockFragmentActivity {
 					objs = jsonArray.getJSONObject(i);
 					objs = objs.getJSONObject("sub_slots");
 
-					listSubSlotID.add(jsonParser.getString(objs, "sub_slot_id"));
+					listSubSlotID
+							.add(jsonParser.getString(objs, "sub_slot_id"));
 					listAvailID.add(jsonParser.getString(objs, "avail_id"));
 					String price = ""
 							+ jsonParser.getDouble(objs, "offered_salary");
@@ -276,7 +285,8 @@ public class OngoingJobsActivity extends SherlockFragmentActivity {
 					listPriceRaw.add(price);
 					listAddress.add(jsonParser.getString(objs, "address"));
 
-					String companyName = jsonParser.getString(objs,"company_name");
+					String companyName = jsonParser.getString(objs,
+							"company_name");
 					String branchName = jsonParser.getString(objs,
 							"branch_name");
 
@@ -291,7 +301,8 @@ public class OngoingJobsActivity extends SherlockFragmentActivity {
 					listRating.add(Float.parseFloat(jsonParser.getString(objs,
 							"grade")));
 
-					String startDate = jsonParser.getString(objs, "start_date_time");
+					String startDate = jsonParser.getString(objs,
+							"start_date_time");
 					String endDate = jsonParser
 							.getString(objs, "end_date_time");
 					Calendar calStart = ProcessDataUtils
@@ -483,10 +494,12 @@ public class OngoingJobsActivity extends SherlockFragmentActivity {
 		progressBar.setVisibility(View.GONE);
 		listview.setVisibility(View.VISIBLE);
 		items = 1;
-		supportInvalidateOptionsMenu();
 	}
 
 	private void loadData() {
+		listview.setVisibility(View.GONE);
+		progressBar.setVisibility(View.VISIBLE);
+		
 		final String url = CommonUtilities.SERVERURL
 				+ CommonUtilities.API_GET_AND_ONGOING_JOBS + "?"
 				+ CommonUtilities.PARAM_PT_ID + "=" + pt_id + "&lat="
@@ -502,10 +515,7 @@ public class OngoingJobsActivity extends SherlockFragmentActivity {
 			}
 		};
 
-		listview.setVisibility(View.GONE);
-		progressBar.setVisibility(View.VISIBLE);
 		items = 0;
-		supportInvalidateOptionsMenu();
 
 		new Thread() {
 			public void run() {
@@ -520,7 +530,8 @@ public class OngoingJobsActivity extends SherlockFragmentActivity {
 		public void onItemClick(android.widget.AdapterView<?> adapterView,
 				View view, int position, long id) {
 
-			Intent i = new Intent(getApplicationContext(), JobDetails.class);
+			Intent i = new Intent(getActivity().getApplicationContext(),
+					JobDetails.class);
 			i.putExtra("job_function_name", listJobFunctionName.get(position));
 			i.putExtra("price", listPrice.get(position));
 			i.putExtra("priceFormat", listPriceRaw.get(position));
@@ -567,49 +578,10 @@ public class OngoingJobsActivity extends SherlockFragmentActivity {
 	};
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case android.R.id.home:
-			Intent result = new Intent(this, HomeActivity.class);
-			startActivity(result);
-			finish();
-			break;
-
-		case SWITCHER:
-			Log.d(CommonUtilities.TAG, "User lat long " + location.getLatitude() + " " + location.getLongitude());
-			Intent ongoing = new Intent(this, OngoingJobsLocationActivity.class);
-			ongoing.putExtra("latitude", String.valueOf(location.getLatitude()));
-			ongoing.putExtra("longitude", String.valueOf(location.getLongitude()));
-			ongoing.putExtra("jsonStr", jsonStr);
-			startActivity(ongoing);
-			break;
-		}
-
-		return super.onOptionsItemSelected(item);
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		for (int i = 0; i < items; i++) {
-			menu.add(0, SWITCHER, 0, "Map").setIcon(R.drawable.ic_map)
-					.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-		}
-
-		return super.onCreateOptionsMenu(menu);
-	}
-
-	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 
 		loadData();
-	}
-
-	@Override
-	public void onBackPressed() {
-		Intent i = new Intent(context, HomeActivity.class);
-		startActivity(i);
-		finish();
 	}
 
 }

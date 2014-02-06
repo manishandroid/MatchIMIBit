@@ -1078,6 +1078,8 @@ public class CaldroidFragment extends DialogFragment {
 	 * @param view
 	 */
 	private void setupDateGridPages(View view) {
+		Log.d(CommonUtilities.TAG, "Setup month year " + month + " " + year);
+		
 		// Get current date time
 		DateTime currentDateTime = new DateTime(year, month, 1, 0, 0, 0);
 		dateInMonthsList = CalendarHelper.getFullWeeks(month, year,
@@ -1283,6 +1285,8 @@ public class CaldroidFragment extends DialogFragment {
 					.get(getPrevious(position));
 			CaldroidGridAdapter nextAdapter = caldroidGridAdapters
 					.get(getNext(position));
+			
+			Log.d(CommonUtilities.TAG, "Position is " + position);
 
 			if (position == currentPage) {
 				// Refresh current adapter

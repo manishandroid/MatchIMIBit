@@ -1,5 +1,4 @@
-/bin
-/gen
+gen/
+bin/
 project.properties
-.DS_Store
 .gitignore

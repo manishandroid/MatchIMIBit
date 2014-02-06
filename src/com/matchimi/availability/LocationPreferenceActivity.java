@@ -183,7 +183,7 @@ public class LocationPreferenceActivity extends SherlockFragmentActivity {
 //									objs = objs.getJSONObject(CommonUtilities.JSON_KEY_LOCATIONS);
 						
 						if (objs != null) {
-							Log.d(CommonUtilities.TAG, "Location data " + objs.toString());
+//							Log.d(CommonUtilities.TAG, "Location data " + objs.toString());
 							
 							String locationName = jsonParser.getString(objs,
 									CommonUtilities.JSON_KEY_LOCATION_NAME);

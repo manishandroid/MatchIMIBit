@@ -144,7 +144,7 @@ public class LoginActivity extends Activity {
 				boolean validPassword = Validation
 						.isValidPassword(passwordText);
 				if (validEmail && validPassword) {
-//					closeKeyboard();
+					closeKeyboard();
 
 					extraBundle = new Bundle();
 					extraBundle.putString(CommonUtilities.USER_BIRTHDAY, "");
@@ -179,7 +179,8 @@ public class LoginActivity extends Activity {
 		
 		settings = getSharedPreferences(
 				CommonUtilities.PREFS_NAME, Context.MODE_PRIVATE);
-	}	
+		
+	}
 	
 	private void closeKeyboard() {
 		InputMethodManager inputManager = (InputMethodManager)
@@ -577,6 +578,9 @@ public class LoginActivity extends Activity {
 							
 							// Check all fields in user 
 							Boolean checkUserComplete = ValidationUtilities.checkProfileComplete(partTimer);
+							
+							Log.d(CommonUtilities.TAG, "Check user profile is copmlete status : " + checkUserComplete);
+							
 							editor.putBoolean(CommonUtilities.USER_PROFILE_COMPLETE, checkUserComplete);			
 							editor.commit();
 							

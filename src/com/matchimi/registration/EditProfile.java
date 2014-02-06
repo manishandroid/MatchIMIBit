@@ -201,6 +201,8 @@ public class EditProfile extends SherlockActivity {
 	private Uri mVideoUri = null;
 	private VideoView mVideoView;
 	
+	private Boolean isOpeningPage = false;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -711,6 +713,8 @@ public class EditProfile extends SherlockActivity {
 					obj.getString(CommonUtilities.PARAM_PROFILE_IS_VERIFIED));
 			editor.commit();
 			
+			// Marks if user just open the page then don't do form validation
+			isOpeningPage = true;
 			checkUserComplete();
 			
 			updateLayout();			
@@ -1305,13 +1309,27 @@ public class EditProfile extends SherlockActivity {
 				CommonUtilities.PREFS_NAME, Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = settings.edit();
 		
-		if(profileInfo.checkComplete() == true && isUserCompleteInput == true) {
-			editor.putBoolean(USER_PROFILE_COMPLETE, true);
-			Log.d(TAG, "USER PROFILE COMPLETED!");
+		if(isOpeningPage) {
+			isOpeningPage = false;
+			
+			if(profileInfo.checkComplete()) {
+				editor.putBoolean(USER_PROFILE_COMPLETE, true);
+				Log.d(TAG, "USER PROFILE COMPLETED!");
+			} else {
+				editor.putBoolean(USER_PROFILE_COMPLETE, false);
+				Log.d(TAG, "USER PROFILE INCOMPLETED! ProfileInfo : " + profileInfo.checkComplete());
+			}
 		} else {
-			editor.putBoolean(USER_PROFILE_COMPLETE, false);
-			Log.d(TAG, "USER PROFILE INCOMPLETED! ProfileInfo : " + profileInfo.checkComplete() +
-					"; Form Input "+ isUserCompleteInput);
+			Log.d(TAG, "USER PROFILE " + profileInfo.checkComplete() + " " + isUserCompleteInput);
+
+			if(profileInfo.checkComplete() == true && isUserCompleteInput == true) {
+				editor.putBoolean(USER_PROFILE_COMPLETE, true);
+				Log.d(TAG, "USER PROFILE COMPLETED!");
+			} else {
+				editor.putBoolean(USER_PROFILE_COMPLETE, false);
+				Log.d(TAG, "USER PROFILE INCOMPLETED! ProfileInfo : " + profileInfo.checkComplete() +
+						"; Form Input "+ isUserCompleteInput);
+			}
 		}
 		
 		editor.commit();

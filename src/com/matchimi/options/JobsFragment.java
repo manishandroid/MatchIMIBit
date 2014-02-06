@@ -72,6 +72,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
@@ -84,6 +86,7 @@ import com.matchimi.CommonUtilities;
 import com.matchimi.R;
 import com.matchimi.ValidationUtilities;
 import com.matchimi.Variables;
+import com.matchimi.ongoingjobs.OngoingJobsActivity;
 import com.matchimi.utils.ApplicationUtils;
 import com.matchimi.utils.ProcessDataUtils;
 import com.matchimi.utils.JSONParser;
@@ -118,6 +121,7 @@ public class JobsFragment extends Fragment {
 	private List<List<String>> listRequirement = null;
 	private List<List<String>> listOptional = null;
 	private List<String> listLocation = null;
+	private List<String> listJobFunctionName = null;
 	private List<MessageModel> listMessage = null;
 	private List<Float> listRating = null;
 	
@@ -133,6 +137,7 @@ public class JobsFragment extends Fragment {
 	private boolean modeList = true;
 	private boolean newestMode = true;
 	private Context context;
+	private static final int ONGOING_MENU = 1;
 
 	public static final int RC_REJECT = 22;
 	public static final int RC_ACCEPT = 23;
@@ -141,6 +146,7 @@ public class JobsFragment extends Fragment {
 	public static final int RC_JOB_DETAIL = 10;
 	
 	private Button jobAvailaibilityButton;
+	private Button onGoingJobsButton;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -151,6 +157,7 @@ public class JobsFragment extends Fragment {
 	        if (parent != null)
 	            parent.removeView(view);
 	    }
+
 	    try {
 		    view = inflater.inflate(R.layout.jobs_menu, container, false);
 	    } catch (InflateException e) {
@@ -161,6 +168,10 @@ public class JobsFragment extends Fragment {
 		pt_id = settings.getString(CommonUtilities.USER_PTID, null);
 		
 		adapter = new JobAdapter(getActivity());
+		
+//		onGoingJobsButton = (Button) view.findViewById(R.id.onGoingButtonJobOffer);
+//		onGoingJobsButton.setOnClickListener(onGoingListener);
+		
 		listview = (ListView) view.findViewById(R.id.joblistview);
 		listview.setAdapter(adapter);
 		
@@ -214,6 +225,7 @@ public class JobsFragment extends Fragment {
 				i.putExtra("location", listLocation.get(arg2));
 				i.putExtra("progressbar", listProgressBar.get(arg2));
 				i.putExtra("colorstatus", listColorStatus.get(arg2));
+				i.putExtra("job_function_name", listJobFunctionName.get(arg2));
 				
 				i.putExtra(CommonUtilities.JSON_KEY_FRIEND_FACEBOOK_ID, listScheduleFriendsFacebookID.get(arg2).toString());
 				i.putExtra(CommonUtilities.JSON_KEY_FRIEND_FACEBOOK_FIRST_NAME, listScheduleFriendsFirstName.get(arg2).toString());	
@@ -236,7 +248,6 @@ public class JobsFragment extends Fragment {
 		
 		loadData();
 		
-
 		return view;
 	}
 	
@@ -264,10 +275,11 @@ public class JobsFragment extends Fragment {
 				listTimeLeft = new ArrayList<String>();
 				listDescription = new ArrayList<String>();
 				listLocation = new ArrayList<String>();
+				listJobFunctionName = new ArrayList<String>();
 				listProgressBar = new ArrayList<Integer>();
 				listColorStatus = new ArrayList<Boolean>();
 				listRating = new ArrayList<Float>();
-
+				
 				listRequirement = new ArrayList<List<String>>();
 				listOptional = new ArrayList<List<String>>();
 
@@ -290,17 +302,15 @@ public class JobsFragment extends Fragment {
 							SimpleDateFormat formatterDate = new SimpleDateFormat(
 									"EE d, MMM", Locale.getDefault());
 							SimpleDateFormat formatterTime = new SimpleDateFormat(
-									"hh a", Locale.getDefault());
+									"hh:mm a", Locale.getDefault());
 							for (int i = 0; i < items.length(); i++) {
 								/* get all json items, and put it on list */
 								try {
 									JSONObject objs = items.getJSONObject(i);
 									objs = objs.getJSONObject("sub_slots");
 									if (objs != null) {
-										listAvailID.add(jsonParser.getString(
-												objs, "avail_id"));
-										String price = ""
-												+ jsonParser.getDouble(objs,
+										listAvailID.add(jsonParser.getString(objs, "avail_id"));
+										String price = "" + jsonParser.getDouble(objs,
 														"offered_salary");
 										if (Integer
 												.parseInt(price.substring(price
@@ -308,29 +318,27 @@ public class JobsFragment extends Fragment {
 											price = price.substring(0,
 													price.indexOf("."));
 										}
+										
 										listPrice
 												.add("<font color='#A4A9AF'>$</font><big><big><big><big><font color='#276289'>"
 														+ price
 														+ "</font></big></big></big></big><font color='#A4A9AF'>/hr</font>");
+										
 										listAddress.add(jsonParser.getString(
 												objs, "address"));
-										listCompany.add(jsonParser.getString(
-												objs, "company_name"));
+										String companyName = jsonParser.getString(objs, "company_name");
+										String branchName = jsonParser.getString(objs, "branch_name");
 										
-										listDescription
-										.add(jsonParser.getString(objs,
-												"description"));
+										listCompany.add(branchName + ", " +companyName);
 										
-										listLocation.add(jsonParser.getString(
-												objs, "location"));
+										listDescription.add(jsonParser.getString(objs, "description"));
 										
+										listLocation.add(jsonParser.getString(objs, "location"));
+										listJobFunctionName.add(jsonParser.getString(objs, "job_function_name"));
 										listRating.add(Float.parseFloat(jsonParser.getString(objs, "grade")));
 										
-										String startDate = jsonParser
-												.getString(objs,
-														"start_date_time");
-										String endDate = jsonParser.getString(
-												objs, "end_date_time");
+										String startDate = jsonParser.getString(objs, "start_date_time");
+										String endDate = jsonParser.getString(objs, "end_date_time");
 										Calendar calStart = ProcessDataUtils.generateCalendar(startDate);
 										Calendar calEnd = ProcessDataUtils.generateCalendar(endDate);
 										
@@ -610,7 +618,7 @@ public class JobsFragment extends Fragment {
 
 	private void doAcceptOffer() {
 		final String url = CommonUtilities.SERVERURL + CommonUtilities.API_ACCEPT_JOB_OFFER;
-		Log.d(CommonUtilities.TAG, "Accept offers" + url + " >>>\n" + jsonStr);
+		Log.d(CommonUtilities.TAG, "Jobs Fragment Accept offers" + url + " >>>\n" + jsonStr);
 
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
@@ -896,6 +904,14 @@ public class JobsFragment extends Fragment {
 	    }
 
 	}
+	
+	private OnClickListener onGoingListener = new OnClickListener() {
+		@Override
+		public void onClick(View arg0) {
+			Intent i = new Intent(getActivity(), OngoingJobsActivity.class);
+			startActivity(i);
+		}
+	};
 
 	protected void manageTab() {
 		if (modeList) {

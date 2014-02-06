@@ -27,7 +27,6 @@ import com.matchimi.R;
 
 public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 
-
 	public CaldroidSampleCustomAdapter(Context context, int month, int year,
 			HashMap<String, Object> caldroidData,
 			HashMap<String, Object> extraData) {
@@ -45,12 +44,21 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 			Integer backgroundResource = backgroundForDateTimeMap.get(dateTime);
 
 			// Set it
-			if (backgroundResource != null) {
-//				Log.d(CommonUtilities.TAG, "Datetime is " + dateTime);
-				
+			if (backgroundResource != null) {				
 				if (dateTime.compareTo(getToday()) < 0) {
-					textView.setBackgroundResource(R.drawable.circle_past);
+					if (sameDay(dateTime, getToday())) {
+						if (sameDay(dateTime, getToday())) {
+							convertView.setBackgroundResource(R.drawable.red_border);
+						}
+						textView.setBackgroundResource(R.drawable.circle_past);						
+					} else {
+						textView.setBackgroundResource(R.drawable.circle_past);						
+					}
+
 				} else {
+					if (sameDay(dateTime, getToday())) {
+						convertView.setBackgroundResource(R.drawable.red_border);
+					}
 					textView.setBackgroundResource(R.drawable.circle_schedule_availability);
 				}
 				
@@ -70,8 +78,7 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 
 			// Set it
 			if (textColorResource != null) {
-				textView.setTextColor(resources.getColor(textColorResource
-						.intValue()));
+				textView.setTextColor(resources.getColor(textColorResource.intValue()));
 			} else if (sameDay(dateTime, getToday())) {
 				textView.setTextColor(Color.GRAY);
 			} else {
@@ -99,10 +106,12 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 						int pixels = (int) (5 * scale + 0.5f);
 						
 						View labelIndicate = new View(convertView.getContext());
-						LayoutParams params = new LayoutParams(pixels, pixels);		
+						LayoutParams params = new LayoutParams(pixels, pixels);
+
 						if(isMoreThanOne) {
 							params.setMargins((int) (5 * scale + 0.5f), 0, 0, 0);													
 						}
+
 						labelIndicate.setBackgroundResource(pointColorResource.intValue());	
 						labelIndicate.setLayoutParams(params);
 						
@@ -115,7 +124,6 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 					}
 				}
 			}
-
 		}
 	}
 	

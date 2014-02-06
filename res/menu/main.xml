@@ -4,6 +4,7 @@
         android:id="@+id/menu_reload"
         android:icon="@drawable/navigation_refresh"
         android:showAsAction="always"
+        android:visible="false"
         android:title="@string/none_string">
     </item>
     
@@ -54,7 +55,8 @@
                     android:visible="false"></item>
                 <item
                     android:id="@+id/menu_logout"
-                    android:title="@string/menu_logout"/>
+                    android:title="@string/menu_logout"
+                    android:visible="false"/>
                 
             </group>
         </menu>

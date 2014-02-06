@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -33,6 +34,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.provider.Settings.Secure;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gcm.GCMBaseIntentService;
 import com.google.android.gcm.GCMRegistrar;
@@ -44,7 +46,7 @@ import com.matchimi.options.JobDetails;
 import com.matchimi.registration.ProfileRegistrationActivity;
 import com.matchimi.utils.JSONParser;
 import com.matchimi.utils.NetworkUtils;
-
+import com.matchimi.utils.ProcessDataUtils;
 
 /**
  * IntentService responsible for handling GCM messages.
@@ -92,6 +94,12 @@ public class GCMIntentService extends GCMBaseIntentService {
         CommonUtilities.displayMessage(context, message);
 
         if(typeData == 1) {
+        	fowardJobDetails(context, message, avail_id, data);
+        } else if(typeData == 2) {
+        	fowardJobDetails(context, message, avail_id, data);
+        } else if(typeData == 3) {
+        	fowardJobDetails(context, message, avail_id, data);
+        } else if(typeData == 4) {
         	fowardJobDetails(context, message, avail_id, data);
         }
         
@@ -166,30 +174,63 @@ public class GCMIntentService extends GCMBaseIntentService {
     private static void fowardJobDetails(Context context, String message, String avail_id,
     		String data) {
     	Log.d(CommonUtilities.TAG, "Received notification with :" + avail_id + ", " + ", " + message);
-//    	
+
         int icon = R.drawable.ic_stat_gcm;
         long when = System.currentTimeMillis();
         NotificationManager notificationManager = (NotificationManager)
                 context.getSystemService(Context.NOTIFICATION_SERVICE);
         Notification notification = new Notification(icon, message, when);
+
+        JSONParser jsonParser = new JSONParser();
         
-        String title = context.getString(R.string.app_name);
-//        String data = "{\"address\":\"5 Tampines Street 32 #01-07/16 Tampines Mart\",\"avail_id\":2315,\"branch_id\":10,\"branch_name\":\"Tampines Mart\",\"company_id\":2,\"company_name\":\"ABC F&B\",\"description\":\"\",\"end_date_time\":\"2014-03-11T04:00:00+08:00\",\"expired_at\":\"2014-01-21T21:59:59+08:00\",\"friends\":[],\"grade\":\"0\",\"job_function_id\":1,\"job_function_name\":\"Banquet Staff\",\"latitude\":\"1.354349\",\"location\":\"1.354349,103.9602589\",\"longitude\":\"103.9602589\",\"main_slot_id\":205,\"mandatory_requirements\":[\"Must wear black shoes\",\"Must wear back pants\"],\"offered_salary\":7.5,\"optional_requirements\":[],\"postal_code\":\"529284\",\"start_date_time\":\"2014-03-11T23:00:00+08:00\",\"status\":\"MA\",\"sub_slot_id\":1653,\"ts_end_date_time\":1394481600,\"ts_expired_at\":1390312799,\"ts_start_date_time\":1394550000}";
-        		
-        // When user click notification message, redirect them to Job Page
-        Intent notificationIntent = new Intent(context, JobDetails.class);
-        notificationIntent.putExtra("avail_id", avail_id);
-        notificationIntent.putExtra("is_notification", true);        
-        notificationIntent.putExtra("data", data);
-        
-        // set intent so it does not start a new activity
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
-                Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent intent =
-                PendingIntent.getActivity(context, 0, notificationIntent, 0);
-        notification.setLatestEventInfo(context, title, message, intent);
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-        notificationManager.notify(0, notification);
+        JSONObject objs;
+
+		try {
+			objs = new JSONObject(data);
+			objs = objs.getJSONObject("sub_slots");
+	        String expiredAt = jsonParser.getString(objs, "expired_at");
+	        Calendar calExpiredAt = ProcessDataUtils.generateCalendar(expiredAt);
+			Calendar calToday = Calendar.getInstance();
+
+			if(calToday.getTimeInMillis() > calExpiredAt.getTimeInMillis()) {
+				String title = context.getString(R.string.app_name);
+		        Intent notificationIntent = new Intent(context, HomeActivity.class);
+		        notificationIntent.putExtra("is_expired", true);
+		        
+		        // set intent so it does not start a new activity
+		        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+		                Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		        PendingIntent intent =
+		                PendingIntent.getActivity(context, 0, notificationIntent, 0);
+		        notification.setLatestEventInfo(context, title, message, intent);
+		        notification.flags |= Notification.FLAG_AUTO_CANCEL;
+		        notificationManager.notify(0, notification);
+		        
+			} else {
+		        String title = context.getString(R.string.app_name);
+//		        String data = "{\"address\":\"5 Tampines Street 32 #01-07/16 Tampines Mart\",\"avail_id\":2315,\"branch_id\":10,\"branch_name\":\"Tampines Mart\",\"company_id\":2,\"company_name\":\"ABC F&B\",\"description\":\"\",\"end_date_time\":\"2014-03-11T04:00:00+08:00\",\"expired_at\":\"2014-01-21T21:59:59+08:00\",\"friends\":[],\"grade\":\"0\",\"job_function_id\":1,\"job_function_name\":\"Banquet Staff\",\"latitude\":\"1.354349\",\"location\":\"1.354349,103.9602589\",\"longitude\":\"103.9602589\",\"main_slot_id\":205,\"mandatory_requirements\":[\"Must wear black shoes\",\"Must wear back pants\"],\"offered_salary\":7.5,\"optional_requirements\":[],\"postal_code\":\"529284\",\"start_date_time\":\"2014-03-11T23:00:00+08:00\",\"status\":\"MA\",\"sub_slot_id\":1653,\"ts_end_date_time\":1394481600,\"ts_expired_at\":1390312799,\"ts_start_date_time\":1394550000}";
+		        		
+		        // When user click notification message, redirect them to Job Page
+		        Intent notificationIntent = new Intent(context, JobDetails.class);
+		        notificationIntent.putExtra("avail_id", avail_id);
+		        notificationIntent.putExtra("is_notification", true);        
+		        notificationIntent.putExtra("data", data);
+		        
+		        // set intent so it does not start a new activity
+		        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+		                Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		        PendingIntent intent =
+		                PendingIntent.getActivity(context, 0, notificationIntent, 0);
+		        notification.setLatestEventInfo(context, title, message, intent);
+		        notification.flags |= Notification.FLAG_AUTO_CANCEL;
+		        notificationManager.notify(0, notification);
+			}
+			
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
     }
 
 

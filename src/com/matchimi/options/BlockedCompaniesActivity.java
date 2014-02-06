@@ -19,12 +19,14 @@ import org.json.JSONObject;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RatingBar;
@@ -59,6 +61,7 @@ public class BlockedCompaniesActivity extends SherlockActivity {
 	private List<String> listName;
 	private List<String> listPostalCode;
 	private LinearLayout blockedCompaniesLayout;
+	private List<String> listBranchId;
 	
 	private JSONParser jsonParser = null;
 	private String jsonStr = null;
@@ -100,6 +103,7 @@ public class BlockedCompaniesActivity extends SherlockActivity {
 //				listGrade = new ArrayList<String>();
 				listName= new ArrayList<String>();
 				listPostalCode = new ArrayList<String>();
+				listBranchId = new ArrayList<String>();
 				
 				if (jsonStr != null) {
 					try {
@@ -121,6 +125,10 @@ public class BlockedCompaniesActivity extends SherlockActivity {
 										CommonUtilities.PARAM_BLOCKED_COMPANIES_NAME);
 								
 								listName.add(branchName + ", " + companyName);
+
+								String branchID = jsonParser.getString(objs, 
+										CommonUtilities.PARAM_BLOCKED_BRANCH_ID);
+								listBranchId.add(branchID);
 								
 								String information = "";
 								String postal_code = jsonParser.getString(objs,
@@ -141,6 +149,7 @@ public class BlockedCompaniesActivity extends SherlockActivity {
 					Toast.makeText(context,
 							getString(R.string.server_error), Toast.LENGTH_SHORT).show();
 				}
+
 				createLayout();
 			}
 		};
@@ -151,6 +160,7 @@ public class BlockedCompaniesActivity extends SherlockActivity {
 			public void run() {
 				jsonParser = new JSONParser();
 				jsonStr = jsonParser.getHttpResultUrlGet(url);
+
 				if (progress != null && progress.isShowing()) {
 					progress.dismiss();
 					mHandlerFeed.post(mUpdateResultsFeed);
@@ -160,6 +170,8 @@ public class BlockedCompaniesActivity extends SherlockActivity {
 	}
 	
 	protected void createLayout() {
+		blockedCompaniesLayout.removeAllViews();
+		
 		if (listName != null && listName.size() > 0) {
 			for (int i = 0; i < listName.size(); i++) {
 				LayoutInflater li = LayoutInflater.from(context);
@@ -180,9 +192,83 @@ public class BlockedCompaniesActivity extends SherlockActivity {
 						.findViewById(R.id.blockedcompanies_information);
 				informationView.setText(listPostalCode.get(i));
 				
+				Button buttonUnblock = (Button) v
+						.findViewById(R.id.unblockButton);
+				buttonUnblock.setOnClickListener(unblockOnClick(v, i));
 				blockedCompaniesLayout.addView(v);
 			}
 		}
+	}
+	
+	private View.OnClickListener unblockOnClick(final View view,
+			final int position) {
+		return new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				submitUnblock(position);
+			}
+		};
+	}
+	
+	protected void submitUnblock(final Integer position) {
+		final String url = SERVERURL + CommonUtilities.API_UNBLOCK_COMPANY;
+		final Handler mHandlerFeed = new Handler();
+		final Runnable mUpdateResultsFeed = new Runnable() {
+			public void run() {
+
+				if (jsonStr != null) {
+					if (jsonStr.trim().equalsIgnoreCase("0")) {
+						loadBlockedCompanies();
+						
+					} else if (jsonStr.trim().equalsIgnoreCase("1")) {
+						Toast.makeText(context,
+								getString(R.string.unblock_error),
+								Toast.LENGTH_SHORT).show();
+					} else {
+						NetworkUtils.connectionHandler(context, jsonStr, "");
+					}
+					
+				} else {
+					Toast.makeText(context, getString(R.string.server_error),
+							Toast.LENGTH_LONG).show();
+				}
+			}
+		};
+
+		progress = ProgressDialog.show(context,
+				getString(R.string.unblock),
+				getString(R.string.unblock_loading), true, false);
+		new Thread() {
+			public void run() {
+				jsonParser = new JSONParser();
+
+				try {
+					JSONObject parentData = new JSONObject();
+					JSONObject childData = new JSONObject();
+					
+					childData.put("pt_id", pt_id);
+					childData.put("branch_id", listBranchId.get(position));
+
+					parentData.put("part_timer", childData);
+
+					String[] params = { "data" };
+					String[] values = { parentData.toString() };
+					jsonStr = jsonParser.getHttpResultUrlPut(url, params,
+							values);
+					Log.e(TAG, "Put data to " + url + " with data >>>\n"
+							+ parentData.toString());
+					Log.e(TAG, "Submit preferred jobs result >>> " + jsonStr);
+
+				} catch (Exception e) {
+					jsonStr = null;
+				}
+
+				if (progress != null && progress.isShowing()) {
+					progress.dismiss();
+					mHandlerFeed.post(mUpdateResultsFeed);
+				}
+			}
+		}.start();
 	}
 
 

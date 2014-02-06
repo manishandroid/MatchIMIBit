@@ -715,15 +715,13 @@ public class ProfileFragment extends Fragment {
 
 		nricView.setText(userNRIC);
 
-		// Set user profile
-		avatarView = (ImageView) view.findViewById(R.id.profile_avatar);
-
-		avatarView.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-				askImageFrom(TAKE_IMG_PROFILE);
-			}
-		});
+		// Set user profile onclick
+//		avatarView.setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View arg0) {
+//				askImageFrom(TAKE_IMG_PROFILE);
+//			}
+//		});
 
 		ratingBar.setRating(settings.getInt(CommonUtilities.USER_RATING, 0));
 

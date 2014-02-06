@@ -1,22 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <style name="AppTheme" parent="Theme.Sherlock.Light"/>
-    	    
+
+    <style name="AppTheme" parent="Theme.Sherlock.Light" />
+
     <style name="Theme.Yoers" parent="@style/Theme.Sherlock.Light">
         <item name="android:backgroundDimEnabled">false</item>
         <!-- <item name="actionBarStyle">@style/example_solid_ActionBar</item> -->
         <!-- <item name="android:actionBarStyle">@style/example_solid_ActionBar</item> -->
     </style>
-    
-    
+
     <style name="SampleTheme" parent="@style/Theme.Sherlock.Light">
+        <item name="actionMenuTextColor">@color/blue</item>
         <item name="numberPickerStyle">@style/NPWidget.Holo.NumberPicker</item>
+        <item name="actionBarStyle">@style/MyApp.SherlockActionBarStyle</item>
+        <item name="android:actionMenuTextColor">@color/blue</item>
+        <item name="android:actionBarStyle">@style/MyApp.SherlockActionBarStyle</item>
     </style>
 
     <style name="SampleTheme.Light" parent="@style/Theme.Sherlock.Light">
+        <item name="actionMenuTextColor">@color/blue</item>
         <item name="numberPickerStyle">@style/NPWidget.Holo.Light.NumberPicker</item>
+        <item name="actionBarStyle">@style/MyApp.SherlockActionBarStyle</item>
+        <item name="android:actionMenuTextColor">@color/blue</item>
+        <item name="android:actionBarStyle">@style/MyApp.SherlockActionBarStyle</item>
     </style>
-    
+
+    <style name="MyApp.SherlockActionBarStyle" parent="@style/Widget.Sherlock.ActionBar">
+        <item name="titleTextStyle">@style/MyApp.ActionBar.TextAppearance</item>
+    </style>
+
+    <style name="MyApp.ActionBar.TextAppearance" parent="@style/TextAppearance.Sherlock.Widget.ActionBar.Menu">
+        <item name="android:textSize">@dimen/calendar_text_small</item>
+        <item name="android:textColor">@color/blue_sky</item>
+    </style>
 
     <style name="example_solid_ActionBar" parent="@style/Widget.Sherlock.Light.ActionBar.Solid">
         <item name="background">@drawable/bg_ab</item>
@@ -60,15 +76,16 @@
         <item name="android:clickable">true</item>
         <item name="android:textStyle">bold</item>
     </style>
-    
+
     <style name="StyledIndicators" parent="@android:style/Theme.Light">
         <item name="vpiCirclePageIndicatorStyle">@style/CustomCirclePageIndicator</item>
-	    <item name="android:windowNoTitle">true</item>
-<!--         <item name="vpiLinePageIndicatorStyle">@style/CustomLinePageIndicator</item> -->
-<!--         <item name="vpiTitlePageIndicatorStyle">@style/CustomTitlePageIndicator</item> -->
-<!--         <item name="vpiTabPageIndicatorStyle">@style/CustomTabPageIndicator</item> -->
-<!--         <item name="vpiUnderlinePageIndicatorStyle">@style/CustomUnderlinePageIndicator</item> -->
-    </style>    
+        <item name="android:windowNoTitle">true</item>
+        <!-- <item name="vpiLinePageIndicatorStyle">@style/CustomLinePageIndicator</item> -->
+        <!-- <item name="vpiTitlePageIndicatorStyle">@style/CustomTitlePageIndicator</item> -->
+        <!-- <item name="vpiTabPageIndicatorStyle">@style/CustomTabPageIndicator</item> -->
+        <!-- <item name="vpiUnderlinePageIndicatorStyle">@style/CustomUnderlinePageIndicator</item> -->
+    </style>
+
     <style name="CustomCirclePageIndicator">
         <item name="fillColor">#FFFFFFFF</item>
         <item name="strokeColor">#FFFFFFFF</item>
@@ -76,12 +93,14 @@
         <item name="radius">5dp</item>
         <item name="centered">true</item>
     </style>
+
     <style name="CustomLinePageIndicator">
         <item name="strokeWidth">4dp</item>
         <item name="lineWidth">30dp</item>
         <item name="unselectedColor">#FF888888</item>
         <item name="selectedColor">#FF880000</item>
     </style>
+
     <style name="CustomTitlePageIndicator">
         <item name="android:background">#18FF0000</item>
         <item name="footerColor">#FFAA2222</item>
@@ -92,6 +111,7 @@
         <item name="selectedColor">#FF000000</item>
         <item name="selectedBold">true</item>
     </style>
+
     <style name="CustomTabPageIndicator" parent="Widget.TabPageIndicator">
         <item name="android:textColor">#FF555555</item>
         <item name="android:textSize">16sp</item>
@@ -100,10 +120,12 @@
         <item name="android:fadingEdge">horizontal</item>
         <item name="android:fadingEdgeLength">8dp</item>
     </style>
+
     <style name="CustomUnderlinePageIndicator">
         <item name="selectedColor">#FFCC0000</item>
         <item name="android:background">#FFCCCCCC</item>
         <item name="fadeLength">1000</item>
         <item name="fadeDelay">1000</item>
     </style>
+
 </resources>

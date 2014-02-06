@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.matchimi"
-    android:versionCode="3"
-    android:versionName="2.2" >
+    android:versionCode="4"
+    android:versionName="2.3" >
 
     <uses-sdk
         android:minSdkVersion="10"
         android:targetSdkVersion="17" />
 
     <supports-screens
-		android:smallScreens="true"
-		android:normalScreens="true"
-		android:largeScreens= "true"
-		android:anyDensity="true"/>
-    
+        android:anyDensity="true"
+        android:largeScreens="true"
+        android:normalScreens="true"
+        android:smallScreens="true" />
+
     <permission
         android:name="com.matchimi.permission.MAPS_RECEIVE"
         android:protectionLevel="signature" />
@@ -37,8 +37,10 @@
     </uses-permission>
     <uses-permission android:name="android.permission.CAMERA" />
 
-    <!-- permission required to use Alarm Manager
-    <uses-permission android:name="com.android.alarm.permission.SET_ALARM" /> -->
+    <!--
+    permission required to use Alarm Manager
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
+    -->
 
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
@@ -52,7 +54,8 @@
      Creates a custom permission so only this app can receive its messages.
 
      NOTE: the permission *must* be called PACKAGE.permission.C2D_MESSAGE,
-           where PACKAGE is the application's package name.    -->
+           where PACKAGE is the application's package name.
+    -->
     <permission
         android:name="com.matchimi.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
@@ -61,22 +64,22 @@
 
     <!-- This app has permission to register and receive data message. -->
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-    
+
     <application
-        android:allowBackup="true"
         android:name="ApplicationGlobal"
+        android:allowBackup="true"
         android:icon="@drawable/icons"
         android:label="@string/app_name"
         android:largeHeap="true"
         android:theme="@style/SampleTheme.Light" >
-        
         <uses-library android:name="com.google.android.maps" />
 
         <activity
             android:name="com.matchimi.HomeActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
             android:label="@string/app_name"
-            android:windowSoftInputMode="adjustResize|stateHidden" >
+            android:windowSoftInputMode="adjustResize" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -224,7 +227,7 @@
             android:label="@string/notifications"
             android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
-		<activity
+        <activity
             android:name="com.matchimi.profile.FeedbacksActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/profile_feedback"
@@ -236,48 +239,55 @@
             android:label="@string/preferred_jobs"
             android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
-        
-        <activity android:name="com.matchimi.guideline.GuidelineMain"
+        <activity
+            android:name="com.matchimi.guideline.GuidelineMain"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/guideline"
-            android:theme="@style/StyledIndicators" 
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden">          
+            android:theme="@style/StyledIndicators"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
-        <activity android:name="com.matchimi.guideline.AddFragment"
+        <activity
+            android:name="com.matchimi.guideline.AddFragment"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden">            
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
-        <activity android:name="com.matchimi.guideline.CalendarFragment"
+        <activity
+            android:name="com.matchimi.guideline.CalendarFragment"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden">
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
-        <activity android:name="com.matchimi.guideline.JobFragment"
+        <activity
+            android:name="com.matchimi.guideline.JobFragment"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden">
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
-        <activity android:name="com.matchimi.guideline.ProfileFragment"
+        <activity
+            android:name="com.matchimi.guideline.ProfileFragment"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden">
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
-        <activity android:name="com.matchimi.ongoingjobs.OngoingJobsActivity"
+        <activity
+            android:name="com.matchimi.ongoingjobs.OngoingJobsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden">
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
-        <activity android:name="com.matchimi.ongoingjobs.OngoingJobsLocationActivity"
+        <activity
+            android:name="com.matchimi.ongoingjobs.OngoingJobsLocationActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden">
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
-        <activity android:name="com.matchimi.ongoingjobs.OngoingJobsAdapter"
+        <activity
+            android:name="com.matchimi.ongoingjobs.OngoingJobsAdapter"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize|stateHidden">
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
-        
+
         <!--
           BroadcastReceiver that will receive intents from GCM
           services and handle them to the custom IntentService.
 
           The com.google.android.c2dm.permission.SEND permission is necessary
-          so only GCM services can send data messages for the app.
+          so only GCM services can send data messages for the app.
         -->
         <receiver
             android:name="com.google.android.gcm.GCMBroadcastReceiver"
@@ -292,17 +302,17 @@
                 <category android:name="com.matchimi" />
             </intent-filter>
         </receiver>
-       
-        
-	<!-- Register the Alarm Receiver -->
-       <!--  <receiver android:name="com.matchimi.MatchimiAlarmReceiver"/>  -->
+
+        <!-- Register the Alarm Receiver -->
+        <!-- <receiver android:name="com.matchimi.MatchimiAlarmReceiver"/> -->
+
 
         <!--
           Application-specific subclass of GCMBaseIntentService that will
           handle received messages.
 
           By default, it must be named .GCMIntentService, unless the
-          application uses a custom BroadcastReceiver that redefines its name.
+          application uses a custom BroadcastReceiver that redefines its name.
         -->
         <service android:name=".GCMIntentService" />
 
@@ -312,6 +322,9 @@
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
 
         <activity
             android:name="com.matchimi.SettingsActivity"

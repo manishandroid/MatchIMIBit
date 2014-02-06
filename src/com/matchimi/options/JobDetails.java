@@ -125,11 +125,13 @@ public class JobDetails extends SherlockFragmentActivity {
 	private String location;
 	private String rawOptional = "";
 	private String rawRequirement = "";
+	private String jobFunctionName = "";
 	private String place = "";
 	private String price;		
 	private String expire;
 	private String description;		
 	private String date;
+	private String sub_slot_id;
 	
 	private String friendsFacebookId = null;
 	private String friendsFacebookFirstName = null;
@@ -142,9 +144,10 @@ public class JobDetails extends SherlockFragmentActivity {
 	private List<String> listScheduleFriendsLastName = new ArrayList<String>();	
 	private List<String> listScheduleFriendsProfilePicture = new ArrayList<String>();
 	private List<String> listScheduleFriendsPtID = new ArrayList<String>();
-	
 	private List<String> listRequirement = new ArrayList<String>();
 	private List<String> listOptional = new ArrayList<String>();
+	
+	private Boolean isOngoing = false;
 	
 	private int progressbar;
 	private boolean colorstatus;
@@ -181,7 +184,8 @@ public class JobDetails extends SherlockFragmentActivity {
 			Intent i = new Intent(CommonUtilities.BROADCAST_SCHEDULE_RECEIVER);
 			sendBroadcast(i);
 			
-			showJobOfferFromNofiticationFlow(b);		
+			showJobOfferFromNofiticationFlow(b);
+
 		} else {
 			showJobOfferFromNormalFlow(b);
 		}
@@ -279,7 +283,7 @@ public class JobDetails extends SherlockFragmentActivity {
 			
 			textOptional.setText(optionalText);
 		}
-
+		
 		TextView buttonAccept = (TextView) findViewById(R.id.buttonAccept);
 		buttonAccept.setOnClickListener(new OnClickListener() {
 			@Override
@@ -360,6 +364,7 @@ public class JobDetails extends SherlockFragmentActivity {
 				location = jsonParser.getString(objs, "location");
 				
 				place = jsonParser.getString(objs, "company_name") + "\n" + jsonParser.getString(objs, "address");
+				jobFunctionName = jsonParser.getString(objs, "job_function_name");
 				
 				String startDate = jsonParser
 						.getString(objs,
@@ -513,7 +518,9 @@ public class JobDetails extends SherlockFragmentActivity {
 		
 	}
 	
-	
+	/**
+	 * Normal flow showing job details from Job offers, Ongoing or Schedule pages
+	 */
 	private void showJobOfferFromNormalFlow(Bundle b) {
 		avail_id = b.getString("avail_id");
 		price = b.getString("price");
@@ -521,6 +528,7 @@ public class JobDetails extends SherlockFragmentActivity {
 		place = b.getString("place");
 		expire = b.getString("expire");
 		description = b.getString("description");
+		jobFunctionName = b.getString("job_function_name");
 		
 		friendsFacebookId = b.getString(CommonUtilities.JSON_KEY_FRIEND_FACEBOOK_ID);
 //		Log.d(CommonUtilities.TAG, "Received " + friendsFacebookId);
@@ -552,6 +560,7 @@ public class JobDetails extends SherlockFragmentActivity {
 		location = b.getString("location");
 		progressbar = b.getInt("progressbar");
 		colorstatus = b.getBoolean("colorstatus");
+		sub_slot_id = b.getString("sub_slot_id");
 		
 		// Set value
 		TextView textPrice = (TextView) findViewById(R.id.textPrice);
@@ -564,10 +573,14 @@ public class JobDetails extends SherlockFragmentActivity {
 		
 		// Check if Job Offer or My Schedule is coming here
 		String jobType = b.getString("type");
+		
 		if (jobType.equalsIgnoreCase("offer")) {
 			textProgressBar.setText(expire + " before this offer expires");			
 		} else if (jobType.equalsIgnoreCase("accepted")) {
 			textProgressBar.setText("Job for " + expire);
+		} else if (jobType.equalsIgnoreCase("ongoing")) {
+			isOngoing = true;
+			textProgressBar.setVisibility(View.GONE);
 		} else {
 			textProgressBar.setText(expire);
 		}
@@ -682,7 +695,7 @@ public class JobDetails extends SherlockFragmentActivity {
 		LinearLayout friendsLayout = (LinearLayout)findViewById(R.id.friendsLayout);
 		RelativeLayout inboxLayout = (RelativeLayout)findViewById(R.id.inboxLayout);
 		
-		if (jobType.equalsIgnoreCase("offer")) {
+		if (jobType.equalsIgnoreCase("offer") || jobType.equalsIgnoreCase("ongoing")) {
 			loadFriends();
 //			loadInbox();
 			
@@ -1059,7 +1072,6 @@ public class JobDetails extends SherlockFragmentActivity {
 	}
 	
 	protected void doCancelOffer(String inputReason) {
-		Log.e(TAG, ">>> Reason: " + inputReason);
 		reasons = inputReason;
 		final String url = SERVERURL+ API_WITHDRAW_AVAILABILITY;
 		final Handler mHandlerFeed = new Handler();
@@ -1095,12 +1107,18 @@ public class JobDetails extends SherlockFragmentActivity {
 		new Thread() {
 			public void run() {
 				jsonParser = new JSONParser();
-				String[] params = { "avail_id"};
-				String[] values = { avail_id
-						};
-//				String[] params = { "avail_id", "reasons"};
-//				String[] values = { avail_id, reasons };
-				jsonStr = jsonParser.getHttpResultUrlPut(url, params, values);
+				
+				if(isOngoing) {
+					String[] params = { "sub_slot_id", "pt_id"};
+					String[] values = { sub_slot_id, pt_id};
+					jsonStr = jsonParser.getHttpResultUrlPut(url, params, values);
+					
+				} else {
+					String[] params = { "avail_id"};
+					String[] values = { avail_id};
+					jsonStr = jsonParser.getHttpResultUrlPut(url, params, values);
+					
+				}
 
 				if (progress != null && progress.isShowing()) {
 					progress.dismiss();
@@ -1114,7 +1132,13 @@ public class JobDetails extends SherlockFragmentActivity {
 	 * Reject offer action
 	 */
 	protected void doRejectOffer(final boolean isBlocked) {		
-		final String url = CommonUtilities.SERVERURL + CommonUtilities.API_REJECT_JOB_OFFER;
+		final String url;
+		if(isOngoing) {
+			url = CommonUtilities.SERVERURL + CommonUtilities.API_REJECT_ONGOING_JOB;			
+		} else {
+			url = CommonUtilities.SERVERURL + CommonUtilities.API_REJECT_JOB_OFFER;
+		}
+		
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
@@ -1160,18 +1184,33 @@ public class JobDetails extends SherlockFragmentActivity {
 					JSONObject parentData = new JSONObject();
 					JSONObject childData = new JSONObject();				
 
-					childData.put("avail_id", avail_id);
-					if(isBlocked) {
-						childData.put("blocked", 1);					
+					if(isOngoing) {
+						String blocked = "0";
+						if(isBlocked) {
+							blocked = "1";
+						}
+						
+						String[] params = { "pt_id", "sub_slot_id", "blocked"};
+						String[] values = { pt_id, sub_slot_id, blocked};
+						
+						jsonStr = jsonParser.getHttpResultUrlPut(url, params, values);
+						
 					} else {
-						childData.put("blocked", 0);
+						childData.put("avail_id", avail_id);						
+
+						if(isBlocked) {
+							childData.put("blocked", 1);					
+						} else {
+							childData.put("blocked", 0);
+						}
+
+						parentData.put("job_offer", childData);
+						String[] params = { "data" };
+						String[] values = { parentData.toString() };
+						jsonStr = jsonParser.getHttpResultUrlPut(url, params, values);						
 					}
-					parentData.put("job_offer", childData);
-					String[] params = { "data" };
-					String[] values = { parentData.toString() };
+
 					
-					jsonStr = jsonParser.getHttpResultUrlPut(url, params, values);
-					Log.d(TAG, "Put into " + url + " with data " + parentData.toString());
 					Log.d(TAG, "Result >>> " + jsonStr);
 					
 				} catch (JSONException e) {
@@ -1187,7 +1226,13 @@ public class JobDetails extends SherlockFragmentActivity {
 	}
 
 	protected void doAcceptOffer() {
-		final String url = CommonUtilities.SERVERURL + CommonUtilities.API_ACCEPT_JOB_OFFER;
+		final String url;
+		if(isOngoing) {
+			url = CommonUtilities.SERVERURL + CommonUtilities.API_ACCEPT_ONGOING_JOB;			
+		} else {
+			url = CommonUtilities.SERVERURL + CommonUtilities.API_ACCEPT_JOB_OFFER;			
+		}
+
 		final Handler mHandlerFeed = new Handler();
 		final Runnable mUpdateResultsFeed = new Runnable() {
 			public void run() {
@@ -1199,6 +1244,7 @@ public class JobDetails extends SherlockFragmentActivity {
 						Intent i = new Intent(CommonUtilities.BROADCAST_SCHEDULE_RECEIVER);
 						sendBroadcast(i);
 						
+						// Reload job offers
 						Intent jobBroadcast = new Intent(CommonUtilities.BROADCAST_JOBS_RECEIVER);
 						sendBroadcast(jobBroadcast);
 
@@ -1235,9 +1281,18 @@ public class JobDetails extends SherlockFragmentActivity {
 		new Thread() {
 			public void run() {
 				jsonParser = new JSONParser();
-				String[] params = { "avail_id" };
-				String[] values = { avail_id };
-				jsonStr = jsonParser.getHttpResultUrlPut(url, params, values);
+				
+				if(isOngoing) {
+					String[] params = { "pt_id", "sub_slot_id" };
+					String[] values = { pt_id, sub_slot_id };
+					Log.d(CommonUtilities.TAG, "Accept with sub_slot_id : " + sub_slot_id + ", pt_id: " + pt_id );
+					jsonStr = jsonParser.getHttpResultUrlPut(url, params, values);					
+				} else {
+					String[] params = { "avail_id" };
+					String[] values = { avail_id };
+					Log.d(CommonUtilities.TAG, "Accept with avail_id : " + avail_id);
+					jsonStr = jsonParser.getHttpResultUrlPut(url, params, values);					
+				}
 
 				if (progress != null && progress.isShowing()) {
 					progress.dismiss();
@@ -1254,9 +1309,11 @@ public class JobDetails extends SherlockFragmentActivity {
 			String longtitude = location.substring(location.indexOf(",") + 1);
 			LatLng pos = new LatLng(Double.parseDouble(latitude),
 					Double.parseDouble(longtitude));
+			
+			Log.d(CommonUtilities.TAG, "Long itude " + jobFunctionName + ", " + description);
 
-			map.addMarker(new MarkerOptions().position(pos).title("Matchimi")
-					.snippet("Job area")
+			map.addMarker(new MarkerOptions().position(pos).title(jobFunctionName)
+					.snippet(description)
 					.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin)));
 			// Move the camera instantly to hamburg with a zoom of 15.
 			map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 12));
@@ -1519,6 +1576,7 @@ public class JobDetails extends SherlockFragmentActivity {
                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                    public void onClick(DialogInterface dialog, int id) {
                       // Nothing here
+                	   Log.d(CommonUtilities.TAG, "Check isProfileComplete " + isProfileComplete);
                    }
                });
         Dialog dialog = builder.create();

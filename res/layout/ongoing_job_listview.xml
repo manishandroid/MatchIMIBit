@@ -1,10 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical" >
-    <ListView 
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent" >
+
+    <ProgressBar
+        android:id="@+id/ongoingProgress"
+        style="@android:style/Widget.ProgressBar.Large"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" />
+
+    <ListView
         android:id="@+id/ongoing_job_listview"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"></ListView>
-</LinearLayout>
+        android:layout_height="wrap_content" >
+    </ListView>
+
+</RelativeLayout>

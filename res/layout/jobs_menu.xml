@@ -3,6 +3,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent" >
+    
+     <!--<LinearLayout
+        android:id="@+id/onGoingJobsOfferWrapper"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/onGoingButtonJobOffer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@color/gray"
+            android:textColor="@color/white"
+            android:padding="12dp"
+            android:text="@string/ongoing_jobs"/>
+    </LinearLayout>-->
+    
 
     <LinearLayout
         android:id="@+id/layTop"

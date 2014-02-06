@@ -6,12 +6,14 @@ import static com.matchimi.CommonUtilities.PREFS_NAME;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -20,6 +22,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -33,26 +36,32 @@ import com.actionbarsherlock.widget.ShareActionProvider;
 import com.matchimi.availability.HomeAvailabilityActivity;
 import com.matchimi.NotificationActivity;
 import com.matchimi.ongoingjobs.OngoingJobsActivity;
+import com.matchimi.ongoingjobs.OngoingJobsLocationActivity;
 import com.matchimi.options.FriendsActivity;
 import com.matchimi.options.HistoryDetail;
 import com.matchimi.options.JobsFragment;
 import com.matchimi.registration.LoginActivity;
 import com.matchimi.utils.ApplicationUtils;
+import com.matchimi.utils.LocationUtility;
 
 public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 
 	private ViewPager mViewPager;
 	private TabsAdapter adapter;
-
+	private static final int ONGOING_MENU = 1;
+	private static Integer item;
+	
 	private SharedPreferences settings;
 	private SharedPreferences.Editor prefEditor;
-
+	private Context context;
+	private Location location;
+	final int SWITCHER = 33;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
 		/* load setting from pref */
-		settings = getSharedPreferences(CommonUtilities.PREFS_NAME,
-				MODE_PRIVATE);
+		settings = getSharedPreferences(CommonUtilities.PREFS_NAME, MODE_PRIVATE);
 		prefEditor = settings.edit();
 
 		if (settings.getInt(CommonUtilities.SETTING_THEME,
@@ -62,6 +71,8 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 			setTheme(ApplicationUtils.getTheme(false));
 		}
 
+		context = this;
+		
 		/*
 		 * Create the ViewPager and our custom adapter
 		 */
@@ -69,7 +80,7 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 		adapter = new TabsAdapter(this, mViewPager);
 		mViewPager.setAdapter(adapter);
 		mViewPager.setOnPageChangeListener(adapter);
-
+		
 		/*
 		 * We need to provide an ID for the ViewPager, otherwise we will get an
 		 * exception like:
@@ -86,11 +97,16 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 		mViewPager.setId(0x7F04FFF0);
 		super.onCreate(savedInstanceState);
 
+		item = 0;
+		
 		/*
 		 * Set the ViewPager as the content view
 		 */
 		setContentView(mViewPager);
+
+		
 	}
+	
 
 	/**
 	 * Add a tab with a backing Fragment to the action bar
@@ -142,6 +158,7 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 		private final SherlockFragmentActivity mActivity;
 		private final ActionBar mActionBar;
 		private final ViewPager mPager;
+		private Boolean isFirstTime = true;
 
 		/**
 		 * @param fm
@@ -152,9 +169,8 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 			this.mActivity = activity;
 			this.mActionBar = activity.getSupportActionBar();
 			this.mPager = pager;
-
-			mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 			
+			mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 		}
 
 		private static class TabInfo {
@@ -207,6 +223,16 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 			 * Select tab when user swiped
 			 */
 			mActionBar.setSelectedNavigationItem(position);
+			item = position;
+			
+			Log.d(CommonUtilities.TAG, "Is first time " + isFirstTime + " with position " + 0);
+			
+			if(position != 0 || !isFirstTime) {
+				Log.d(CommonUtilities.TAG, "Ongoing " + position + " " + isFirstTime);
+				mActivity.supportInvalidateOptionsMenu();
+			}
+			
+			Log.d(CommonUtilities.TAG, "Fragment position now : " + position);
 		}
 
 		public void onTabSelected(Tab tab, FragmentTransaction ft) {
@@ -214,8 +240,13 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 			 * Slide to selected fragment when user selected tab
 			 */
 			TabInfo tabInfo = (TabInfo) tab.getTag();
+			
 			for (int i = 0; i < mTabs.size(); i++) {
 				if (mTabs.get(i) == tabInfo) {
+					if(i != 0) {
+						isFirstTime = false;
+					}
+					
 //					Log.e(CommonUtilities.TAG, "Page Selected : " + i);
 					if(i != 1) {
 						final Intent scheduleIntent = new Intent("schedule.receiver");						
@@ -224,7 +255,7 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 					
 					mPager.setCurrentItem(i);
 				}
-			}
+			}			
 		}
 
 		public void onTabUnselected(Tab tab, FragmentTransaction ft) {
@@ -239,11 +270,40 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 		super.onConfigurationChanged(newConfig);
 	}
 
+	@Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+		Log.d(CommonUtilities.TAG, "Create option menu with item " + item);
+		
+		if(item == 1) {
+			menu.add(0, ONGOING_MENU, 0, "Map").setIcon(R.drawable.ic_map)
+			.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+		} else {
+			menu.clear();
+		}
+		
+		 return super.onCreateOptionsMenu(menu);
+    }
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    switch (item.getItemId()) {
+	        case ONGOING_MENU:
+//	        	Intent i = new Intent(context, OngoingJobsLocationActivity.class);
+//				startActivity(i);
+//				finish();
+				
+	            return true;
+	            
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
+	}
+	
 //	@Override
 //	public boolean onCreateOptionsMenu(Menu menu) {
 //		getSupportMenuInflater().inflate(R.menu.main, menu);
 //
-//		// Set file with share history to the provider and set the share intent.
+		// Set file with share history to the provider and set the share intent.
 //		MenuItem actionItem = menu.findItem(R.id.menu_share);
 //		ShareActionProvider actionProvider = (ShareActionProvider) actionItem
 //				.getActionProvider();
@@ -265,85 +325,87 @@ public abstract class TabSwipeActivity extends SherlockFragmentActivity {
 //		return super.onCreateOptionsMenu(menu);
 //	}
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.GINGERBREAD) {
-			// TODO Auto-generated method stub
-			if (item.getItemId() == android.R.id.home) {
-				finish();
-			} else {
-				Intent i;
-				switch (item.getItemId()) {
-				case R.id.menu_more:
-					prepareNav(item.getSubMenu());
-					break;
-				case R.id.menu_help:
-					break;
-				case R.id.menu_history:
-					i = new Intent(getApplicationContext(), HistoryDetail.class);
-					startActivity(i);
-					break;
-				case R.id.menu_ongoing_jobs:
-					i = new Intent(getApplicationContext(), HistoryDetail.class);
-					startActivity(i);
-					break;
-				case R.id.menu_friends:
-					i = new Intent(getApplicationContext(), FriendsActivity.class);
-					startActivity(i);
-					break;
-				case R.id.menu_notifications:
-					i = new Intent(getApplicationContext(), NotificationActivity.class);
-					startActivity(i);
-					break;
-				case R.id.menu_availability:
-					i = new Intent(getApplicationContext(),
-							HomeAvailabilityActivity.class);
-					startActivityForResult(i, JobsFragment.RC_JOB_DETAIL);
-					break;
-				case R.id.menu_ongoing_job:
-					i = new Intent(getApplicationContext(),
-							OngoingJobsActivity.class);
-					startActivity(i);
-					break;
-				case R.id.menu_logout:	
-//					i = new Intent(getApplicationContext(),
-//							LoginActivity.class);
-//					
-//					SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);					
-//					SharedPreferences.Editor editor = settings.edit();
-//					editor.putBoolean(LOGIN, false);
-//					editor.putBoolean(CommonUtilities.IS_FIRSTTIME, true);
-//					editor.commit();
-//					
-//					startActivityForResult(i, JobsFragment.RC_JOB_DETAIL);
-//					finish();
+	
+
+//	@Override
+//	public boolean onOptionsItemSelected(MenuItem item) {
+//		if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.GINGERBREAD) {
+//			// TODO Auto-generated method stub
+//			if (item.getItemId() == android.R.id.home) {
+//				finish();
+//			} else {
+//				Intent i;
+//				switch (item.getItemId()) {
+//				case R.id.menu_more:
+//					prepareNav(item.getSubMenu());
 //					break;
-				case R.id.menu_setting:
-					i = new Intent(getApplicationContext(),
-							SettingsActivity.class);
-					startActivityForResult(i, JobsFragment.RC_JOB_DETAIL);
-					break;
-				case R.id.menu_reload:
-					Intent iBroadcast = null;
-					switch (mViewPager.getCurrentItem()) {
-					case 0:
-						iBroadcast = new Intent(CommonUtilities.BROADCAST_JOBS_RECEIVER);
-						break;
-					case 1:
-						iBroadcast = new Intent("schedule.receiver");
-						break;
-					case 2:
-						iBroadcast = new Intent("profile.receiver");
-						break;
-					}
-					sendBroadcast(iBroadcast);
-					break;
-				}
-			}
-		}
-		
-		return super.onOptionsItemSelected(item);
-	}
+//				case R.id.menu_help:
+//					break;
+//				case R.id.menu_history:
+//					i = new Intent(getApplicationContext(), HistoryDetail.class);
+//					startActivity(i);
+//					break;
+//				case R.id.menu_ongoing_jobs:
+//					i = new Intent(getApplicationContext(), HistoryDetail.class);
+//					startActivity(i);
+//					break;
+//				case R.id.menu_friends:
+//					i = new Intent(getApplicationContext(), FriendsActivity.class);
+//					startActivity(i);
+//					break;
+//				case R.id.menu_notifications:
+//					i = new Intent(getApplicationContext(), NotificationActivity.class);
+//					startActivity(i);
+//					break;
+//				case R.id.menu_availability:
+//					i = new Intent(getApplicationContext(),
+//							HomeAvailabilityActivity.class);
+//					startActivityForResult(i, JobsFragment.RC_JOB_DETAIL);
+//					break;
+//				case R.id.menu_ongoing_job:
+//					i = new Intent(getApplicationContext(),
+//							OngoingJobsActivity.class);
+//					startActivity(i);
+//					break;
+//				case R.id.menu_logout:	
+////					i = new Intent(getApplicationContext(),
+////							LoginActivity.class);
+////					
+////					SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);					
+////					SharedPreferences.Editor editor = settings.edit();
+////					editor.putBoolean(LOGIN, false);
+////					editor.putBoolean(CommonUtilities.IS_FIRSTTIME, true);
+////					editor.commit();
+////					
+////					startActivityForResult(i, JobsFragment.RC_JOB_DETAIL);
+////					finish();
+////					break;
+//				case R.id.menu_setting:
+//					i = new Intent(getApplicationContext(),
+//							SettingsActivity.class);
+//					startActivityForResult(i, JobsFragment.RC_JOB_DETAIL);
+//					break;
+//				case R.id.menu_reload:
+//					Intent iBroadcast = null;
+//					switch (mViewPager.getCurrentItem()) {
+//					case 0:
+//						iBroadcast = new Intent(CommonUtilities.BROADCAST_JOBS_RECEIVER);
+//						break;
+//					case 1:
+//						iBroadcast = new Intent("schedule.receiver");
+//						break;
+//					case 2:
+//						iBroadcast = new Intent("profile.receiver");
+//						break;
+//					}
+//					sendBroadcast(iBroadcast);
+//					break;
+//				}
+//			}
+//		}
+//		
+//		return super.onOptionsItemSelected(item);
+//	}
 
 	private void showSettingMenu() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
