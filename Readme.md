@@ -1,11 +1,19 @@
 Installation
 ------------------
-This app required libraries :
 
-1. ActionBarSherlock
+To run this app, please install libraries :
 
-2. GCM Library
+1. ActionBarSherlock - http://actionbarsherlock.com/
+2. Google Play Services Library (From SDK)
+3. Facebook SDK - https://github.com/facebook/facebook-android-sdk
+4. Google Volley - https://android.googlesource.com/platform/frameworks/volley
+5. Number Picker - https://github.com/SimonVT/android-numberpicker
+6. ViewPagerIndicator http://viewpagerindicator.com
+	
+Configuration
+----------------------
+Please add your SSH key and Eclipse keystore into Facebook SDK and Google Map Code Console.
+Otherwise the map and facebook login will not working.
 
-3. Facebook SDK
+Contact our admin for registering SSH key with matchimi API.
 
-4. Google Volley
