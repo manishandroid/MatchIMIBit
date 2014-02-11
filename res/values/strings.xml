@@ -353,8 +353,6 @@
     <string name="notifications_ping">Ping</string>
     <string name="send_button">Send</string>
     <string name="write_message">Write...</string>
-    <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
     <string name="error_config">Please set the %1$s constant and recompile the app.</string>
     <string name="already_registered">Device is already registered on server.</string>
     <string name="gcm_registered">From GCM: device successfully registered!</string>
@@ -384,7 +382,6 @@
     <string name="loading_repeat_days">Loading repeat days ...</string>
     <string name="loading_location">Loading locations ...</string>
     
-    <string name="preferred_jobs">Preferred Jobs</string>
     <string name="preferred_hotel">Hotel</string>
     <string name="preferred_fandb">F&amp;B</string>
     <string name="preferred_sales">Sales/Retail/Events</string>    
